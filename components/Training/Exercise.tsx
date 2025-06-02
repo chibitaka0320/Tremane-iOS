@@ -1,4 +1,4 @@
-import theme from "@/config/theme";
+import theme from "@/styles/theme";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 type Exercise = {

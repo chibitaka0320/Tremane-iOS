@@ -6,7 +6,7 @@ import {
   FlatList,
 } from "react-native";
 import TrainingItem from "@/components/Training/TrainingItem";
-import theme from "@/config/theme";
+import theme from "@/styles/theme";
 
 type Props = {
   selectedDate: string;

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import theme from "@/config/theme";
+import theme from "@/styles/theme";
 import Exercise from "./Exercise";
 
 type Exercise = {
