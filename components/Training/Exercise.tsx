@@ -1,16 +1,9 @@
 import theme from "@/styles/theme";
+import { ExerciseType } from "@/types/training";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-type Exercise = {
-  name: string;
-  sets: Array<{
-    weight: number;
-    reps: number;
-  }>;
-};
-
 type Props = {
-  exercise: Exercise;
+  exercise: ExerciseType;
 };
 
 export default function Exercise({ exercise }: Props) {

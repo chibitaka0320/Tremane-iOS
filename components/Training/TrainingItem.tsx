@@ -1,17 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import theme from "@/styles/theme";
 import Exercise from "./Exercise";
-
-type Exercise = {
-  name: string;
-  sets: Array<{
-    weight: number;
-    reps: number;
-  }>;
-};
+import { ExerciseType } from "@/types/training";
 
 export default function TrainingItem() {
-  const exercises: Exercise[] = [
+  const exercises: ExerciseType[] = [
     {
       name: "ベンチプレス",
       sets: [
