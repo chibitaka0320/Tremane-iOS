@@ -7,15 +7,17 @@ type Props = {
 };
 
 export default function Exercise({ exercise }: Props) {
+  const { name, sets } = exercise;
+
   return (
     <View style={styles.exerciseContainer}>
       <View style={styles.exerciseHeader}>
-        <Text style={styles.exerciseName}>{exercise.name}</Text>
+        <Text style={styles.exerciseName}>{name}</Text>
         <TouchableOpacity>
-          <Text style={styles.addButton}>+</Text>
+          <Text style={styles.addButton}>＋</Text>
         </TouchableOpacity>
       </View>
-      {exercise.sets.map((set, setIndex) => (
+      {sets.map((set, setIndex) => (
         <View key={setIndex} style={styles.setContainer}>
           <Text style={styles.setNumber}>{setIndex + 1}</Text>
           <Text style={styles.setValue}>{set.weight} kg</Text>
@@ -28,17 +30,18 @@ export default function Exercise({ exercise }: Props) {
 
 const styles = StyleSheet.create({
   exerciseContainer: {
-    padding: theme.spacing[2],
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
   },
   exerciseHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   exerciseName: {
     fontSize: theme.fontSizes.midium,
-    fontWeight: "bold",
   },
   addButton: {
     fontSize: 24,

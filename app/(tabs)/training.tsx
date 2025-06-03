@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import TrainingItem from "@/components/Training/TrainingItem";
 import theme from "@/styles/theme";
 
@@ -12,7 +6,36 @@ type Props = {
   selectedDate: string;
 };
 
-const data = [1, 2, 3];
+const data = [
+  {
+    name: "胸",
+    exercises: [
+      {
+        name: "ベンチプレス",
+        sets: [
+          { weight: 80, reps: 6 },
+          { weight: 90, reps: 5 },
+        ],
+      },
+      {
+        name: "ダンベルプレス",
+        sets: [{ weight: 38, reps: 5 }],
+      },
+    ],
+  },
+  {
+    name: "背中",
+    exercises: [
+      {
+        name: "チンニング",
+        sets: [
+          { weight: 0, reps: 6 },
+          { weight: 10, reps: 5 },
+        ],
+      },
+    ],
+  },
+];
 
 export default function TrainingScreen({ selectedDate }: Props) {
   return (
@@ -24,7 +47,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
       ) : (
         <FlatList
           data={data}
-          renderItem={() => <TrainingItem />}
+          renderItem={({ item }) => <TrainingItem bodyPart={item} />}
           showsVerticalScrollIndicator={false}
           style={styles.trainingItem}
           ListFooterComponent={<View style={styles.trainingItemFooter}></View>}

@@ -1,27 +1,19 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import theme from "@/styles/theme";
 import Exercise from "./Exercise";
-import { ExerciseType } from "@/types/training";
+import { BodyPartType } from "@/types/training";
 
-export default function TrainingItem() {
-  const exercises: ExerciseType[] = [
-    {
-      name: "ベンチプレス",
-      sets: [
-        { weight: 80, reps: 6 },
-        { weight: 90, reps: 5 },
-      ],
-    },
-    {
-      name: "ダンベルプレス",
-      sets: [{ weight: 38, reps: 5 }],
-    },
-  ];
+type Props = {
+  bodyPart: BodyPartType;
+};
+
+export default function TrainingItem({ bodyPart }: Props) {
+  const { name, exercises } = bodyPart;
 
   return (
     <View style={styles.container}>
       <View style={styles.categoryContainer}>
-        <Text style={styles.categoryTitle}>胸</Text>
+        <Text style={styles.categoryTitle}>{name}</Text>
       </View>
       {exercises.map((exercise, index) => (
         <Exercise exercise={exercise} key={index} />
@@ -32,7 +24,7 @@ export default function TrainingItem() {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 5,
+    borderRadius: 8,
     width: "90%",
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,

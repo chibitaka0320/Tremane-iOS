@@ -10,7 +10,7 @@ interface ExerciseType {
 
 interface BodyPartType {
   name: string;
-  events: ExerciseType[];
+  exercises: ExerciseType[];
 }
 
 export type { BodyPartType, ExerciseType };
