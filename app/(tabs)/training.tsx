@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.main,
   },
   trainingItem: {
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing[4],
   },
   trainingItemFooter: {
     height: theme.spacing[6],

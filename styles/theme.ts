@@ -4,10 +4,12 @@ const spacing = [2, 4, 8, 16, 32, 64, 128, 256, 512];
 // 色
 const colors = {
   primary: "#72D2FF",
+  white: "#FFFFFF",
   background: {
     light: "#FFFFFF",
     main: "#E4E4E4",
   },
+  lightGray: "#e0e0e0",
 };
 
 // 文字サイズ

@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[4],
   },
   categoryContainer: {
     backgroundColor: theme.colors.primary,
@@ -37,5 +37,6 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: theme.fontSizes.large,
     fontWeight: "bold",
+    color: theme.colors.white,
   },
 });

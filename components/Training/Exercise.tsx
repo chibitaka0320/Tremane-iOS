@@ -32,25 +32,28 @@ const styles = StyleSheet.create({
   exerciseContainer: {
     paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   exerciseHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.lightGray,
+    paddingBottom: theme.spacing[2],
+    marginBottom: theme.spacing[2],
   },
   exerciseName: {
     fontSize: theme.fontSizes.midium,
   },
   addButton: {
     fontSize: 24,
-    color: "#007bff",
+    color: theme.colors.primary,
   },
   setContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: theme.spacing[2],
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[4],
   },
   setNumber: {
     fontSize: theme.fontSizes.midium,
