@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import TrainingItem from "@/components/Training/TrainingItem";
 import theme from "@/styles/theme";
+import { BodyPartType } from "@/types/training";
 
 type Props = {
   selectedDate: string;
 };
 
-const data = [
+const data: BodyPartType[] = [
   {
     name: "胸",
     exercises: [
