@@ -5,6 +5,7 @@ const spacing = [2, 4, 8, 16, 32, 64, 128, 256, 512];
 const colors = {
   primary: "#72D2FF",
   white: "#FFFFFF",
+  black: "#000000",
   background: {
     light: "#FFFFFF",
     main: "#E4E4E4",
