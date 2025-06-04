@@ -16,7 +16,7 @@ const colors = {
 // 文字サイズ
 const fontSizes = {
   small: 12,
-  midium: 16,
+  medium: 16,
   large: 20,
 };
 

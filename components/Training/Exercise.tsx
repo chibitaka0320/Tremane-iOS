@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[2],
   },
   exerciseName: {
-    fontSize: theme.fontSizes.midium,
+    fontSize: theme.fontSizes.medium,
   },
   addButton: {
     fontSize: 24,
@@ -56,10 +56,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing[4],
   },
   setNumber: {
-    fontSize: theme.fontSizes.midium,
+    fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
   },
   setValue: {
-    fontSize: theme.fontSizes.midium,
+    fontSize: theme.fontSizes.medium,
   },
 });
