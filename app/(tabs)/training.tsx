@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import TrainingItem from "@/components/Training/TrainingItem";
+import TrainingItem from "@/components/training/TrainingItem";
 import theme from "@/styles/theme";
 import { BodyPartType } from "@/types/training";
 

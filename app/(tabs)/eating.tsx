@@ -1,61 +1,26 @@
+import EatingRow from "@/components/eating/EatingRow";
+import Summary from "@/components/eating/Summary";
 import theme from "@/styles/theme";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { ProgressChart } from "react-native-chart-kit";
-
-const data = {
-  data: [0.4, 0.6, 0.8],
-};
-
-const screenWidth = Dimensions.get("window").width / 2.4;
-
-const chartConfig = {
-  backgroundGradientFrom: "#FFFFFF",
-  backgroundGradientTo: "#FFFFFF",
-  color: (opacity = 1) => `rgba(99, 176, 242, ${opacity})`,
-};
+import { View, StyleSheet, ScrollView, Text } from "react-native";
 
 export default function EatingScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.summaryContainer}>
-        <View>
-          <ProgressChart
-            data={data}
-            width={screenWidth}
-            height={screenWidth}
-            strokeWidth={6}
-            radius={40}
-            chartConfig={chartConfig}
-            hideLegend={true}
-          />
+    <ScrollView style={styles.container}>
+      <Summary />
+      <View style={styles.eatingContainer}>
+        <View style={styles.row}>
+          <Text style={styles.eating}>食べ物</Text>
+          <Text style={styles.kcal}>カロリー</Text>
+          <Text style={styles.pfc}>P</Text>
+          <Text style={styles.pfc}>F</Text>
+          <Text style={styles.pfc}>C</Text>
         </View>
-        <View style={styles.values}>
-          <Text>総摂取カロリー/目標値</Text>
-          <View style={styles.totalValues}>
-            <Text>807</Text>
-            <Text>/</Text>
-            <Text>2,000</Text>
-            <Text>kcal</Text>
-          </View>
-          <View style={styles.border}></View>
-          <View style={styles.pfcValue}>
-            <Text>P</Text>
-            <Text>51 / 153</Text>
-            <Text>g</Text>
-          </View>
-          <View style={styles.pfcValue}>
-            <Text>P</Text>
-            <Text>51 / 153</Text>
-            <Text>g</Text>
-          </View>
-          <View style={styles.pfcValue}>
-            <Text>P</Text>
-            <Text>51 / 153</Text>
-            <Text>g</Text>
-          </View>
-        </View>
+        <View style={styles.border}></View>
+        <EatingRow />
+        <EatingRow />
+        <EatingRow />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -65,34 +30,36 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.main,
     paddingVertical: theme.spacing[4],
   },
-  summaryContainer: {
+  eatingContainer: {
     borderRadius: 8,
     width: "90%",
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
     marginBottom: theme.spacing[4],
     padding: theme.spacing[3],
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
-  values: {
-    width: "45%",
-  },
-  totalValues: {
+  row: {
     flexDirection: "row",
-    justifyContent: "center",
-    paddingVertical: theme.spacing[2],
+  },
+  eating: {
+    width: "30%",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  kcal: {
+    width: "30%",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  pfc: {
+    width: "13%",
+    textAlign: "center",
+    fontWeight: "bold",
   },
   border: {
     width: "100%",
     height: 1,
     backgroundColor: theme.colors.black,
-  },
-  pfcValue: {
-    flexDirection: "row",
-    paddingHorizontal: theme.spacing[2],
-    paddingTop: theme.spacing[2],
-    justifyContent: "space-between",
+    marginVertical: theme.spacing[3],
   },
 });
