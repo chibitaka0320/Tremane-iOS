@@ -10,13 +10,13 @@ const data: EatType = {
     kcal: 807,
     protein: 51,
     fat: 14,
-    carbo: 121,
+    carb: 121,
   },
   goal: {
     kcal: 1528,
     protein: 153,
     fat: 34,
-    carbo: 153,
+    carb: 153,
   },
   meals: [
     {
@@ -25,7 +25,7 @@ const data: EatType = {
       kcal: 423,
       protein: 19,
       fat: 10,
-      carbo: 65,
+      carb: 65,
     },
     {
       id: 2,
@@ -33,7 +33,7 @@ const data: EatType = {
       kcal: 103,
       protein: 21,
       fat: 2,
-      carbo: 2,
+      carb: 2,
     },
     {
       id: 3,
@@ -41,7 +41,7 @@ const data: EatType = {
       kcal: 281,
       protein: 11,
       fat: 2,
-      carbo: 54,
+      carb: 54,
     },
   ],
 };

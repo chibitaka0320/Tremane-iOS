@@ -54,7 +54,7 @@ export default function Summary({ total, goal }: Props) {
         </View>
         <View style={styles.pfcValue}>
           <Text>P</Text>
-          <Value intake={total.carbo} goal={goal.carbo} />
+          <Value intake={total.carb} goal={goal.carb} />
           <Text>g</Text>
         </View>
       </View>

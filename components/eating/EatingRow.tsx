@@ -11,19 +11,19 @@ export default function EatingRow({ meal }: Props) {
     <View style={styles.row}>
       <Text style={styles.eating}>{meal.name}</Text>
       <View style={styles.kcal}>
-        <Text>400</Text>
+        <Text>{meal.kcal}</Text>
         <Text style={styles.unit}>kcal</Text>
       </View>
       <View style={styles.pfc}>
-        <Text>40</Text>
+        <Text>{meal.protein}</Text>
         <Text style={styles.unit}>g</Text>
       </View>
       <View style={styles.pfc}>
-        <Text>40</Text>
+        <Text>{meal.fat}</Text>
         <Text style={styles.unit}>g</Text>
       </View>
       <View style={styles.pfc}>
-        <Text>40</Text>
+        <Text>{meal.carb}</Text>
         <Text style={styles.unit}>g</Text>
       </View>
     </View>
