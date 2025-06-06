@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   unit: {
-    paddingLeft: theme.spacing[1],
+    marginLeft: theme.spacing[1],
   },
 });
