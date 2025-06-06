@@ -10,8 +10,8 @@ export default function EatingRow({ meal }: Props) {
   return (
     <View style={styles.row}>
       <Text style={styles.eating}>{meal.name}</Text>
-      <View style={styles.kcal}>
-        <Text>{meal.kcal}</Text>
+      <View style={styles.calories}>
+        <Text>{meal.calories}</Text>
         <Text style={styles.unit}>kcal</Text>
       </View>
       <View style={styles.pfc}>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   eating: {
     width: "30%",
   },
-  kcal: {
+  calories: {
     width: "30%",
     flexDirection: "row",
     justifyContent: "center",

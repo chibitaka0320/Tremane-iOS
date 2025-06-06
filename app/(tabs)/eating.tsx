@@ -7,13 +7,13 @@ import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 const data: EatType = {
   date: "2025-06-05",
   total: {
-    kcal: 807,
+    calories: 807,
     protein: 51,
     fat: 14,
     carb: 121,
   },
   goal: {
-    kcal: 1528,
+    calories: 1528,
     protein: 153,
     fat: 34,
     carb: 153,
@@ -22,7 +22,7 @@ const data: EatType = {
     {
       id: 1,
       name: "卵かけ納豆ご飯",
-      kcal: 423,
+      calories: 423,
       protein: 19,
       fat: 10,
       carb: 65,
@@ -30,7 +30,7 @@ const data: EatType = {
     {
       id: 2,
       name: "プロテイン",
-      kcal: 103,
+      calories: 103,
       protein: 21,
       fat: 2,
       carb: 2,
@@ -38,7 +38,7 @@ const data: EatType = {
     {
       id: 3,
       name: "そば",
-      kcal: 281,
+      calories: 281,
       protein: 11,
       fat: 2,
       carb: 54,
@@ -53,7 +53,7 @@ export default function EatingScreen() {
       <View style={styles.eatingContainer}>
         <View style={styles.row}>
           <Text style={styles.eating}>食べ物</Text>
-          <Text style={styles.kcal}>カロリー</Text>
+          <Text style={styles.calories}>カロリー</Text>
           <Text style={styles.pfc}>P</Text>
           <Text style={styles.pfc}>F</Text>
           <Text style={styles.pfc}>C</Text>
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  kcal: {
+  calories: {
     width: "30%",
     textAlign: "center",
     fontWeight: "bold",

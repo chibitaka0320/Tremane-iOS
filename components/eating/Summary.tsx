@@ -38,7 +38,7 @@ export default function Summary({ total, goal }: Props) {
       <View style={styles.values}>
         <Text>総摂取カロリー/目標値</Text>
         <View style={styles.totalValues}>
-          <Value intake={total.kcal} goal={goal.kcal} />
+          <Value intake={total.calories} goal={goal.calories} />
           <Text>kcal</Text>
         </View>
         <View style={styles.border}></View>
