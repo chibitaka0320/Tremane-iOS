@@ -16,7 +16,7 @@ interface Meal {
   id: number;
   name: string;
   kcal: number;
-  protein: number;
+  protain: number;
   fat: number;
   carbo: number;
 }

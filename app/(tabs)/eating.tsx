@@ -1,7 +1,50 @@
 import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import theme from "@/styles/theme";
+import { EatType } from "@/types/eating";
 import { View, StyleSheet, ScrollView, Text } from "react-native";
+
+const data: EatType = {
+  date: "2025-06-05",
+  total: {
+    kcal: 807,
+    protein: 51,
+    fat: 14,
+    carbo: 121,
+  },
+  goal: {
+    kcal: 1528,
+    protein: 153,
+    fat: 34,
+    carbo: 153,
+  },
+  meals: [
+    {
+      id: 1,
+      name: "卵かけ納豆ご飯",
+      kcal: 423,
+      protein: 19,
+      fat: 10,
+      carbo: 65,
+    },
+    {
+      id: 2,
+      name: "プロテイン",
+      kcal: 103,
+      protein: 21,
+      fat: 2,
+      carbo: 2,
+    },
+    {
+      id: 3,
+      name: "そば",
+      kcal: 281,
+      protein: 11,
+      fat: 2,
+      carbo: 54,
+    },
+  ],
+};
 
 export default function EatingScreen() {
   return (
