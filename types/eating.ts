@@ -28,4 +28,4 @@ interface EatType {
   meals: Meal[];
 }
 
-export type { EatType };
+export type { EatType, Meal, Goal, Total };

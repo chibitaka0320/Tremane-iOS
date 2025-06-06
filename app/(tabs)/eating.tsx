@@ -2,7 +2,7 @@ import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import theme from "@/styles/theme";
 import { EatType } from "@/types/eating";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 
 const data: EatType = {
   date: "2025-06-05",
@@ -49,7 +49,7 @@ const data: EatType = {
 export default function EatingScreen() {
   return (
     <ScrollView style={styles.container}>
-      <Summary />
+      <Summary total={data.total} goal={data.goal} />
       <View style={styles.eatingContainer}>
         <View style={styles.row}>
           <Text style={styles.eating}>食べ物</Text>
@@ -59,9 +59,10 @@ export default function EatingScreen() {
           <Text style={styles.pfc}>C</Text>
         </View>
         <View style={styles.border}></View>
-        <EatingRow />
-        <EatingRow />
-        <EatingRow />
+        <FlatList
+          data={data.meals}
+          renderItem={({ item }) => <EatingRow meal={item} />}
+        />
       </View>
     </ScrollView>
   );

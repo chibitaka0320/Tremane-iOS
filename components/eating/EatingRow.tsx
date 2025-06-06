@@ -1,10 +1,15 @@
 import theme from "@/styles/theme";
+import { Meal } from "@/types/eating";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function EatingRow() {
+type Props = {
+  meal: Meal;
+};
+
+export default function EatingRow({ meal }: Props) {
   return (
     <View style={styles.row}>
-      <Text style={styles.eating}>卵かけご飯</Text>
+      <Text style={styles.eating}>{meal.name}</Text>
       <View style={styles.kcal}>
         <Text>400</Text>
         <Text style={styles.unit}>kcal</Text>

@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import Value from "./Value";
 import theme from "@/styles/theme";
+import { Goal, Total } from "@/types/eating";
 
 const data = {
   data: [0.4, 0.6, 0.8],
@@ -15,7 +16,12 @@ const chartConfig = {
   color: (opacity = 1) => `rgba(99, 176, 242, ${opacity})`,
 };
 
-export default function Summary() {
+type Props = {
+  total: Total;
+  goal: Goal;
+};
+
+export default function Summary({ total, goal }: Props) {
   return (
     <View style={styles.summaryContainer}>
       <View>
@@ -32,23 +38,23 @@ export default function Summary() {
       <View style={styles.values}>
         <Text>総摂取カロリー/目標値</Text>
         <View style={styles.totalValues}>
-          <Value intake={900} goal={2000} />
+          <Value intake={total.kcal} goal={goal.kcal} />
           <Text>kcal</Text>
         </View>
         <View style={styles.border}></View>
         <View style={styles.pfcValue}>
           <Text>P</Text>
-          <Value intake={51} goal={153} />
+          <Value intake={total.protein} goal={goal.protein} />
           <Text>g</Text>
         </View>
         <View style={styles.pfcValue}>
           <Text>F</Text>
-          <Value intake={14} goal={34} />
+          <Value intake={total.fat} goal={goal.fat} />
           <Text>g</Text>
         </View>
         <View style={styles.pfcValue}>
           <Text>P</Text>
-          <Value intake={121} goal={153} />
+          <Value intake={total.carbo} goal={goal.carbo} />
           <Text>g</Text>
         </View>
       </View>
