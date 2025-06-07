@@ -1,6 +1,7 @@
 import theme from "@/styles/theme";
 import { ExerciseType } from "@/types/training";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 type Props = {
   exercise: ExerciseType;
@@ -14,7 +15,11 @@ export default function Exercise({ exercise }: Props) {
       <View style={styles.exerciseHeader}>
         <Text style={styles.exerciseName}>{name}</Text>
         <TouchableOpacity>
-          <Text style={styles.addButton}>＋</Text>
+          <AntDesign
+            name="pluscircleo"
+            color="black"
+            style={styles.addButton}
+          />
         </TouchableOpacity>
       </View>
       {sets.map((set, setIndex) => (
@@ -39,6 +44,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.lightGray,
+    paddingTop: theme.spacing[1],
     paddingBottom: theme.spacing[2],
     marginBottom: theme.spacing[2],
   },
@@ -46,8 +52,8 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.medium,
   },
   addButton: {
-    fontSize: 24,
-    color: theme.colors.primary,
+    marginRight: theme.spacing[2],
+    fontSize: theme.fontSizes.large,
   },
   setContainer: {
     flexDirection: "row",

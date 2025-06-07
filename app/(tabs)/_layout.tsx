@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { CalendarProvider, WeekCalendar } from "react-native-calendars";
@@ -6,11 +6,27 @@ import { CalendarProvider, WeekCalendar } from "react-native-calendars";
 import BodyScreen from "./body";
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
+import { useNavigation } from "expo-router";
+import { TouchableOpacity, Text } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function Layout() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString());
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => {
+        return (
+          <TouchableOpacity>
+            <Feather name="menu" size={25} />
+          </TouchableOpacity>
+        );
+      },
+    });
+  }, []);
 
   return (
     <CalendarProvider
