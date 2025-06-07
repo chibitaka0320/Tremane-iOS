@@ -59,11 +59,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.main,
-    paddingTop: theme.spacing[5],
+    paddingTop: theme.spacing[6],
     paddingHorizontal: theme.spacing[3],
   },
   item: {
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
   },
   label: {
     marginBottom: theme.spacing[1],
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     // color: theme.colors.text.main,
   },
   linksContainer: {
-    marginTop: theme.spacing[5],
+    marginTop: theme.spacing[6],
     alignItems: "center",
   },
   link: {

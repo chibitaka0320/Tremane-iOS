@@ -82,14 +82,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.main,
-    paddingVertical: theme.spacing[4],
+    paddingVertical: theme.spacing[5],
   },
   eatingContainer: {
     borderRadius: 8,
     width: "90%",
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
     padding: theme.spacing[3],
   },
   row: {

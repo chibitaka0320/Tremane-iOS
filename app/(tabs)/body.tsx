@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.main,
-    paddingVertical: theme.spacing[4],
+    paddingVertical: theme.spacing[5],
   },
   bodyContainer: {
     borderRadius: 8,
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     height: 250,
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
     padding: theme.spacing[3],
     flexDirection: "row",
     justifyContent: "space-around",

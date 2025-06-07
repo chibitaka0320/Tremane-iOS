@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
     padding: theme.spacing[3],
     flexDirection: "row",
     justifyContent: "space-between",

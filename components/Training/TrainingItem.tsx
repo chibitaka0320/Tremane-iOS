@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
   },
   categoryContainer: {
     backgroundColor: theme.colors.primary,

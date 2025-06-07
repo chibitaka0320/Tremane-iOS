@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[4],
+    paddingHorizontal: theme.spacing[5],
   },
   setNumber: {
     fontSize: theme.fontSizes.medium,
