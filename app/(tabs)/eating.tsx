@@ -1,5 +1,6 @@
 import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
+import { PFC_LABELS } from "@/constants/pfc";
 import theme from "@/styles/theme";
 import { EatType } from "@/types/eating";
 import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
@@ -54,14 +55,17 @@ export default function EatingScreen() {
         <View style={styles.row}>
           <Text style={styles.eating}>食べ物</Text>
           <Text style={styles.calories}>カロリー</Text>
-          <Text style={styles.pfc}>P</Text>
-          <Text style={styles.pfc}>F</Text>
-          <Text style={styles.pfc}>C</Text>
+          {PFC_LABELS.map(({ key, label }) => (
+            <Text style={styles.pfc} key={key}>
+              {label}
+            </Text>
+          ))}
         </View>
         <View style={styles.border}></View>
         <FlatList
           data={data.meals}
           renderItem={({ item }) => <EatingRow meal={item} />}
+          scrollEnabled={false}
         />
       </View>
     </ScrollView>

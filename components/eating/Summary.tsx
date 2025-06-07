@@ -3,6 +3,7 @@ import { ProgressChart } from "react-native-chart-kit";
 import Value from "./Value";
 import theme from "@/styles/theme";
 import { Goal, Total } from "@/types/eating";
+import { PFC_LABELS } from "@/constants/pfc";
 
 const data = {
   data: [0.4, 0.6, 0.8],
@@ -42,21 +43,16 @@ export default function Summary({ total, goal }: Props) {
           <Text>kcal</Text>
         </View>
         <View style={styles.border}></View>
-        <View style={styles.pfcValue}>
-          <Text>P</Text>
-          <Value intake={total.protein} goal={goal.protein} />
-          <Text>g</Text>
-        </View>
-        <View style={styles.pfcValue}>
-          <Text>F</Text>
-          <Value intake={total.fat} goal={goal.fat} />
-          <Text>g</Text>
-        </View>
-        <View style={styles.pfcValue}>
-          <Text>P</Text>
-          <Value intake={total.carb} goal={goal.carb} />
-          <Text>g</Text>
-        </View>
+        {PFC_LABELS.map(({ key, label }) => (
+          <View style={styles.pfcValue} key={key}>
+            <Text>{label}</Text>
+            <Value
+              intake={total[key as keyof Total]}
+              goal={goal[key as keyof Goal]}
+            />
+            <Text>g</Text>
+          </View>
+        ))}
       </View>
     </View>
   );
