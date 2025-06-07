@@ -6,7 +6,10 @@ export default function RootLayout() {
         headerBackVisible: false,
       }}
     >
-      <Stack.Screen name="signIn" options={{ headerTitle: "ログイン" }} />
+      <Stack.Screen
+        name="signIn"
+        options={{ headerTitle: "ログイン", gestureEnabled: false }}
+      />
       <Stack.Screen name="signUp" options={{ headerTitle: "新規登録" }} />
     </Stack>
   );

@@ -6,12 +6,42 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
+import * as SecureStore from "expo-secure-store";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onLogin = async () => {
+    setIsLoading(true);
+
+    // TODO：バリデーションは仕様検討
+    if (password !== "password") {
+      Alert.alert("メールアドレスまたはパスワードが違います");
+      setIsLoading(false);
+    } else {
+      try {
+        await SecureStore.setItemAsync("userToken", "token");
+        router.replace("/training");
+      } catch (e) {
+        Alert.alert("ログインに失敗しました");
+        setIsLoading(false);
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -36,7 +66,7 @@ export default function SignIn() {
           secureTextEntry
         />
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={onLogin}>
         <Text style={styles.buttonText}>ログイン</Text>
       </TouchableOpacity>
       <View style={styles.linksContainer}>
@@ -47,6 +77,8 @@ export default function SignIn() {
         >
           <Text style={styles.link}>アカウントをお持ちでない場合</Text>
         </TouchableOpacity>
+
+        {/* TODO: 処理ができ次第実装 */}
         <Link href={"/auth/signUp"} style={styles.link}>
           パスワードを忘れた場合
         </Link>
@@ -59,11 +91,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.main,
-    paddingTop: theme.spacing[5],
+    paddingTop: theme.spacing[6],
     paddingHorizontal: theme.spacing[3],
   },
   item: {
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
   },
   label: {
     marginBottom: theme.spacing[1],
@@ -91,7 +123,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.medium,
   },
   linksContainer: {
-    marginTop: theme.spacing[5],
+    marginTop: theme.spacing[6],
     alignItems: "center",
   },
   link: {
@@ -100,5 +132,10 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[2],
     marginBottom: theme.spacing[3],
     textAlign: "center",
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
