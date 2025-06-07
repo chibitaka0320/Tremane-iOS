@@ -19,6 +19,12 @@ const data: EatType = {
     fat: 34,
     carb: 153,
   },
+  rate: {
+    calories: 1,
+    protein: 0.4,
+    fat: 0.2,
+    carb: 0.8,
+  },
   meals: [
     {
       id: 1,
@@ -50,7 +56,7 @@ const data: EatType = {
 export default function EatingScreen() {
   return (
     <ScrollView style={styles.container}>
-      <Summary total={data.total} goal={data.goal} />
+      <Summary total={data.total} goal={data.goal} rate={data.rate} />
       <View style={styles.eatingContainer}>
         <View style={styles.row}>
           <Text style={styles.eating}>食べ物</Text>

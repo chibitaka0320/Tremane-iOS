@@ -2,12 +2,8 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import Value from "./Value";
 import theme from "@/styles/theme";
-import { Goal, Total } from "@/types/eating";
+import { Goal, Rate, Total } from "@/types/eating";
 import { PFC_LABELS } from "@/constants/pfc";
-
-const data = {
-  data: [0.4, 0.6, 0.8],
-};
 
 const screenWidth = Dimensions.get("window").width / 2.4;
 
@@ -20,9 +16,14 @@ const chartConfig = {
 type Props = {
   total: Total;
   goal: Goal;
+  rate: Rate;
 };
 
-export default function Summary({ total, goal }: Props) {
+export default function Summary({ total, goal, rate }: Props) {
+  const data = {
+    data: [rate.protein, rate.fat, rate.carb],
+  };
+
   return (
     <View style={styles.summaryContainer}>
       <View>
