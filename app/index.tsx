@@ -9,7 +9,7 @@ export default function Index() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const token = await SecureStore.getItemAsync("userToken");
+        const token = await SecureStore.getItemAsync("accessToken");
         setIsAuthenticated(token !== null);
       } catch (e) {
         setIsAuthenticated(false);

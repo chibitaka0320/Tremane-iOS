@@ -23,7 +23,8 @@ export default function Menu() {
 
   const onSignOut = async () => {
     try {
-      await SecureStore.deleteItemAsync("userToken");
+      await SecureStore.deleteItemAsync("accessToken");
+      await SecureStore.deleteItemAsync("refreshToken");
       while (router.canGoBack()) {
         router.back();
       }

@@ -6,12 +6,49 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useState } from "react";
+import { getDeviceInfo } from "@/lib/getDevice";
+import * as SecureStore from "expo-secure-store";
+import { SignUpResponse } from "@/types/api";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignUp = async () => {
+    setIsLoading(true);
+    try {
+      const deviceInfo = getDeviceInfo();
+      const res = await fetch("http://localhost:8080/auth/signUp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, deviceInfo }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 409) {
+          Alert.alert("すでに登録されているメールアドレスです");
+          return;
+        }
+        Alert.alert("登録に失敗しました");
+        return;
+      }
+
+      const data: SignUpResponse = await res.json();
+      await SecureStore.setItemAsync("accessToken", data.accessToken);
+      await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+      router.replace("/training");
+    } catch (e) {
+      Alert.alert("エラーが発生しました");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -36,7 +73,11 @@ export default function SignUp() {
           secureTextEntry
         />
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSignUp}
+        disabled={isLoading}
+      >
         <Text style={styles.buttonText}>新規登録</Text>
       </TouchableOpacity>
       <View style={styles.linksContainer}>
@@ -81,7 +122,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: theme.colors.background.light,
     borderRadius: 3,
-    paddingVertical: theme.spacing[2],
+    paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],
     borderWidth: 1,
