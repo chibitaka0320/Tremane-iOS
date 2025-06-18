@@ -12,6 +12,7 @@ import { useState } from "react";
 import { getDeviceInfo } from "@/lib/getDevice";
 import * as SecureStore from "expo-secure-store";
 import { SignUpResponse } from "@/types/api";
+import { apiRequest } from "@/lib/apiClient";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -22,28 +23,24 @@ export default function SignUp() {
     setIsLoading(true);
     try {
       const deviceInfo = getDeviceInfo();
-      const res = await fetch("http://localhost:8080/auth/signUp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, deviceInfo }),
+      const data = await apiRequest<SignUpResponse>("/auth/signUp", "POST", {
+        email,
+        password,
+        deviceInfo,
       });
 
-      if (!res.ok) {
-        if (res.status === 409) {
+      await SecureStore.setItemAsync("accessToken", data.accessToken);
+      await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+      router.replace("/training");
+    } catch (e) {
+      if (e instanceof Response) {
+        if (e.status === 409) {
           Alert.alert("すでに登録されているメールアドレスです");
           return;
         }
         Alert.alert("登録に失敗しました");
         return;
       }
-
-      const data: SignUpResponse = await res.json();
-      await SecureStore.setItemAsync("accessToken", data.accessToken);
-      await SecureStore.setItemAsync("refreshToken", data.refreshToken);
-      router.replace("/training");
-    } catch (e) {
       Alert.alert("エラーが発生しました");
     } finally {
       setIsLoading(false);
