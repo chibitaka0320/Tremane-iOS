@@ -38,7 +38,7 @@ export default function SignIn() {
   if (isLoading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator />
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
