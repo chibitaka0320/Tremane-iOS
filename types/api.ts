@@ -3,6 +3,11 @@ export type SignUpResponse = {
   refreshToken: string;
 };
 
+export type SignInResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;

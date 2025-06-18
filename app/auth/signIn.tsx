@@ -11,6 +11,10 @@ import {
 } from "react-native";
 import { useState } from "react";
 import * as SecureStore from "expo-secure-store";
+import { validateEmail, validatePassword } from "@/lib/validators";
+import { getDeviceInfo } from "@/lib/getDevice";
+import { apiRequest } from "@/lib/apiClient";
+import { SignInResponse } from "@/types/api";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -18,20 +22,41 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
 
   const onLogin = async () => {
+    if (!validateEmail(email)) {
+      Alert.alert("有効なメールアドレスを入力してください");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      Alert.alert("パスワードは8文字以上で入力してください");
+      return;
+    }
+
     setIsLoading(true);
 
-    // TODO：バリデーションは仕様検討
-    if (password !== "password") {
-      Alert.alert("メールアドレスまたはパスワードが違います");
-      setIsLoading(false);
-    } else {
-      try {
-        await SecureStore.setItemAsync("userToken", "token");
-        router.replace("/training");
-      } catch (e) {
+    try {
+      const deviceInfo = getDeviceInfo();
+      const data = await apiRequest<SignInResponse>("/auth/signIn", "POST", {
+        email,
+        password,
+        deviceInfo,
+      });
+
+      await SecureStore.setItemAsync("accessToken", data.accessToken);
+      await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+      router.replace("/training");
+    } catch (e) {
+      if (e instanceof Response) {
+        if (e.status === 401) {
+          Alert.alert("メールアドレスまたはパスワードが違います");
+          return;
+        }
         Alert.alert("ログインに失敗しました");
-        setIsLoading(false);
+        return;
       }
+      Alert.alert("エラーが発生しました");
+    } finally {
+      setIsLoading(false);
     }
   };
 
