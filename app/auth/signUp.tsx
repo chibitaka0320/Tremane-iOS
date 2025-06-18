@@ -7,12 +7,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { getDeviceInfo } from "@/lib/getDevice";
 import * as SecureStore from "expo-secure-store";
 import { SignUpResponse } from "@/types/api";
 import { apiRequest } from "@/lib/apiClient";
+import { validateEmail, validatePassword } from "@/lib/validators";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -20,7 +22,18 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = async () => {
+    if (!validateEmail(email)) {
+      Alert.alert("有効なメールアドレスを入力してください");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      Alert.alert("パスワードは8文字以上で入力してください");
+      return;
+    }
+
     setIsLoading(true);
+
     try {
       const deviceInfo = getDeviceInfo();
       const data = await apiRequest<SignUpResponse>("/auth/signUp", "POST", {
@@ -47,6 +60,14 @@ export default function SignUp() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator color={theme.colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.item}>
@@ -67,6 +88,7 @@ export default function SignUp() {
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
+          autoCapitalize="none"
           secureTextEntry
         />
       </View>
@@ -139,5 +161,10 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[2],
     marginBottom: theme.spacing[3],
     textAlign: "center",
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
