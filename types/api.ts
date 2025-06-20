@@ -8,6 +8,11 @@ export type SignInResponse = {
   refreshToken: string;
 };
 
+export type RefreshTokenResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;
