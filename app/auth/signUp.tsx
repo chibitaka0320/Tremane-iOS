@@ -7,15 +7,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { getDeviceInfo } from "@/lib/getDevice";
-import * as SecureStore from "expo-secure-store";
 import { SignUpResponse } from "@/types/api";
 import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
+import { setAccessToken, setRefreshToken } from "@/lib/token";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -43,8 +42,8 @@ export default function SignUp() {
         deviceInfo,
       });
 
-      await SecureStore.setItemAsync("accessToken", data.accessToken);
-      await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+      await setAccessToken(data.accessToken);
+      await setRefreshToken(data.refreshToken);
       router.replace("/training");
     } catch (e) {
       if (e instanceof Response) {

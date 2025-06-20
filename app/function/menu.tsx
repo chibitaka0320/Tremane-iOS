@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { MaterialIcons, SimpleLineIcons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import theme from "@/styles/theme";
-import * as SecureStore from "expo-secure-store";
+import { deleteAccessToken, deleteRefreshToken } from "@/lib/token";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
@@ -23,8 +23,8 @@ export default function Menu() {
 
   const onSignOut = async () => {
     try {
-      await SecureStore.deleteItemAsync("accessToken");
-      await SecureStore.deleteItemAsync("refreshToken");
+      deleteAccessToken;
+      deleteRefreshToken;
       while (router.canGoBack()) {
         router.back();
       }

@@ -10,11 +10,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
-import * as SecureStore from "expo-secure-store";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import { getDeviceInfo } from "@/lib/getDevice";
 import { apiRequest } from "@/lib/apiClient";
 import { SignInResponse } from "@/types/api";
+import { setAccessToken, setRefreshToken } from "@/lib/token";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -42,8 +42,8 @@ export default function SignIn() {
         deviceInfo,
       });
 
-      await SecureStore.setItemAsync("accessToken", data.accessToken);
-      await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+      await setAccessToken(data.accessToken);
+      await setRefreshToken(data.refreshToken);
       router.replace("/training");
     } catch (e) {
       if (e instanceof Response) {
