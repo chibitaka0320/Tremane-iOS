@@ -1,7 +1,7 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { getAccesstoken } from "@/lib/token";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -9,7 +9,7 @@ export default function Index() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const token = await SecureStore.getItemAsync("accessToken");
+        const token = await getAccesstoken();
         setIsAuthenticated(token !== null);
       } catch (e) {
         setIsAuthenticated(false);
