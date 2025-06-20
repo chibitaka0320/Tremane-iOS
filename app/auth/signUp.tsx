@@ -15,6 +15,7 @@ import * as SecureStore from "expo-secure-store";
 import { SignUpResponse } from "@/types/api";
 import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
+import Indicator from "@/components/common/Indicator";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -61,11 +62,7 @@ export default function SignUp() {
   };
 
   if (isLoading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator color={theme.colors.primary} />
-      </View>
-    );
+    return <Indicator />;
   }
 
   return (
@@ -161,10 +158,5 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[2],
     marginBottom: theme.spacing[3],
     textAlign: "center",
-  },
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
