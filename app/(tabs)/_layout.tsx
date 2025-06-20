@@ -9,11 +9,14 @@ import EatingScreen from "./eating";
 import { router, useNavigation } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { format } from "date-fns";
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function Layout() {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString());
+  const [selectedDate, setSelectedDate] = useState(
+    format(new Date(), "yyyy-MM-dd")
+  );
   const navigation = useNavigation();
 
   const onMenu = () => {
@@ -33,11 +36,7 @@ export default function Layout() {
   }, []);
 
   return (
-    <CalendarProvider
-      date={selectedDate}
-      onDateChanged={(date) => setSelectedDate(date)}
-      showTodayButton
-    >
+    <CalendarProvider date={selectedDate} showTodayButton>
       <WeekCalendar onDayPress={(day) => setSelectedDate(day.dateString)} />
       <Tab.Navigator>
         <Tab.Screen name="トレーニング">
