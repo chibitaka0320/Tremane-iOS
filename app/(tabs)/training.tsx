@@ -31,7 +31,8 @@ export default function TrainingScreen({ selectedDate }: Props) {
 
   const URL = "/training?date=" + selectedDate;
 
-  const fetchApi = async () => {
+  const fetchTrainingData = async () => {
+    setLoading(true);
     try {
       const TOKEN = await getAccessToken();
       if (TOKEN === null) {
@@ -65,19 +66,19 @@ export default function TrainingScreen({ selectedDate }: Props) {
           }
         } else {
           Alert.alert("エラー", "時間をおいて再度ログインしてください");
-          throw new Error();
+          return;
         }
       } else {
         Alert.alert("エラー", "時間をおいて再度ログインしてください");
-        throw new Error();
+        return;
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    setLoading(true);
-    fetchApi();
-    setLoading(false);
+    fetchTrainingData();
   }, [selectedDate]);
 
   if (isLoading) {
@@ -95,8 +96,10 @@ export default function TrainingScreen({ selectedDate }: Props) {
       ) : (
         <FlatList
           data={data}
+          style={styles.trainingContainer}
           renderItem={({ item }) => <TrainingItem bodyPart={item} />}
           showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.name}
           ListFooterComponent={<View style={styles.trainingItemFooter}></View>}
         />
       )}
@@ -108,7 +111,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.main,
-    paddingVertical: theme.spacing[5],
   },
   nonDataContainer: {
     padding: theme.spacing[5],
@@ -117,6 +119,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
     alignItems: "center",
+    marginVertical: theme.spacing[5],
+  },
+  trainingContainer: {
+    paddingVertical: theme.spacing[5],
   },
   text: {
     fontSize: theme.fontSizes.large,
