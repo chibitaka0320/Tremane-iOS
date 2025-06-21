@@ -1,3 +1,4 @@
+import theme from "@/styles/theme";
 import { TouchableOpacity, StyleSheet, type ViewStyle } from "react-native";
 
 interface Props {
@@ -19,8 +20,8 @@ const styles = StyleSheet.create({
   circleButton: {
     height: 60,
     width: 60,
-    backgroundColor: "#467FD8",
-    borderRadius: 50,
+    backgroundColor: theme.colors.primary,
+    borderRadius: "50%",
     justifyContent: "center",
     alignItems: "center",
   },
