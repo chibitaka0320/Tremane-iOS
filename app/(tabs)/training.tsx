@@ -35,7 +35,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
     try {
       const TOKEN = await getAccessToken();
       if (TOKEN === null) {
-        authErrorHandler();
+        await authErrorHandler();
       } else {
         const data = await apiRequest<BodyPartType[]>(URL, "GET", null, TOKEN);
         setData(data);
@@ -50,7 +50,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
             // データ再取得
             const TOKEN = await getAccessToken();
             if (TOKEN === null) {
-              authErrorHandler();
+              await authErrorHandler();
             } else {
               const data = await apiRequest<BodyPartType[]>(
                 URL,
@@ -61,7 +61,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
               setData(data);
             }
           } catch (e) {
-            authErrorHandler();
+            await authErrorHandler();
           }
         } else {
           Alert.alert("エラー", "時間をおいて再度ログインしてください");
