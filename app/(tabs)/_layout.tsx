@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Text } from "react-native";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { CalendarProvider, WeekCalendar } from "react-native-calendars";
@@ -8,8 +9,9 @@ import TrainingScreen from "./training";
 import EatingScreen from "./eating";
 import { router, useNavigation } from "expo-router";
 import { TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Entypo, Feather } from "@expo/vector-icons";
 import { format } from "date-fns";
+import theme from "@/styles/theme";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -36,7 +38,13 @@ export default function Layout() {
   }, []);
 
   return (
-    <CalendarProvider date={selectedDate} showTodayButton>
+    <CalendarProvider
+      date={selectedDate}
+      showTodayButton
+      onDateChanged={(day) => {
+        setSelectedDate(day.toString());
+      }}
+    >
       <WeekCalendar onDayPress={(day) => setSelectedDate(day.dateString)} />
       <Tab.Navigator>
         <Tab.Screen name="トレーニング">
@@ -45,6 +53,21 @@ export default function Layout() {
         <Tab.Screen name="食事" component={EatingScreen} />
         <Tab.Screen name="ボディ" component={BodyScreen} />
       </Tab.Navigator>
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          right: 40,
+          bottom: 60,
+          borderRadius: "50%",
+          backgroundColor: theme.colors.primary,
+          height: 60,
+          width: 60,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Entypo name="plus" size={40} color={theme.colors.white} />
+      </TouchableOpacity>
     </CalendarProvider>
   );
 }
