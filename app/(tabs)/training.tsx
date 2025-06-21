@@ -38,7 +38,6 @@ export default function TrainingScreen({ selectedDate }: Props) {
         authErrorHandler();
       } else {
         const data = await apiRequest<BodyPartType[]>(URL, "GET", null, TOKEN);
-        console.log(data);
         setData(data);
       }
     } catch (e) {
@@ -46,9 +45,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
         if (e.status === 403) {
           try {
             // アクセストークン再発行処理
-            const data = await refreshAccessToken();
-            await setAccessToken(data.accessToken);
-            await setRefreshToken(data.refreshToken);
+            await refreshAccessToken();
 
             // データ再取得
             const TOKEN = await getAccessToken();

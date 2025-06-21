@@ -28,7 +28,7 @@ export async function deleteRefreshToken() {
   await SecureStore.deleteItemAsync("refreshToken");
 }
 
-export async function refreshAccessToken(): Promise<RefreshTokenResponse> {
+export async function refreshAccessToken() {
   const URL = "/auth/refresh";
   const refreshToken = await getRefreshToken();
   const deviceInfo = getDeviceInfo();
@@ -37,15 +37,11 @@ export async function refreshAccessToken(): Promise<RefreshTokenResponse> {
     authErrorHandler();
     throw new Error();
   } else {
-    try {
-      const data = await apiRequest<RefreshTokenResponse>(URL, "POST", {
-        refreshToken,
-        deviceInfo,
-      });
-      return data;
-    } catch (e) {
-      authErrorHandler();
-      throw e;
-    }
+    const data = await apiRequest<RefreshTokenResponse>(URL, "POST", {
+      refreshToken,
+      deviceInfo,
+    });
+    await setAccessToken(data.accessToken);
+    await setRefreshToken(data.refreshToken);
   }
 }
