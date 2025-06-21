@@ -1,7 +1,11 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { getAccessToken } from "@/lib/token";
+import {
+  getAccessToken,
+  getRefreshToken,
+  refreshAccessToken,
+} from "@/lib/token";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -9,8 +13,15 @@ export default function Index() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const token = await getAccessToken();
-        setIsAuthenticated(token !== null);
+        const accessToken = await getAccessToken();
+        const refreshToken = await getRefreshToken();
+
+        if (accessToken === null || refreshToken === null) {
+          throw new Error();
+        } else {
+          await refreshAccessToken();
+          setIsAuthenticated(true);
+        }
       } catch (e) {
         setIsAuthenticated(false);
       }
