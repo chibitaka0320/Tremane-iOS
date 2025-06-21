@@ -2,30 +2,22 @@ import { View, Text, StyleSheet } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { CircleButton } from "@/components/common/CircleButton";
 import theme from "@/styles/theme";
+import { router } from "expo-router";
 
-const onTraining = (date: string) => {};
-const onEating = (date: string): void => {};
-const onBody = (date: string): void => {};
-const onEventList = (): void => {};
-
-type Props = {
-  date: string;
+const onTraining = () => {
+  router.push("/add/training");
 };
+const onEating = () => {};
+const onBody = () => {};
+const onEventList = () => {};
 
-export const RecordMenu = (props: Props) => {
-  const { date } = props;
-
+export const RecordMenu = () => {
   return (
     <View style={styles.container}>
       <View style={styles.menuContainer}>
         <View style={styles.item}>
           <Text style={styles.menuTitle}>トレーニング</Text>
-          <CircleButton
-            style={styles.circleButton}
-            onPress={() => {
-              onTraining(date);
-            }}
-          >
+          <CircleButton style={styles.circleButton} onPress={onTraining}>
             <FontAwesome5
               name="dumbbell"
               size={30}
@@ -35,14 +27,7 @@ export const RecordMenu = (props: Props) => {
         </View>
         <View style={styles.item}>
           <Text style={styles.menuTitle}>食事</Text>
-          <CircleButton
-            style={styles.circleButton}
-            onPress={() => {
-              if (typeof date === "string") {
-                onEating(date);
-              }
-            }}
-          >
+          <CircleButton style={styles.circleButton} onPress={onEating}>
             <MaterialIcons
               name="set-meal"
               size={30}
@@ -52,25 +37,13 @@ export const RecordMenu = (props: Props) => {
         </View>
         <View style={styles.item}>
           <Text style={styles.menuTitle}>ボディ</Text>
-          <CircleButton
-            style={styles.circleButton}
-            onPress={() => {
-              if (typeof date === "string") {
-                onBody(date);
-              }
-            }}
-          >
+          <CircleButton style={styles.circleButton} onPress={onBody}>
             <FontAwesome5 name="camera" size={30} color={theme.colors.white} />
           </CircleButton>
         </View>
         <View style={styles.item}>
           <Text style={styles.menuTitle}>種目リスト</Text>
-          <CircleButton
-            style={styles.circleButton}
-            onPress={() => {
-              onEventList();
-            }}
-          >
+          <CircleButton style={styles.circleButton} onPress={onEventList}>
             <MaterialIcons
               name="list-alt"
               size={30}

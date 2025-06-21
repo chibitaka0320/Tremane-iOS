@@ -93,7 +93,7 @@ export default function Layout() {
           backdropComponent={renderBackdrop}
         >
           <BottomSheetView style={styles.menu}>
-            <RecordMenu date={selectedDate} />
+            <RecordMenu />
           </BottomSheetView>
         </BottomSheetModal>
       </BottomSheetModalProvider>
