@@ -33,15 +33,10 @@ export async function refreshAccessToken() {
   const refreshToken = await getRefreshToken();
   const deviceInfo = getDeviceInfo();
 
-  if (refreshToken == null) {
-    authErrorHandler();
-    throw new Error();
-  } else {
-    const data = await apiRequest<RefreshTokenResponse>(URL, "POST", {
-      refreshToken,
-      deviceInfo,
-    });
-    await setAccessToken(data.accessToken);
-    await setRefreshToken(data.refreshToken);
-  }
+  const data = await apiRequest<RefreshTokenResponse>(URL, "POST", {
+    refreshToken,
+    deviceInfo,
+  });
+  await setAccessToken(data.accessToken);
+  await setRefreshToken(data.refreshToken);
 }
