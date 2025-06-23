@@ -5,7 +5,7 @@ export async function apiRequest<T>(
   method: ApiMethod = "GET",
   body?: any,
   token?: string
-): Promise<T> {
+): Promise<T | null> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -21,6 +21,10 @@ export async function apiRequest<T>(
 
   if (!res.ok) {
     throw res;
+  }
+
+  if (res.status === 204) {
+    return null;
   }
 
   return res.json();

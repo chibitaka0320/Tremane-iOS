@@ -25,9 +25,7 @@ export default function Menu() {
     try {
       deleteAccessToken;
       deleteRefreshToken;
-      while (router.canGoBack()) {
-        router.back();
-      }
+      router.dismissAll();
       router.replace("/auth/signIn");
     } catch (e) {
       Alert.alert("ログアウトに失敗しました");

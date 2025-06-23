@@ -39,7 +39,9 @@ export default function TrainingScreen({ selectedDate }: Props) {
         await authErrorHandler();
       } else {
         const data = await apiRequest<BodyPartType[]>(URL, "GET", null, TOKEN);
-        setData(data);
+        if (data != null) {
+          setData(data);
+        }
       }
     } catch (e) {
       if (e instanceof Response) {
@@ -59,7 +61,9 @@ export default function TrainingScreen({ selectedDate }: Props) {
                 null,
                 TOKEN
               );
-              setData(data);
+              if (data != null) {
+                setData(data);
+              }
             }
           } catch (e) {
             await authErrorHandler();
