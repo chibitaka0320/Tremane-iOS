@@ -106,12 +106,18 @@ export default function TrainingScreen() {
   };
 
   const onRecordTraining = () => {
+    if (!bodyParts || !exercise) {
+      Alert.alert("値を選択してください");
+      return;
+    }
+
     if (!weight || !reps) {
       Alert.alert("値を入力してください");
       return;
     }
     if (isNaN(parseFloat(weight)) || isNaN(parseInt(reps))) {
       Alert.alert("数値を正しく入力してください");
+      return;
     }
     fetchInsertTraining();
   };
