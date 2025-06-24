@@ -11,12 +11,7 @@ import theme from "@/styles/theme";
 import { BodyPartType } from "@/types/training";
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/apiClient";
-import {
-  getAccessToken,
-  refreshAccessToken,
-  setAccessToken,
-  setRefreshToken,
-} from "@/lib/token";
+import { getAccessToken, refreshAccessToken } from "@/lib/token";
 import Indicator from "@/components/common/Indicator";
 import { MaterialIcons } from "@expo/vector-icons";
 import { authErrorHandler } from "@/lib/authErrorHandler";
