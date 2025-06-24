@@ -3,15 +3,22 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { CircleButton } from "@/components/common/CircleButton";
 import theme from "@/styles/theme";
 import { router } from "expo-router";
+import { RefObject } from "react";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
-const onTraining = () => {
-  router.push("/add/training");
-};
-const onEating = () => {};
-const onBody = () => {};
-const onEventList = () => {};
+interface Props {
+  bottomSheetRef: RefObject<BottomSheetModal>;
+}
 
-export const RecordMenu = () => {
+export const RecordMenu = ({ bottomSheetRef }: Props) => {
+  const onTraining = () => {
+    bottomSheetRef.current?.dismiss();
+    router.push("/add/training");
+  };
+  const onEating = () => {};
+  const onBody = () => {};
+  const onEventList = () => {};
+
   return (
     <View style={styles.container}>
       <View style={styles.menuContainer}>
