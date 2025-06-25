@@ -42,9 +42,13 @@ export default function SignIn() {
         deviceInfo,
       });
 
-      await setAccessToken(data.accessToken);
-      await setRefreshToken(data.refreshToken);
-      router.replace("/training");
+      if (data == null) {
+        Alert.alert("ログインに失敗しました");
+      } else {
+        await setAccessToken(data.accessToken);
+        await setRefreshToken(data.refreshToken);
+        router.replace("/training");
+      }
     } catch (e) {
       if (e instanceof Response) {
         if (e.status === 401) {

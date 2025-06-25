@@ -42,9 +42,13 @@ export default function SignUp() {
         deviceInfo,
       });
 
-      await setAccessToken(data.accessToken);
-      await setRefreshToken(data.refreshToken);
-      router.replace("/training");
+      if (data == null) {
+        Alert.alert("登録に失敗しました");
+      } else {
+        await setAccessToken(data.accessToken);
+        await setRefreshToken(data.refreshToken);
+        router.replace("/training");
+      }
     } catch (e) {
       if (e instanceof Response) {
         if (e.status === 409) {
