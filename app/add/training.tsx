@@ -58,7 +58,7 @@ export default function TrainingScreen() {
       if (TOKEN === null) {
         await authErrorHandler();
       } else {
-        await apiRequest(URL, "POST", requestBody, TOKEN);
+        await apiRequest(URL, "POST", requestBody);
         router.dismissAll();
         router.replace("/(tabs)/training");
       }
@@ -72,7 +72,7 @@ export default function TrainingScreen() {
             if (TOKEN === null) {
               await authErrorHandler();
             } else {
-              await apiRequest(URL, "POST", requestBody, TOKEN);
+              await apiRequest(URL, "POST", requestBody);
               router.dismissAll();
               router.replace("/(tabs)/training");
             }

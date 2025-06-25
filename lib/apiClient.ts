@@ -1,14 +1,18 @@
+import { getAccessToken } from "./token";
+
 type ApiMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 export async function apiRequest<T>(
   url: string,
   method: ApiMethod = "GET",
-  body?: any,
-  token?: string
+  body?: any
 ): Promise<T | null> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
+
+  const token = await getAccessToken();
+
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
