@@ -1,11 +1,8 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import {
-  getAccessToken,
-  getRefreshToken,
-  refreshAccessToken,
-} from "@/lib/token";
+import { getAccessToken, getRefreshToken } from "@/lib/token";
+import { refreshAccessToken } from "@/lib/apiClient";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

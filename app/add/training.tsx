@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -13,12 +13,9 @@ import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { getAccessToken, refreshAccessToken } from "@/lib/token";
-import { authErrorHandler } from "@/lib/authErrorHandler";
-import { apiRequest } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useNavigation } from "expo-router";
-import { CommonActions } from "@react-navigation/native";
 
 const bodyPartValues = [
   { label: "胸", value: "1" },
@@ -43,9 +40,8 @@ export default function TrainingScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
-  const URL = "/training";
-
   const fetchInsertTraining = async () => {
+    const URL = "/training";
     setLoading(true);
     const requestBody = {
       date: format(date, "yyyy-MM-dd"),
@@ -54,39 +50,12 @@ export default function TrainingScreen() {
       reps: parseInt(reps),
     };
     try {
-      const TOKEN = await getAccessToken();
-      if (TOKEN === null) {
-        await authErrorHandler();
-      } else {
-        await apiRequest(URL, "POST", requestBody);
-        router.dismissAll();
-        router.replace("/(tabs)/training");
-      }
+      await apiRequestWithRefresh(URL, "POST", requestBody);
+      router.dismissAll();
+      router.replace("/(tabs)/training");
     } catch (e) {
-      if (e instanceof Response) {
-        if (e.status === 403) {
-          try {
-            await refreshAccessToken();
-
-            const TOKEN = await getAccessToken();
-            if (TOKEN === null) {
-              await authErrorHandler();
-            } else {
-              await apiRequest(URL, "POST", requestBody);
-              router.dismissAll();
-              router.replace("/(tabs)/training");
-            }
-          } catch (e) {
-            await authErrorHandler();
-          }
-        } else {
-          Alert.alert("エラー", "時間をおいて再度実行してください");
-          return;
-        }
-      } else {
-        Alert.alert("エラー", "時間をおいて再度実行してください");
-        return;
-      }
+      Alert.alert("エラー", "時間をおいて再度実行してください");
+      return;
     } finally {
       setLoading(false);
     }

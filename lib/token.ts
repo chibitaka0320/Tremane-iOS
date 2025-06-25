@@ -27,16 +27,3 @@ export async function deleteAccessToken() {
 export async function deleteRefreshToken() {
   await SecureStore.deleteItemAsync("refreshToken");
 }
-
-export async function refreshAccessToken() {
-  const URL = "/auth/refresh";
-  const refreshToken = await getRefreshToken();
-  const deviceInfo = getDeviceInfo();
-
-  const data = await apiRequest<RefreshTokenResponse>(URL, "POST", {
-    refreshToken,
-    deviceInfo,
-  });
-  await setAccessToken(data.accessToken);
-  await setRefreshToken(data.refreshToken);
-}

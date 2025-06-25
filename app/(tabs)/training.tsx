@@ -10,8 +10,8 @@ import TrainingItem from "@/components/training/TrainingItem";
 import theme from "@/styles/theme";
 import { BodyPartType } from "@/types/training";
 import { useEffect, useState } from "react";
-import { apiRequest } from "@/lib/apiClient";
-import { getAccessToken, refreshAccessToken } from "@/lib/token";
+import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
+import { getAccessToken } from "@/lib/token";
 import Indicator from "@/components/common/Indicator";
 import { MaterialIcons } from "@expo/vector-icons";
 import { authErrorHandler } from "@/lib/authErrorHandler";
@@ -29,43 +29,17 @@ export default function TrainingScreen({ selectedDate }: Props) {
   const fetchTrainingData = async () => {
     setLoading(true);
     try {
-      const TOKEN = await getAccessToken();
-      if (TOKEN === null) {
-        await authErrorHandler();
-      } else {
-        const data = await apiRequest<BodyPartType[]>(URL, "GET", null);
-        if (data != null) {
-          setData(data);
-        }
+      const data = await apiRequestWithRefresh<BodyPartType[]>(
+        URL,
+        "GET",
+        null
+      );
+      if (data != null) {
+        setData(data);
       }
     } catch (e) {
-      if (e instanceof Response) {
-        if (e.status === 403) {
-          try {
-            // アクセストークン再発行処理
-            await refreshAccessToken();
-
-            // データ再取得
-            const TOKEN = await getAccessToken();
-            if (TOKEN === null) {
-              await authErrorHandler();
-            } else {
-              const data = await apiRequest<BodyPartType[]>(URL, "GET", null);
-              if (data != null) {
-                setData(data);
-              }
-            }
-          } catch (e) {
-            await authErrorHandler();
-          }
-        } else {
-          Alert.alert("エラー", "時間をおいて再度ログインしてください");
-          return;
-        }
-      } else {
-        Alert.alert("エラー", "時間をおいて再度ログインしてください");
-        return;
-      }
+      Alert.alert("エラー", "時間をおいて再度ログインしてください");
+      return;
     } finally {
       setLoading(false);
     }
