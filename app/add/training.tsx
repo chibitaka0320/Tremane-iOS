@@ -38,7 +38,7 @@ export default function TrainingScreen() {
 
   useEffect(() => {
     const fetchApi = async () => {
-      const URL = "/bodypart";
+      const URL = "/bodyparts";
       const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
         URL,
         "GET"
