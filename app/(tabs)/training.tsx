@@ -9,12 +9,11 @@ import {
 import TrainingItem from "@/components/training/TrainingItem";
 import theme from "@/styles/theme";
 import { BodyPartType } from "@/types/training";
-import { useEffect, useState } from "react";
-import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
-import { getAccessToken } from "@/lib/token";
+import { useCallback, useEffect, useState } from "react";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { MaterialIcons } from "@expo/vector-icons";
-import { authErrorHandler } from "@/lib/authErrorHandler";
+import { useFocusEffect } from "expo-router";
 
 type Props = {
   selectedDate: string;
@@ -45,9 +44,11 @@ export default function TrainingScreen({ selectedDate }: Props) {
     }
   };
 
-  useEffect(() => {
-    fetchTrainingData();
-  }, [selectedDate]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTrainingData();
+    }, [selectedDate])
+  );
 
   if (isLoading) {
     return <Indicator />;
