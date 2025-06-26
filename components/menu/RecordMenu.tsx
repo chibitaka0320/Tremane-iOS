@@ -15,7 +15,10 @@ export const RecordMenu = ({ bottomSheetRef }: Props) => {
     bottomSheetRef.current?.dismiss();
     router.push("/add/training");
   };
-  const onEating = () => {};
+  const onEating = () => {
+    bottomSheetRef.current?.dismiss();
+    router.push("/add/eating");
+  };
   const onBody = () => {};
   const onEventList = () => {};
 
