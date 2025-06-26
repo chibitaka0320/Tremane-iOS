@@ -16,18 +16,8 @@ import { format } from "date-fns";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useNavigation } from "expo-router";
-
-const bodyPartValues = [
-  { label: "胸", value: "1" },
-  { label: "背中", value: "2" },
-  { label: "型", value: "3" },
-];
-
-const exerciseValues = [
-  { label: "ベンチプレス", value: "1" },
-  { label: "スクワット", value: "2" },
-  { label: "デッドリフト", value: "3" },
-];
+import { BodyPartExerciseResponse } from "@/types/api";
+import { selectLabel } from "@/types/common";
 
 export default function TrainingScreen() {
   const navigation = useNavigation();
@@ -39,6 +29,52 @@ export default function TrainingScreen() {
   const [reps, setReps] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
+
+  const [bodyPartData, setBodyPartData] = useState<BodyPartExerciseResponse[]>(
+    []
+  );
+  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
+  const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      const URL = "/bodypart";
+      const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
+        URL,
+        "GET"
+      );
+      if (res) {
+        setBodyPartData(res);
+        setBodyPartOptions(
+          res.map((part) => ({
+            label: part.name,
+            value: String(part.partsId),
+          }))
+        );
+      }
+    };
+    fetchApi();
+  }, []);
+
+  useEffect(() => {
+    if (!bodyParts) {
+      setExerciseOptions([]);
+      setExercise("");
+      return;
+    }
+    const selected = bodyPartData.find(
+      (part) => String(part.partsId) === bodyParts
+    );
+    if (selected) {
+      setExerciseOptions(
+        selected.exercises.map((ex) => ({
+          label: ex.name,
+          value: String(ex.exerciseId),
+        }))
+      );
+      setExercise("");
+    }
+  }, [bodyParts, bodyPartData]);
 
   const fetchInsertTraining = async () => {
     const URL = "/training";
@@ -121,7 +157,7 @@ export default function TrainingScreen() {
             onValueChange={(value) => {
               setbodyParts(value);
             }}
-            items={bodyPartValues}
+            items={bodyPartOptions}
             value={bodyParts}
             placeholder={{ label: "選択してください", value: "" }}
             style={pickerSelectStyles}
@@ -133,10 +169,11 @@ export default function TrainingScreen() {
             onValueChange={(value) => {
               setExercise(value);
             }}
-            items={exerciseValues}
+            items={exerciseOptions}
             value={exercise}
             placeholder={{ label: "選択してください", value: "" }}
             style={pickerSelectStyles}
+            disabled={!bodyParts}
           />
         </View>
         <View style={[styles.inputItem, styles.row]}>
