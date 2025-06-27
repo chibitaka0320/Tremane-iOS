@@ -211,7 +211,8 @@ const styles = StyleSheet.create({
     padding: theme.spacing[3],
   },
   inputItem: {
-    margin: theme.spacing[3],
+    marginHorizontal: theme.spacing[3],
+    marginVertical: theme.spacing[3],
   },
   label: {
     fontSize: theme.fontSizes.medium,
@@ -234,6 +235,7 @@ const styles = StyleSheet.create({
     width: "45%",
   },
   button: {
+    marginVertical: theme.spacing[3],
     fontSize: theme.fontSizes.medium,
     paddingVertical: theme.spacing[3],
     paddingHorizontal: theme.spacing[3],
