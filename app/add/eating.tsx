@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -8,28 +8,27 @@ import {
   Keyboard,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
-import { router, useNavigation } from "expo-router";
-import { BodyPartExerciseResponse } from "@/types/api";
-import { selectLabel } from "@/types/common";
+import { useNavigation } from "expo-router";
 
 export default function EatingScreen() {
   const navigation = useNavigation();
 
   const [date, setDate] = useState(new Date());
   const [name, setName] = useState("");
-  const [kcal, setKcal] = useState("0");
-  const [weight, setWeight] = useState("");
-  const [reps, setReps] = useState("");
+  const [protein, setProtein] = useState("0");
+  const [fat, setFat] = useState("0");
+  const [carbo, setCarbo] = useState("0");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [isKcalFocused, setIsKcalFocused] = useState(false);
+  const [isProtein, setIsProtein] = useState(false);
+  const [isFat, setIsFat] = useState(false);
+  const [isCarbo, setIsCarbo] = useState(false);
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -52,7 +51,10 @@ export default function EatingScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
+      >
         <View style={styles.inputItem}>
           <Text style={styles.label}>日付</Text>
           <Text style={styles.inputValue} onPress={showDatePicker}>
@@ -79,51 +81,82 @@ export default function EatingScreen() {
           />
         </View>
         <View style={styles.inputItem}>
-          <Text style={styles.label}>カロリー</Text>
-          <TextInput
-            style={styles.inputValue}
-            keyboardType="numeric"
-            value={isKcalFocused ? (kcal === "0" ? "" : kcal) : kcal}
-            onFocus={() => setIsKcalFocused(true)}
-            onBlur={() => {
-              setIsKcalFocused(false);
-              // 空欄でフォーカスアウトしたら0に戻す
-              if (kcal === "" || isNaN(Number(kcal))) {
-                setKcal("0");
-              } else if (/^0\d+/.test(kcal)) {
-                // 先頭が0で2桁以上の場合はトリム（例: 0123→123, 00→0）
-                const trimmed = String(Number(kcal));
-                setKcal(trimmed);
-              }
-              // 1桁の"0"はそのまま許容
-            }}
-            onChangeText={setKcal}
-          />
-        </View>
-        <View style={[styles.inputItem, styles.row]}>
-          <View style={styles.rowItem}>
-            <Text style={styles.label}>重量（kg）</Text>
-            <TextInput
-              onChangeText={setWeight}
-              style={styles.inputValue}
-              keyboardType="numeric"
-              value={weight}
-            />
-          </View>
-          <View style={styles.rowItem}>
-            <Text style={styles.label}>回数</Text>
-            <TextInput
-              onChangeText={setReps}
-              style={styles.inputValue}
-              keyboardType="numeric"
-              value={reps}
-            />
+          <View style={styles.pfcHeader}>
+            <Text style={styles.label}>タンパク質（P）</Text>
+            <View style={styles.valuesContainer}>
+              <TextInput
+                keyboardType="numeric"
+                style={[styles.inputValue, styles.pfcValue]}
+                onChangeText={setProtein}
+                value={isProtein ? (protein === "0" ? "" : protein) : protein}
+                onFocus={() => setIsProtein(true)}
+                onBlur={() => {
+                  setIsProtein(false);
+                  if (protein === "" || isNaN(Number(protein))) {
+                    setProtein("0");
+                  } else if (/^0\d+/.test(protein)) {
+                    const trimmed = String(Number(protein));
+                    setProtein(trimmed);
+                  }
+                }}
+              />
+              <Text style={styles.unit}>g</Text>
+            </View>
           </View>
         </View>
+        <View style={styles.inputItem}>
+          <View style={styles.pfcHeader}>
+            <Text style={styles.label}>脂質（F）</Text>
+            <View style={styles.valuesContainer}>
+              <TextInput
+                keyboardType="numeric"
+                style={[styles.inputValue, styles.pfcValue]}
+                onChangeText={setFat}
+                value={isFat ? (fat === "0" ? "" : fat) : fat}
+                onFocus={() => setIsFat(true)}
+                onBlur={() => {
+                  setIsFat(false);
+                  if (fat === "" || isNaN(Number(fat))) {
+                    setFat("0");
+                  } else if (/^0\d+/.test(fat)) {
+                    const trimmed = String(Number(fat));
+                    setFat(trimmed);
+                  }
+                }}
+              />
+              <Text style={styles.unit}>g</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.inputItem}>
+          <View style={styles.pfcHeader}>
+            <Text style={styles.label}>糖質（C）</Text>
+            <View style={styles.valuesContainer}>
+              <TextInput
+                keyboardType="numeric"
+                style={[styles.inputValue, styles.pfcValue]}
+                onChangeText={setCarbo}
+                value={isCarbo ? (carbo === "0" ? "" : carbo) : carbo}
+                onFocus={() => setIsCarbo(true)}
+                onBlur={() => {
+                  setIsCarbo(false);
+                  if (carbo === "" || isNaN(Number(carbo))) {
+                    setCarbo("0");
+                  } else if (/^0\d+/.test(carbo)) {
+                    const trimmed = String(Number(carbo));
+                    setCarbo(trimmed);
+                  }
+                }}
+              />
+              <Text style={styles.unit}>g</Text>
+            </View>
+          </View>
+        </View>
+
         <TouchableOpacity style={styles.inputItem} onPress={onRecordEating}>
           <Text style={styles.button}>食事を記録</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
@@ -135,7 +168,8 @@ const styles = StyleSheet.create({
     padding: theme.spacing[3],
   },
   inputItem: {
-    margin: theme.spacing[3],
+    marginHorizontal: theme.spacing[3],
+    marginVertical: theme.spacing[3],
   },
   label: {
     fontSize: theme.fontSizes.medium,
@@ -150,14 +184,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.lightGray,
     borderRadius: 8,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  rowItem: {
-    width: "45%",
-  },
+  pfcValue: { width: 80 },
   button: {
+    marginVertical: theme.spacing[3],
     fontSize: theme.fontSizes.medium,
     paddingVertical: theme.spacing[3],
     paddingHorizontal: theme.spacing[3],
@@ -167,11 +196,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderRadius: 8,
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: styles.inputValue,
-  inputIOSContainer: {
-    pointerEvents: "none",
+  pfcHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  valuesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  unit: {
+    marginLeft: theme.spacing[2],
   },
 });
