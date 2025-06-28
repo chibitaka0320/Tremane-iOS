@@ -43,7 +43,16 @@ export default function EatingScreen() {
     hideDatePicker();
   };
 
-  const onRecordEating = () => {};
+  // API作成後実装
+  const onRecordEating = () => {
+    const req = {
+      date,
+      name,
+      protein,
+      fat,
+      carbo,
+    };
+  };
 
   if (isLoading) {
     return <Indicator />;
