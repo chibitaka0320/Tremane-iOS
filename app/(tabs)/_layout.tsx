@@ -80,7 +80,9 @@ export default function Layout() {
           <Tab.Screen name="トレーニング">
             {() => <TrainingScreen selectedDate={selectedDate} />}
           </Tab.Screen>
-          <Tab.Screen name="食事" component={EatingScreen} />
+          <Tab.Screen name="食事">
+            {() => <EatingScreen selectedDate={selectedDate} />}
+          </Tab.Screen>
           <Tab.Screen name="ボディ" component={BodyScreen} />
         </Tab.Navigator>
 

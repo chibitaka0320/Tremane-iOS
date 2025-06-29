@@ -14,7 +14,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 
 export default function EatingScreen() {
   const navigation = useNavigation();
@@ -43,15 +44,45 @@ export default function EatingScreen() {
     hideDatePicker();
   };
 
-  // API作成後実装
-  const onRecordEating = () => {
-    const req = {
-      date,
+  // 食事記録処理
+  const fetchInsertEating = async () => {
+    const URL = "/eating";
+    setLoading(true);
+    const requestBody = {
+      date: format(date, "yyyy-MM-dd"),
       name,
-      protein,
-      fat,
-      carbo,
+      protein: parseFloat(protein),
+      fat: parseFloat(fat),
+      carbo: parseFloat(carbo),
     };
+
+    try {
+      await apiRequestWithRefresh(URL, "POST", requestBody);
+      router.back();
+      router.replace("/(tabs)/eating");
+    } catch (e) {
+      Alert.alert("エラー", "時間をおいて再度実行してください");
+      return;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 食事記録ボタン押下
+  const onRecordEating = () => {
+    if (!name) {
+      Alert.alert("名前を入力してください");
+      return;
+    }
+    if (
+      isNaN(parseFloat(protein)) ||
+      isNaN(parseFloat(fat)) ||
+      isNaN(parseFloat(carbo))
+    ) {
+      Alert.alert("数値を正しく入力してください");
+      return;
+    }
+    fetchInsertEating();
   };
 
   if (isLoading) {

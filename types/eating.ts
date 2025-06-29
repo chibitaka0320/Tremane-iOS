@@ -2,21 +2,21 @@ interface Total {
   calories: number;
   protein: number;
   fat: number;
-  carb: number;
+  carbo: number;
 }
 
 interface Goal {
   calories: number;
   protein: number;
   fat: number;
-  carb: number;
+  carbo: number;
 }
 
 interface Rate {
   calories: number;
   protein: number;
   fat: number;
-  carb: number;
+  carbo: number;
 }
 
 interface Meal {
@@ -25,7 +25,7 @@ interface Meal {
   calories: number;
   protein: number;
   fat: number;
-  carb: number;
+  carbo: number;
 }
 
 interface EatType {

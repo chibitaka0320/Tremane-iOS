@@ -14,14 +14,18 @@ const chartConfig = {
 };
 
 type Props = {
-  total: Total;
-  goal: Goal;
-  rate: Rate;
+  total?: Total;
+  goal?: Goal;
+  rate?: Rate;
 };
 
 export default function Summary({ total, goal, rate }: Props) {
   const data = {
-    data: [rate.protein, rate.fat, rate.carb],
+    data: [
+      rate?.protein ? rate.protein : 0,
+      rate?.fat ? rate.fat : 0,
+      rate?.carbo ? rate.carbo : 0,
+    ],
   };
 
   return (
@@ -40,7 +44,7 @@ export default function Summary({ total, goal, rate }: Props) {
       <View style={styles.values}>
         <Text>総摂取カロリー/目標値</Text>
         <View style={styles.totalValues}>
-          <Value intake={total.calories} goal={goal.calories} />
+          <Value intake={total?.calories} goal={goal?.calories} />
           <Text>kcal</Text>
         </View>
         <View style={styles.border}></View>
@@ -48,8 +52,8 @@ export default function Summary({ total, goal, rate }: Props) {
           <View style={styles.pfcValue} key={key}>
             <Text>{label}</Text>
             <Value
-              intake={total[key as keyof Total]}
-              goal={goal[key as keyof Goal]}
+              intake={total?.[key as keyof Total]}
+              goal={goal?.[key as keyof Goal]}
             />
             <Text>g</Text>
           </View>
