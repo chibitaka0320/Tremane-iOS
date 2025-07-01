@@ -28,6 +28,16 @@ type ExerciseResponse = {
   name: string;
 };
 
+// ユーザー情報API
+export type UserInfoResponse = {
+  nickname: string;
+  height: number;
+  weight: number;
+  birthday: Date;
+  gender: number;
+  activeLevel: number;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;

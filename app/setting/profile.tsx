@@ -17,12 +17,14 @@ import RNPickerSelect from "react-native-picker-select";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
 import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
+import { UserInfoResponse } from "@/types/api";
 
 export default function ProfileScreen() {
   const [nickname, setNickname] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [birthDate, setBirthDate] = useState<Date>(new Date("2000-01-01"));
+  const [birthday, setBirthday] = useState<Date>(new Date("2000-01-01"));
   const [gender, setGender] = useState("");
   const [activeLevel, setActiveLevel] = useState("");
 
@@ -40,14 +42,30 @@ export default function ProfileScreen() {
   };
 
   const handleConfirm = (date: Date) => {
-    setBirthDate(date);
+    setBirthday(date);
     hideDatePicker();
   };
 
   /** API実装後作成 */
   const onUpdate = () => {
-    console.log({ nickname, height, weight, birthDate, gender, activeLevel });
+    console.log({ nickname, height, weight, birthday, gender, activeLevel });
   };
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      const URL = "/users/profile";
+      const res = await apiRequestWithRefresh<UserInfoResponse>(URL, "GET");
+      if (res) {
+        setNickname(res.nickname);
+        setHeight(String(res.height));
+        setWeight(String(res.weight));
+        setBirthday(res.birthday);
+        setGender(String(res.gender));
+        setActiveLevel(String(res.activeLevel));
+      }
+    };
+    fetchApi();
+  }, []);
 
   if (isLoading) {
     return <Indicator />;
@@ -88,10 +106,10 @@ export default function ProfileScreen() {
         <View style={styles.inputItem}>
           <Text style={styles.label}>生年月日</Text>
           <Text style={styles.inputValue} onPress={showDatePicker}>
-            {format(birthDate, "yyyy年MM月dd日")}
+            {format(birthday, "yyyy年MM月dd日")}
           </Text>
           <DateTimePickerModal
-            date={birthDate}
+            date={birthday}
             isVisible={isDatePickerVisible}
             mode="date"
             locale="ja"
