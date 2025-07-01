@@ -12,11 +12,12 @@ export default function Menu() {
     router.back();
   };
 
-  // TODO: 画面ができ次第の実装
-  const onGoal = () => {};
+  const onProf = () => {
+    router.push("/setting/profile");
+  };
 
   // TODO: 画面ができ次第の実装
-  const onProf = () => {};
+  const onGoal = () => {};
 
   // TODO: 画面ができ次第の実装
   const onAccount = () => {};
