@@ -8,6 +8,7 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
@@ -19,6 +20,7 @@ import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { UserInfoResponse } from "@/types/api";
+import { router } from "expo-router";
 
 export default function ProfileScreen() {
   const [nickname, setNickname] = useState("");
@@ -46,9 +48,48 @@ export default function ProfileScreen() {
     hideDatePicker();
   };
 
-  /** API実装後作成 */
+  // ユーザーアップデート
+  const fetchUpdateUser = async () => {
+    const URL = "/users/profile";
+    setLoading(true);
+    const requestBody = {
+      nickname,
+      height: parseFloat(height),
+      weight: parseFloat(weight),
+      birthday: format(birthday, "yyyy-MM-dd"),
+      gender: parseInt(gender),
+      activeLevel: parseInt(activeLevel),
+    };
+
+    try {
+      await apiRequestWithRefresh(URL, "POST", requestBody);
+      router.back();
+    } catch (e) {
+      Alert.alert("エラー", "時間をおいて再度実行してください");
+      return;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 更新ボタン押下
   const onUpdate = () => {
-    console.log({ nickname, height, weight, birthday, gender, activeLevel });
+    if (!nickname || !height || !weight) {
+      Alert.alert("値を入力してください");
+      return;
+    }
+
+    if (!gender || !activeLevel) {
+      Alert.alert("値を選択してください");
+      return;
+    }
+
+    if (isNaN(parseFloat(height)) || isNaN(parseFloat(weight))) {
+      Alert.alert("数値を正しく入力してください");
+      return;
+    }
+
+    fetchUpdateUser();
   };
 
   useEffect(() => {
@@ -57,11 +98,24 @@ export default function ProfileScreen() {
       const res = await apiRequestWithRefresh<UserInfoResponse>(URL, "GET");
       if (res) {
         setNickname(res.nickname);
-        setHeight(String(res.height));
-        setWeight(String(res.weight));
-        setBirthday(res.birthday);
-        setGender(String(res.gender));
-        setActiveLevel(String(res.activeLevel));
+        if (res.height != null) {
+          setHeight(String(res.height));
+        }
+        if (res.weight != null) {
+          setWeight(String(res.weight));
+        }
+
+        if (res.birthday != null) {
+          setBirthday(new Date(res.birthday));
+        }
+
+        if (res.gender != null) {
+          setGender(String(res.gender));
+        }
+
+        if (res.activeLevel != null) {
+          setActiveLevel(String(res.activeLevel));
+        }
       }
     };
     fetchApi();

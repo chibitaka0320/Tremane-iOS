@@ -29,7 +29,6 @@ export default function EatingScreen({ selectedDate }: Props) {
     try {
       const data = await apiRequestWithRefresh<EatType>(URL, "GET", null);
       if (data != null) {
-        console.log(data);
         setData(data);
       }
     } catch (e) {
@@ -45,6 +44,7 @@ export default function EatingScreen({ selectedDate }: Props) {
       fetchEatingData();
     }, [selectedDate])
   );
+
   return (
     <ScrollView style={styles.container}>
       <Summary total={data?.total} goal={data?.goal} rate={data?.rate} />
@@ -59,7 +59,7 @@ export default function EatingScreen({ selectedDate }: Props) {
           ))}
         </View>
         <View style={styles.border}></View>
-        {data?.meals ? (
+        {data?.meals && data.meals.length > 0 ? (
           <FlatList
             data={data.meals}
             renderItem={({ item }) => <EatingRow meal={item} />}
