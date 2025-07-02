@@ -34,8 +34,11 @@ export type UserInfoResponse = {
   height: number;
   weight: number;
   birthday: Date;
+  age: number;
   gender: number;
   activeLevel: number;
+  bmr: number;
+  totalCalorie: number;
 };
 
 export type ErrorType = {

@@ -7,7 +7,6 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { UserInfoResponse } from "@/types/api";
 import { router, useFocusEffect } from "expo-router";
 import { genderOptions } from "@/constants/genderOptions";
-import { calcAge } from "@/lib/calcAge";
 import NotSetProfile from "@/components/setting/NotSetProfile";
 import { Feather } from "@expo/vector-icons";
 import { activeOptions } from "@/constants/activeOptions";
@@ -18,7 +17,10 @@ export default function ProfileScreen() {
   const [weight, setWeight] = useState("");
   const [birthday, setBirthday] = useState<Date>();
   const [gender, setGender] = useState("");
+  const [age, setAge] = useState("");
   const [activeLevel, setActiveLevel] = useState("");
+  const [bmr, setBmr] = useState("");
+  const [totalCalorie, setTotalCalorie] = useState("");
   const [isNotSet, setIsNotSet] = useState<Boolean>();
 
   const [isLoading, setLoading] = useState(false);
@@ -49,8 +51,20 @@ export default function ProfileScreen() {
               setGender(String(res.gender));
             }
 
+            if (res.age != null) {
+              setAge(String(res.age));
+            }
+
             if (res.activeLevel != null) {
               setActiveLevel(String(res.activeLevel));
+            }
+
+            if (res.bmr != null) {
+              setBmr(String(res.bmr));
+            }
+
+            if (res.totalCalorie != null) {
+              setTotalCalorie(String(res.totalCalorie));
             }
 
             setIsNotSet(false);
@@ -99,7 +113,7 @@ export default function ProfileScreen() {
       </View>
       <View style={styles.item}>
         <Text style={styles.label}>年齢</Text>
-        <Text style={styles.value}>{calcAge(birthday)} 歳</Text>
+        <Text style={styles.value}>{age} 歳</Text>
       </View>
       <View style={styles.item}>
         <Text style={styles.label}>性別</Text>
@@ -113,6 +127,14 @@ export default function ProfileScreen() {
           {activeOptions.find((active) => active.value === activeLevel)
             ?.label ?? ""}
         </Text>
+      </View>
+      <View style={styles.item}>
+        <Text style={styles.label}>基礎代謝</Text>
+        <Text style={styles.value}>{bmr} kcal</Text>
+      </View>
+      <View style={styles.item}>
+        <Text style={styles.label}>総消費カロリー</Text>
+        <Text style={styles.value}>{totalCalorie} kcal</Text>
       </View>
     </View>
   );
