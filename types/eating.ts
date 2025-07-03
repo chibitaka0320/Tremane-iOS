@@ -13,7 +13,6 @@ interface Goal {
 }
 
 interface Rate {
-  calories: number;
   protein: number;
   fat: number;
   carbo: number;

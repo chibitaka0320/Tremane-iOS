@@ -116,23 +116,23 @@ export default function GoalScreen() {
 
       const res = await apiRequestWithRefresh<UserGoalResponse>(URL, "GET");
       if (res) {
-        if (res.weight) {
+        if (res.weight != null) {
           setWeight(String(res.weight));
         }
 
-        if (res.goalWeight) {
+        if (res.goalWeight != null) {
           setGoalWeight(String(res.goalWeight));
         }
 
-        if (res.start) {
+        if (res.start != null) {
           setStart(new Date(res.start));
         }
 
-        if (res.finish) {
+        if (res.finish != null) {
           setFinish(new Date(res.finish));
         }
 
-        if (res.pfc) {
+        if (res.pfc != null) {
           setPfc(String(res.pfc));
         }
       }
