@@ -20,8 +20,9 @@ export default function Menu() {
     router.push("/setting/profile");
   };
 
-  // TODO: 画面ができ次第の実装
-  const onGoal = () => {};
+  const onGoal = () => {
+    router.push("/setting/goal");
+  };
 
   // TODO: 画面ができ次第の実装
   const onAccount = () => {};

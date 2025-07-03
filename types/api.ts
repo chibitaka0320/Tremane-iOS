@@ -41,6 +41,16 @@ export type UserInfoResponse = {
   totalCalorie: number;
 };
 
+// ユーザー目標API
+export type UserGoalResponse = {
+  weight: number;
+  goalWeight: number;
+  goalCalorie: number;
+  start: Date;
+  finish: Date;
+  pfc: number;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;
