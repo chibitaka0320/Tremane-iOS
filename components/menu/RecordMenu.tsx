@@ -7,7 +7,7 @@ import { RefObject } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 interface Props {
-  bottomSheetRef: RefObject<BottomSheetModal>;
+  bottomSheetRef: RefObject<BottomSheetModal | null>;
 }
 
 export const RecordMenu = ({ bottomSheetRef }: Props) => {
