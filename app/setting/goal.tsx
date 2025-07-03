@@ -68,7 +68,7 @@ export default function GoalScreen() {
   );
 
   const onEdit = () => {
-    // router.push("/setting/edit/profile");
+    router.push("/setting/edit/goal");
   };
 
   if (isLoading) {
