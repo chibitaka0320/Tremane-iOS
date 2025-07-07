@@ -11,10 +11,8 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { validateEmail, validatePassword } from "@/lib/validators";
-import { getDeviceInfo } from "@/lib/getDevice";
-import { apiRequest } from "@/lib/apiClient";
-import { SignInResponse } from "@/types/api";
-import { setAccessToken, setRefreshToken } from "@/lib/token";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebaseConfig";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -35,30 +33,14 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const deviceInfo = getDeviceInfo();
-      const data = await apiRequest<SignInResponse>("/auth/signIn", "POST", {
-        email,
-        password,
-        deviceInfo,
-      });
-
-      if (data == null) {
-        Alert.alert("ログインに失敗しました");
+      await signInWithEmailAndPassword(auth, email, password);
+      router.replace("/training");
+    } catch (error: any) {
+      if (error.code === "auth/invalid-credential") {
+        Alert.alert("メールアドレスまたはパスワードが違います");
       } else {
-        await setAccessToken(data.accessToken);
-        await setRefreshToken(data.refreshToken);
-        router.replace("/training");
-      }
-    } catch (e) {
-      if (e instanceof Response) {
-        if (e.status === 401) {
-          Alert.alert("メールアドレスまたはパスワードが違います");
-          return;
-        }
         Alert.alert("ログインに失敗しました");
-        return;
       }
-      Alert.alert("エラーが発生しました");
     } finally {
       setIsLoading(false);
     }
