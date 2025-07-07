@@ -1,30 +1,20 @@
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { getAccessToken, getRefreshToken } from "@/lib/token";
-import { refreshAccessToken } from "@/lib/apiClient";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebaseConfig";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkLogin = async () => {
-      try {
-        const accessToken = await getAccessToken();
-        const refreshToken = await getRefreshToken();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(user !== null);
+    });
 
-        if (accessToken === null || refreshToken === null) {
-          throw new Error();
-        } else {
-          await refreshAccessToken();
-          setIsAuthenticated(true);
-        }
-      } catch (e) {
-        setIsAuthenticated(false);
-      }
+    return () => {
+      unsubscribe();
     };
-
-    checkLogin();
   }, []);
 
   if (isAuthenticated === null) {
