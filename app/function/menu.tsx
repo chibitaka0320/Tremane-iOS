@@ -2,11 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { MaterialIcons, SimpleLineIcons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import theme from "@/styles/theme";
-import {
-  deleteAccessToken,
-  deleteRefreshToken,
-  getAccessToken,
-} from "@/lib/token";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebaseConfig";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
@@ -29,8 +26,7 @@ export default function Menu() {
 
   const onSignOut = async () => {
     try {
-      deleteAccessToken();
-      deleteRefreshToken();
+      signOut(auth);
       router.dismissAll();
       router.replace("/auth/signIn");
     } catch (e) {
