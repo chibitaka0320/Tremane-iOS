@@ -1,12 +1,5 @@
-import { RefreshTokenResponse } from "@/types/api";
 import { authErrorHandler } from "./authErrorHandler";
-import { getDeviceInfo } from "./getDevice";
-import {
-  getAccessToken,
-  getRefreshToken,
-  setAccessToken,
-  setRefreshToken,
-} from "./token";
+import { auth } from "./firebaseConfig";
 
 type ApiMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -46,19 +39,20 @@ export async function apiRequestWithRefresh<T>(
   method: ApiMethod = "GET",
   body?: any
 ): Promise<T | null> {
-  let token = await getAccessToken();
-  if (!token) {
+  const user = auth.currentUser;
+  if (!user) {
     await authErrorHandler();
     return null;
   }
 
+  let token = await user.getIdToken();
+
   try {
     return await apiRequest<T>(url, method, body, token);
   } catch (e) {
-    if (e instanceof Response && e.status === 403) {
+    if (e instanceof Response && e.status === 401) {
       try {
-        await refreshAccessToken();
-        token = await getAccessToken();
+        token = await user.getIdToken(true);
         if (!token) {
           await authErrorHandler();
           return null;
@@ -71,22 +65,5 @@ export async function apiRequestWithRefresh<T>(
     } else {
       throw e;
     }
-  }
-}
-
-export async function refreshAccessToken() {
-  const URL = "/auth/refresh";
-  const refreshToken = await getRefreshToken();
-  const deviceInfo = getDeviceInfo();
-
-  const data = await apiRequest<RefreshTokenResponse>(URL, "POST", {
-    refreshToken,
-    deviceInfo,
-  });
-  if (data == null) {
-    authErrorHandler();
-  } else {
-    await setAccessToken(data.accessToken);
-    await setRefreshToken(data.refreshToken);
   }
 }
