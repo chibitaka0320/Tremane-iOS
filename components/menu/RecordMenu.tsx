@@ -45,7 +45,7 @@ export const RecordMenu = ({ bottomSheetRef }: Props) => {
             />
           </CircleButton>
         </View>
-        <View style={styles.item}>
+        {/* <View style={styles.item}>
           <Text style={styles.menuTitle}>ボディ</Text>
           <CircleButton style={styles.circleButton} onPress={onBody}>
             <FontAwesome5 name="camera" size={30} color={theme.colors.white} />
@@ -60,7 +60,7 @@ export const RecordMenu = ({ bottomSheetRef }: Props) => {
               color={theme.colors.white}
             />
           </CircleButton>
-        </View>
+        </View> */}
       </View>
     </View>
   );

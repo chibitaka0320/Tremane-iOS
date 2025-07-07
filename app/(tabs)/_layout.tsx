@@ -4,7 +4,6 @@ import { StyleSheet } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { CalendarProvider, WeekCalendar } from "react-native-calendars";
 
-import BodyScreen from "./body";
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
 import { router, useNavigation } from "expo-router";
@@ -83,7 +82,7 @@ export default function Layout() {
           <Tab.Screen name="食事">
             {() => <EatingScreen selectedDate={selectedDate} />}
           </Tab.Screen>
-          <Tab.Screen name="ボディ" component={BodyScreen} />
+          {/* <Tab.Screen name="ボディ" component={BodyScreen} /> */}
         </Tab.Navigator>
 
         <CircleButton onPress={onPlusButton} style={styles.button}>
