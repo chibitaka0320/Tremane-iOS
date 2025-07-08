@@ -12,7 +12,11 @@ import { useState } from "react";
 import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
-import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  UserCredential,
+} from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 
 export default function SignUp() {
@@ -39,9 +43,14 @@ export default function SignUp() {
         email,
         password
       );
-      await apiRequest("/auth/signUp", "POST", {
-        userId: user.user.uid,
-      });
+      try {
+        await apiRequest("/auth/signUp", "POST", {
+          userId: user.user.uid,
+        });
+      } catch (error) {
+        await deleteUser(user.user);
+        Alert.alert("登録に失敗しました");
+      }
 
       router.replace("/training");
     } catch (error: any) {
