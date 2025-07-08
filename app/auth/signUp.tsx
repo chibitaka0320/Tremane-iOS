@@ -9,12 +9,11 @@ import {
   Alert,
 } from "react-native";
 import { useState } from "react";
-import { getDeviceInfo } from "@/lib/getDevice";
-import { SignUpResponse } from "@/types/api";
 import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
-import { setAccessToken, setRefreshToken } from "@/lib/token";
+import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { auth } from "@/lib/firebaseConfig";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -35,30 +34,22 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const deviceInfo = getDeviceInfo();
-      const data = await apiRequest<SignUpResponse>("/auth/signUp", "POST", {
+      const user: UserCredential = await createUserWithEmailAndPassword(
+        auth,
         email,
-        password,
-        deviceInfo,
+        password
+      );
+      await apiRequest("/auth/signUp", "POST", {
+        userId: user.user.uid,
       });
 
-      if (data == null) {
-        Alert.alert("登録に失敗しました");
+      router.replace("/training");
+    } catch (error: any) {
+      if (error.code === "auth/email-already-in-use") {
+        Alert.alert("すでに登録されているメールアドレスです");
       } else {
-        await setAccessToken(data.accessToken);
-        await setRefreshToken(data.refreshToken);
-        router.replace("/training");
-      }
-    } catch (e) {
-      if (e instanceof Response) {
-        if (e.status === 409) {
-          Alert.alert("すでに登録されているメールアドレスです");
-          return;
-        }
         Alert.alert("登録に失敗しました");
-        return;
       }
-      Alert.alert("エラーが発生しました");
     } finally {
       setIsLoading(false);
     }
