@@ -15,6 +15,7 @@ import Indicator from "@/components/common/Indicator";
 import {
   createUserWithEmailAndPassword,
   deleteUser,
+  sendEmailVerification,
   UserCredential,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
@@ -38,17 +39,17 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const user: UserCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCredential: UserCredential =
+        await createUserWithEmailAndPassword(auth, email, password);
+
+      const user = userCredential.user;
+
       try {
         await apiRequest("/auth/signUp", "POST", {
-          userId: user.user.uid,
+          userId: user.uid,
         });
       } catch (error) {
-        await deleteUser(user.user);
+        await deleteUser(user);
         Alert.alert("登録に失敗しました");
       }
 

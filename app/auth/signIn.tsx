@@ -90,7 +90,7 @@ export default function SignIn() {
         </TouchableOpacity>
 
         {/* TODO: 処理ができ次第実装 */}
-        <Link href={"/auth/signUp"} style={styles.link}>
+        <Link href={"/auth/resetPassword"} style={styles.link}>
           パスワードを忘れた場合
         </Link>
       </View>
