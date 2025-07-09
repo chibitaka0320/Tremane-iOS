@@ -13,9 +13,9 @@ import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
 import {
-  createUserWithEmailAndPassword,
   deleteUser,
-  sendEmailVerification,
+  EmailAuthProvider,
+  linkWithCredential,
   signInAnonymously,
   UserCredential,
 } from "firebase/auth";
@@ -40,22 +40,18 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const userCredential: UserCredential =
-        await createUserWithEmailAndPassword(auth, email, password);
+      const credential = EmailAuthProvider.credential(email, password);
 
-      const user = userCredential.user;
+      const user = auth.currentUser;
 
-      try {
-        await apiRequest("/auth/signUp", "POST", {
-          userId: user.uid,
-        });
-      } catch (error) {
-        await deleteUser(user);
-        Alert.alert("登録に失敗しました");
-      }
+      if (user === null) return;
 
+      await linkWithCredential(user, credential);
+
+      router.dismissAll();
       router.replace("/training");
     } catch (error: any) {
+      console.log(error);
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("すでに登録されているメールアドレスです");
       } else {
@@ -125,18 +121,6 @@ export default function SignUp() {
       >
         <Text style={styles.buttonText}>新規登録</Text>
       </TouchableOpacity>
-      <View style={styles.linksContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            router.back();
-          }}
-        >
-          <Text style={styles.link}>すでにアカウントをお持ちの場合</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={anonymous}>
-          <Text style={styles.link}>登録せずに使用する</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }

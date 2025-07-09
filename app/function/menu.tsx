@@ -22,7 +22,15 @@ export default function Menu() {
   };
 
   // TODO: 画面ができ次第の実装
-  const onAccount = () => {};
+  const onAccount = () => {
+    const user = auth.currentUser;
+
+    if (user?.isAnonymous) {
+      router.push("/function/anonymousMenu");
+    } else {
+      router.push("/function/accoumtMenu");
+    }
+  };
 
   const onSignOut = async () => {
     try {
