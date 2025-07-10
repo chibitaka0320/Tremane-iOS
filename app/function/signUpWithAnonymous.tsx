@@ -7,8 +7,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
@@ -20,23 +23,23 @@ import {
   UserCredential,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
+import CustomTextInput from "@/components/common/CustomTextInput";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
+  useEffect(() => {
+    if (validateEmail(email) && validatePassword(password)) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [email, password]);
 
   const handleSignUp = async () => {
-    if (!validateEmail(email)) {
-      Alert.alert("有効なメールアドレスを入力してください");
-      return;
-    }
-
-    if (!validatePassword(password)) {
-      Alert.alert("パスワードは8文字以上で入力してください");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -91,85 +94,109 @@ export default function SignUp() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.item}>
-        <Text style={styles.label}>メールアドレス</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Email address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-      </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>パスワード</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          autoCapitalize="none"
-          secureTextEntry
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSignUp}
-        disabled={isLoading}
-      >
-        <Text style={styles.buttonText}>新規登録</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>TREMANEアカウントを登録する</Text>
+          <View style={styles.item}>
+            <Text style={styles.label}>メールアドレス</Text>
+            <CustomTextInput
+              placeholder="Email address"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+          </View>
+          <View style={styles.item}>
+            <Text style={styles.label}>パスワード</Text>
+            <CustomTextInput
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
+              isPassword
+            />
+          </View>
+          <TouchableOpacity
+            style={[styles.button, isDisabled && styles.buttonDisabled]}
+            onPress={handleSignUp}
+            disabled={isDisabled && isLoading}
+          >
+            <Text style={styles.buttonText}>新規登録</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background.main,
-    paddingTop: theme.spacing[6],
-    paddingHorizontal: theme.spacing[3],
+  headerContainer: {
+    height: "30%",
   },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
+  },
+  // タイトル
+  title: {
+    fontSize: theme.fontSizes.large,
+    textAlign: "center",
+    fontWeight: "bold",
+    marginVertical: theme.spacing[6],
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    padding: theme.spacing[3],
+  },
+
+  // インプットアイテム
   item: {
-    marginBottom: theme.spacing[5],
+    marginBottom: theme.spacing[4],
   },
   label: {
     marginBottom: theme.spacing[1],
-    fontSize: theme.fontSizes.medium,
-    fontWeight: "bold",
   },
   textInput: {
     backgroundColor: theme.colors.background.light,
     borderWidth: 1,
     borderColor: theme.colors.lightGray,
-    borderRadius: 3,
+    borderRadius: 5,
     fontSize: theme.fontSizes.medium,
     padding: theme.spacing[3],
   },
+
+  // ボタン
   button: {
-    backgroundColor: theme.colors.background.light,
-    borderRadius: 3,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: theme.colors.lightGray,
+    color: theme.colors.white,
+  },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
   },
   buttonText: {
     fontSize: theme.fontSizes.medium,
-    // color: theme.colors.text.main,
+    color: theme.colors.white,
   },
+
   linksContainer: {
     marginTop: theme.spacing[6],
     alignItems: "center",
   },
   link: {
-    fontWeight: "bold",
-    fontSize: theme.fontSizes.medium,
     marginTop: theme.spacing[2],
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[5],
     textAlign: "center",
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
