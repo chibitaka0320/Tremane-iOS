@@ -91,7 +91,7 @@ export default function GoalScreen() {
         <Text style={styles.label}>目標体重</Text>
         <View style={styles.weight}>
           <Text style={styles.value}>{weight}</Text>
-          <Text> → </Text>
+          <Text style={styles.value}> → </Text>
           <Text style={styles.value}>{goalWeight} kg</Text>
         </View>
       </View>
@@ -134,12 +134,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
+    color: theme.colors.primary,
   },
   label: {
     fontSize: theme.fontSizes.medium,
   },
   value: {
     fontSize: theme.fontSizes.medium,
+    color: theme.colors.font.gray,
   },
   weight: {
     flexDirection: "row",

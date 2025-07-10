@@ -12,6 +12,10 @@ const colors = {
     main: "#E4E4E4",
   },
   lightGray: "#e0e0e0",
+  font: {
+    black: "#000000",
+    gray: "#777777",
+  },
 };
 
 // 文字サイズ

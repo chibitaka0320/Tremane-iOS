@@ -26,7 +26,6 @@ export default function TrainingScreen({ selectedDate }: Props) {
   const URL = "/training?date=" + selectedDate;
 
   const fetchTrainingData = async () => {
-    setLoading(true);
     try {
       const data = await apiRequestWithRefresh<BodyPartType[]>(
         URL,
@@ -39,8 +38,6 @@ export default function TrainingScreen({ selectedDate }: Props) {
     } catch (e) {
       Alert.alert("エラー", "時間をおいて再度ログインしてください");
       return;
-    } finally {
-      setLoading(false);
     }
   };
 

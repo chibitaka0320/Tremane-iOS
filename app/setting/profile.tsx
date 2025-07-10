@@ -158,11 +158,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
+    color: theme.colors.primary,
   },
   label: {
     fontSize: theme.fontSizes.medium,
   },
   value: {
     fontSize: theme.fontSizes.medium,
+    color: theme.colors.font.gray,
   },
 });
