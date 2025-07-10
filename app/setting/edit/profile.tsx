@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Text,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
@@ -14,23 +13,30 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import { format } from "date-fns";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import RNPickerSelect from "react-native-picker-select";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
 import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { UserInfoResponse } from "@/types/api";
 import { router } from "expo-router";
+import CustomTextInput from "@/components/common/CustomTextInput";
+import {
+  validateHeight,
+  validateNickname,
+  validateWeight,
+} from "@/lib/validators";
 
 export default function ProfileScreen() {
   const [nickname, setNickname] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [birthday, setBirthday] = useState<Date>(new Date("2000-01-01"));
-  const [gender, setGender] = useState("");
-  const [activeLevel, setActiveLevel] = useState("");
+  const [gender, setGender] = useState("0");
+  const [activeLevel, setActiveLevel] = useState("0");
 
   const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   const activeLevelExplanation = getActiveLevelExplanation(activeLevel);
@@ -47,6 +53,19 @@ export default function ProfileScreen() {
     setBirthday(date);
     hideDatePicker();
   };
+
+  // ボタン活性・非活性
+  useEffect(() => {
+    if (
+      validateNickname(nickname) &&
+      validateHeight(height) &&
+      validateWeight(weight)
+    ) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [nickname, height, weight]);
 
   // ユーザーアップデート
   const fetchUpdateUser = async () => {
@@ -132,37 +151,33 @@ export default function ProfileScreen() {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
       >
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>ニックネーム</Text>
-          <TextInput
-            onChangeText={setNickname}
-            style={styles.inputValue}
-            value={nickname}
-          />
+          <CustomTextInput onChangeText={setNickname} value={nickname} />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>身長（cm）</Text>
-          <TextInput
+          <CustomTextInput
             onChangeText={setHeight}
-            style={styles.inputValue}
             keyboardType="numeric"
             value={height}
           />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>体重（kg）</Text>
-          <TextInput
+          <CustomTextInput
             onChangeText={setWeight}
-            style={styles.inputValue}
             keyboardType="numeric"
             value={weight}
           />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>生年月日</Text>
-          <Text style={styles.inputValue} onPress={showDatePicker}>
-            {format(birthday, "yyyy年MM月dd日")}
-          </Text>
+          <TouchableOpacity style={styles.inputValue} onPress={showDatePicker}>
+            <Text style={styles.inputValueText}>
+              {format(birthday, "yyyy年MM月dd日")}
+            </Text>
+          </TouchableOpacity>
           <DateTimePickerModal
             date={birthday}
             isVisible={isDatePickerVisible}
@@ -175,35 +190,66 @@ export default function ProfileScreen() {
             cancelTextIOS="キャンセル"
           />
         </View>
-        <View style={styles.inputItem}>
+
+        <View style={styles.item}>
           <Text style={styles.label}>性別</Text>
-          <RNPickerSelect
-            onValueChange={(value) => {
-              setGender(value);
-            }}
-            items={genderOptions}
-            value={gender}
-            placeholder={{ label: "選択してください", value: "" }}
-            style={pickerSelectStyles}
-          />
+          <View style={styles.selectContainer}>
+            {genderOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.selectButton,
+                  gender === option.value && styles.selectedButton,
+                ]}
+                onPress={() => setGender(option.value)}
+              >
+                <Text
+                  style={[
+                    styles.selectText,
+                    gender === option.value && styles.selectedText,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-        <View style={styles.inputItem}>
+
+        <View style={styles.item}>
           <Text style={styles.label}>活動レベル</Text>
-          <RNPickerSelect
-            onValueChange={(value) => {
-              setActiveLevel(value);
-            }}
-            items={activeOptions}
-            value={activeLevel}
-            placeholder={{ label: "選択してください", value: "" }}
-            style={pickerSelectStyles}
-          />
+          <View style={styles.selectContainer}>
+            {activeOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.selectButton,
+                  activeLevel === option.value && styles.selectedButton,
+                ]}
+                onPress={() => setActiveLevel(option.value)}
+              >
+                <Text
+                  style={[
+                    styles.selectText,
+                    activeLevel === option.value && styles.selectedText,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           {activeLevelExplanation ? (
             <Text style={styles.explanation}>{activeLevelExplanation}</Text>
           ) : null}
         </View>
-        <TouchableOpacity style={styles.inputItem} onPress={onUpdate}>
-          <Text style={styles.button}>プロフィールを更新</Text>
+
+        <TouchableOpacity
+          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          onPress={onUpdate}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>プロフィールを更新</Text>
         </TouchableOpacity>
       </ScrollView>
     </TouchableWithoutFeedback>
@@ -212,46 +258,74 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.background.light,
     flex: 1,
-    padding: theme.spacing[3],
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
   },
-  inputItem: {
-    marginHorizontal: theme.spacing[3],
-    marginVertical: theme.spacing[3],
+
+  // インプットアイテム
+  item: {
+    marginBottom: theme.spacing[4],
   },
   label: {
-    fontSize: theme.fontSizes.medium,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
   inputValue: {
-    fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
+    justifyContent: "center",
     paddingHorizontal: theme.spacing[3],
     borderWidth: 1,
     borderColor: theme.colors.lightGray,
-    backgroundColor: theme.colors.background.lightGray,
-    borderRadius: 8,
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 5,
+    height: 48,
   },
-  button: {
-    marginVertical: theme.spacing[3],
+  inputValueText: {
     fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[3],
-    backgroundColor: theme.colors.primary,
-    color: theme.colors.white,
-    fontWeight: "bold",
-    textAlign: "center",
-    borderRadius: 8,
   },
+
+  // 通常ボタン
+  button: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
+    paddingVertical: theme.spacing[3],
+    alignItems: "center",
+    marginVertical: theme.spacing[3],
+    color: theme.colors.white,
+  },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
+  },
+  buttonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
+  },
+
   explanation: {
     margin: theme.spacing[2],
   },
-});
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: styles.inputValue,
-  inputIOSContainer: {
-    pointerEvents: "none",
+  // 選択肢レイアウト
+  selectContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  selectButton: {
+    padding: theme.spacing[2],
+    backgroundColor: "#DDDDDD",
+    flex: 1,
+  },
+  selectedButton: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
+  selectText: {
+    textAlign: "center",
+  },
+  selectedText: {
+    color: theme.colors.white,
+    fontWeight: "bold",
   },
 });
