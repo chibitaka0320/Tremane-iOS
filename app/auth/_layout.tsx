@@ -4,20 +4,20 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerBackVisible: false,
+        headerShown: false,
       }}
     >
       <Stack.Screen
         name="signIn"
         options={{
-          headerTitle: "ログイン",
           gestureEnabled: false,
           animation: "slide_from_left",
         }}
       />
-      <Stack.Screen name="signUp" options={{ headerTitle: "新規登録" }} />
+      <Stack.Screen name="signUp" />
       <Stack.Screen
         name="resetPassword"
-        options={{ headerTitle: "パスワード再設定", headerBackVisible: true }}
+        options={{ headerBackVisible: true }}
       />
     </Stack>
   );
