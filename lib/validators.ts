@@ -11,7 +11,7 @@ export function validatePassword(password: string): boolean {
 
 // ニックネーム
 export function validateNickname(nickname: string): boolean {
-  return nickname.length >= 20 && nickname != "";
+  return nickname.length <= 20 && nickname != "";
 }
 
 // 身長

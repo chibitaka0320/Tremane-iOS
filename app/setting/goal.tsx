@@ -97,7 +97,9 @@ export default function GoalScreen() {
       </View>
       <View style={styles.item}>
         <Text style={styles.label}>目標摂取カロリー</Text>
-        <Text style={styles.value}>{goalCalorie} kcal</Text>
+        <Text style={styles.value}>
+          {goalCalorie ? goalCalorie + " kcal" : "未設定項目あり"}
+        </Text>
       </View>
       <View style={styles.item}>
         <Text style={styles.label}>開始日</Text>
