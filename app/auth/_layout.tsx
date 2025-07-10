@@ -17,7 +17,11 @@ export default function RootLayout() {
       <Stack.Screen name="signUp" />
       <Stack.Screen
         name="resetPassword"
-        options={{ headerBackVisible: true }}
+        options={{
+          headerShown: true,
+          headerBackVisible: true,
+          headerTitle: "パスワード再設定",
+        }}
       />
     </Stack>
   );

@@ -148,19 +148,11 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: theme.spacing[1],
   },
-  textInput: {
-    backgroundColor: theme.colors.background.light,
-    borderWidth: 1,
-    borderColor: theme.colors.lightGray,
-    borderRadius: 5,
-    fontSize: theme.fontSizes.medium,
-    padding: theme.spacing[3],
-  },
 
   // ボタン
   button: {
     backgroundColor: theme.colors.primary,
-    borderRadius: 3,
+    borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],

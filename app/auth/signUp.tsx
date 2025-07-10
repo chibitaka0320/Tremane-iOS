@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   // ボタン
   button: {
     backgroundColor: theme.colors.primary,
-    borderRadius: 3,
+    borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],

@@ -1,8 +1,10 @@
+import CustomTextInput from "@/components/common/CustomTextInput";
 import { auth } from "@/lib/firebaseConfig";
+import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { router } from "expo-router";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Keyboard,
   TextInput,
@@ -17,24 +19,29 @@ import {
 export default function resetPassword() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
+  useEffect(() => {
+    if (validateEmail(email)) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [email]);
 
   const handlePress = (): void => {
     setIsLoading(true);
 
     try {
-      if (email === "") {
-        Alert.alert("メールアドレスを入力してください");
-      } else {
-        sendPasswordResetEmail(auth, email);
-        Alert.alert("再設定メールを送信しました。", "", [
-          {
-            text: "OK",
-            onPress: () => {
-              router.back();
-            },
+      sendPasswordResetEmail(auth, email);
+      Alert.alert("再設定メールを送信しました。", "", [
+        {
+          text: "OK",
+          onPress: () => {
+            router.back();
           },
-        ]);
-      }
+        },
+      ]);
     } catch (error) {
       Alert.alert("メールアドレスを正しく入力してください");
     } finally {
@@ -50,10 +57,14 @@ export default function resetPassword() {
     >
       <View style={styles.container}>
         <View style={styles.contents}>
-          <View style={styles.items}>
-            <Text style={styles.itemText}>メールアドレス</Text>
-            <TextInput
-              style={styles.itemTextInput}
+          <Text style={styles.title}>再設定用メールを送信します</Text>
+          <Text style={styles.subTitle}>
+            指定したメールアドレス宛にメールを送信します。{"\n"}
+            記載されたURLからパスワードの再設定を行なってください。
+          </Text>
+          <View style={styles.item}>
+            <Text style={styles.label}>メールアドレス</Text>
+            <CustomTextInput
               placeholder="Email address"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -62,14 +73,14 @@ export default function resetPassword() {
               onChangeText={(value) => {
                 setEmail(value);
               }}
-            ></TextInput>
+            />
           </View>
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, isDisabled && styles.buttonDisabled]}
             onPress={handlePress}
-            disabled={isLoading}
+            disabled={isLoading && isDisabled}
           >
-            <Text style={styles.buttonText}>パスワード再設定</Text>
+            <Text style={styles.buttonText}>メールを送信</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -85,46 +96,39 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 30,
   },
-  active: {
-    ...StyleSheet.absoluteFillObject,
-    flex: 1,
-  },
-  items: {
-    marginVertical: 20,
-  },
-  itemText: {
-    marginBottom: 10,
+
+  // 注記
+  title: {
+    fontSize: theme.fontSizes.large,
+    marginBottom: theme.spacing[4],
     fontWeight: "bold",
   },
-  itemTextInput: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#DEDDDC",
-    borderRadius: 3,
-    fontSize: 16,
-    padding: 10,
+  subTitle: {
+    marginBottom: theme.spacing[4],
   },
-  trans: {
-    marginTop: 20,
-    flexDirection: "row",
-    justifyContent: "center",
+
+  // インプットアイテム
+  item: {
+    marginBottom: theme.spacing[4],
   },
-  transLink: {
-    marginLeft: 10,
+  label: {
+    marginBottom: theme.spacing[1],
   },
-  transLinkText: {
-    fontWeight: "bold",
-  },
+
+  // ボタン
   button: {
-    backgroundColor: theme.colors.background.light,
-    borderRadius: 3,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: theme.colors.lightGray,
+    color: theme.colors.white,
+  },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
   },
   buttonText: {
     fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
   },
 });
