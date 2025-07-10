@@ -30,6 +30,7 @@ export default function ProfileScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setLoading(true);
       const fetchApi = async () => {
         const URL = "/users/profile";
         try {
@@ -73,6 +74,8 @@ export default function ProfileScreen() {
           if (e instanceof Response && e.status === 404) {
             setIsNotSet(true);
           }
+        } finally {
+          setLoading(false);
         }
       };
       fetchApi();
@@ -83,7 +86,7 @@ export default function ProfileScreen() {
     router.push("/setting/edit/profile");
   };
 
-  if (isLoading) {
+  if (isLoading && isNotSet == null) {
     return <Indicator />;
   }
 

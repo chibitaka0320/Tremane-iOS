@@ -71,7 +71,7 @@ export default function GoalScreen() {
     router.push("/setting/edit/goal");
   };
 
-  if (isLoading) {
+  if (isLoading && isNotSet == null) {
     return <Indicator />;
   }
 
