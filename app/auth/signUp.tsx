@@ -128,7 +128,7 @@ export default function SignUp() {
       <View style={styles.linksContainer}>
         <TouchableOpacity
           onPress={() => {
-            router.back();
+            router.navigate("/auth/signIn");
           }}
         >
           <Text style={styles.link}>すでにアカウントをお持ちの場合</Text>
