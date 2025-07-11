@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -7,49 +7,49 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   Text,
 } from "react-native";
-import { FontAwesome6 } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 // firebase
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
-  signInWithEmailAndPassword,
   updatePassword,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
+import CustomTextInput from "@/components/common/CustomTextInput";
+import Indicator from "@/components/common/Indicator";
+import { validatePassword } from "@/lib/validators";
 
 export default function Password() {
-  const [toggleA, setToggleA] = useState(true);
   const [currentPassword, setCurrentPassword] = useState("");
-  const [toggleB, setToggleB] = useState(true);
   const [changePassword, setChangePassword] = useState("");
-  const [toggleC, setToggleC] = useState(true);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [visible, setVisible] = useState(false);
+
+  const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
+  // ボタン活性・非活性
+  useEffect(() => {
+    if (
+      validatePassword(currentPassword) &&
+      validatePassword(changePassword) &&
+      validatePassword(confirmPassword) &&
+      changePassword === confirmPassword
+    ) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [currentPassword, changePassword, confirmPassword]);
 
   const onUpdate = async (): Promise<void> => {
     try {
-      setVisible(true);
+      setLoading(true);
       const user = auth.currentUser;
       if (user === null) return;
-      if (
-        currentPassword === "" ||
-        changePassword === "" ||
-        confirmPassword === ""
-      ) {
-        Alert.alert("未入力事項があります");
-        return;
-      }
-
-      if (confirmPassword !== changePassword) {
-        Alert.alert("確認用のパスワードが一致しません");
-        return;
-      }
 
       const userMail = user.email;
       if (userMail === null) return;
@@ -78,35 +78,13 @@ export default function Password() {
         Alert.alert("新しいパスワードを正しく入力してください");
       }
     } finally {
-      setVisible(false);
+      setLoading(false);
     }
-    //   .then(() => {
-    //     if (changePassword === confirmPassword) {
-    //       updatePassword(user, changePassword)
-    //         .then(() => {
-    //           Alert.alert("パスワードの変更が完了しました", "", [
-    //             {
-    //               text: "OK",
-    //               onPress: () => {
-    //                 router.back();
-    //               },
-    //             },
-    //           ]);
-    //         })
-    //         .catch(() => {
-    //           Alert.alert("新しいパスワードを正しく入力してください");
-    //           setVisible(false);
-    //         });
-    //     } else {
-    //       Alert.alert("確認用のパスワードが一致しません");
-    //       setVisible(false);
-    //     }
-    //   })
-    //   .catch(() => {
-    //     Alert.alert("現在のパスワードに誤りがあります");
-    //     setVisible(false);
-    //   });
   };
+
+  if (isLoading) {
+    return <Indicator />;
+  }
 
   return (
     <TouchableWithoutFeedback
@@ -116,72 +94,48 @@ export default function Password() {
     >
       <View style={styles.container}>
         <View style={styles.item}>
-          <TextInput
-            style={styles.itemTextInput}
-            placeholder="現在のパスワード"
+          <Text style={styles.label}>現在のパスワード</Text>
+          <CustomTextInput
             autoCapitalize="none"
-            secureTextEntry={toggleA}
             autoFocus
             value={currentPassword}
             onChangeText={(value) => {
               setCurrentPassword(value);
             }}
-          ></TextInput>
-          <TouchableOpacity
-            onPress={() => {
-              setToggleA(!toggleA);
-            }}
-            style={styles.itemIcon}
-          >
-            <FontAwesome6 name={toggleA ? "eye" : "eye-slash"} size={22} />
-          </TouchableOpacity>
+            isPassword
+          />
         </View>
 
         <View style={styles.item}>
-          <TextInput
-            style={styles.itemTextInput}
-            placeholder="新しいパスワード"
+          <Text style={styles.label}>新しいパスワード</Text>
+          <CustomTextInput
             autoCapitalize="none"
-            secureTextEntry={toggleB}
             value={changePassword}
             onChangeText={(value) => {
               setChangePassword(value);
             }}
-          ></TextInput>
-          <TouchableOpacity
-            onPress={() => {
-              setToggleB(!toggleB);
-            }}
-            style={styles.itemIcon}
-          >
-            <FontAwesome6 name={toggleB ? "eye" : "eye-slash"} size={22} />
-          </TouchableOpacity>
+            isPassword
+          />
         </View>
 
         <View style={styles.item}>
-          <TextInput
-            style={styles.itemTextInput}
-            placeholder="新しいパスワードの確認"
+          <Text style={styles.label}>新しいパスワードの確認</Text>
+          <CustomTextInput
             autoCapitalize="none"
-            secureTextEntry={toggleC}
             value={confirmPassword}
             onChangeText={(value) => {
               setConfirmPassword(value);
             }}
-          ></TextInput>
-          <TouchableOpacity
-            onPress={() => {
-              setToggleC(!toggleC);
-            }}
-            style={styles.itemIcon}
-          >
-            <FontAwesome6 name={toggleC ? "eye" : "eye-slash"} size={22} />
-          </TouchableOpacity>
+            isPassword
+          />
         </View>
-        <TouchableOpacity style={styles.button} onPress={onUpdate}>
-          <Text>パスワードを変更</Text>
+        <TouchableOpacity
+          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          onPress={onUpdate}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>パスワードを変更</Text>
         </TouchableOpacity>
-        {visible && <ActivityIndicator style={styles.active} />}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -190,49 +144,45 @@ export default function Password() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
   },
-  active: {
-    ...StyleSheet.absoluteFillObject,
-    flex: 1,
-  },
+
+  // インプットアイテム
   item: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    marginBottom: theme.spacing[4],
+  },
+  label: {
+    marginBottom: theme.spacing[1],
+  },
+  inputValue: {
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing[3],
     borderWidth: 1,
-    borderColor: "#DEDDDC",
-    borderRadius: 3,
-    marginVertical: 15,
-  },
-  itemTextInput: {
-    fontSize: 16,
-    padding: 10,
-    width: "85%",
-  },
-  itemIcon: {
-    width: 30,
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  button: {
+    borderColor: theme.colors.lightGray,
     backgroundColor: theme.colors.background.light,
-    borderRadius: 3,
+    borderRadius: 5,
+    height: 48,
+  },
+  inputValueText: {
+    fontSize: theme.fontSizes.medium,
+  },
+
+  // 通常ボタン
+  button: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: theme.colors.lightGray,
+    color: theme.colors.white,
   },
-  trans: {
-    marginTop: 60,
-    flexDirection: "row",
-    justifyContent: "center",
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
   },
-  transLink: {
-    marginLeft: 10,
-  },
-  transLinkText: {
-    fontWeight: "bold",
+  buttonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
   },
 });
