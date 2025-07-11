@@ -1,4 +1,6 @@
 import { auth } from "@/lib/firebaseConfig";
+import theme from "@/styles/theme";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { deleteUser } from "firebase/auth";
 import React from "react";
@@ -33,60 +35,60 @@ export default function DeleteAccountScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 警告アイコン */}
-      <Text style={styles.warningIcon}>⚠️</Text>
-
-      {/* タイトル */}
-      <Text style={styles.title}>アカウント削除</Text>
-
-      {/* 説明文 */}
-      <Text style={styles.description}>
-        本当にアカウントを削除しますか？{"\n"}この操作は取り消せません。
-      </Text>
-
-      {/* 削除ボタン */}
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Text style={styles.deleteButtonText}>アカウントを削除</Text>
-      </TouchableOpacity>
+      <View style={styles.item}>
+        <Entypo name="warning" size={80} color={theme.colors.warn} />
+        <Text style={styles.warn}>本当に削除しますか？</Text>
+        <Text style={styles.subTitle}>
+          この操作は取り消せません。
+          {"\n"}
+          ユーザーに関するデータは全て削除されます。
+          {"\n"}
+          ユーザー及び関連するデータを削除してもよろしいですか？
+        </Text>
+        <TouchableOpacity style={styles.button} onPress={handleDelete}>
+          <Text style={styles.buttonText}>アカウントを削除する</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: theme.colors.background.light,
     flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 24,
-    paddingVertical: 48,
+    padding: theme.spacing[5],
     alignItems: "center",
-    justifyContent: "center",
   },
-  warningIcon: {
-    fontSize: 64,
-    marginBottom: 24,
-    color: "#E53935",
+  item: {
+    position: "absolute",
+    top: "20%",
+    alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
-    marginBottom: 16,
-    color: "#222",
+    marginBottom: theme.spacing[3],
   },
-  description: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#555",
-    marginBottom: 32,
+  subTitle: {
+    marginHorizontal: theme.spacing[4],
+    marginVertical: theme.spacing[3],
+    fontSize: theme.fontSizes.small,
   },
-  deleteButton: {
-    backgroundColor: "#E53935",
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
+  button: {
+    alignItems: "center",
+    backgroundColor: theme.colors.error,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
+    marginTop: theme.spacing[3],
+    borderRadius: 5,
   },
-  deleteButtonText: {
-    color: "#fff",
-    fontSize: 16,
+  buttonText: {
+    color: theme.colors.white,
+  },
+  warn: {
+    fontSize: theme.fontSizes.large,
     fontWeight: "bold",
+    marginVertical: theme.spacing[3],
   },
 });
