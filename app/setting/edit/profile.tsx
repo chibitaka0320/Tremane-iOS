@@ -67,8 +67,8 @@ export default function ProfileScreen() {
     }
   }, [nickname, height, weight]);
 
-  // ユーザーアップデート
-  const fetchUpdateUser = async () => {
+  // 更新ボタン押下
+  const onUpdate = async () => {
     const URL = "/users/profile";
     setLoading(true);
     const requestBody = {
@@ -89,26 +89,6 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // 更新ボタン押下
-  const onUpdate = () => {
-    if (!nickname || !height || !weight) {
-      Alert.alert("値を入力してください");
-      return;
-    }
-
-    if (!gender || !activeLevel) {
-      Alert.alert("値を選択してください");
-      return;
-    }
-
-    if (isNaN(parseFloat(height)) || isNaN(parseFloat(weight))) {
-      Alert.alert("数値を正しく入力してください");
-      return;
-    }
-
-    fetchUpdateUser();
   };
 
   useEffect(() => {

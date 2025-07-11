@@ -114,7 +114,7 @@ export default function GoalScreen() {
         </Text>
       </View>
       <View style={styles.item}>
-        <Text style={styles.label}>活動レベル</Text>
+        <Text style={styles.label}>PFCバランス</Text>
         <Text style={styles.value}>{pfcBalanceExplain}</Text>
       </View>
     </View>

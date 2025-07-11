@@ -14,29 +14,41 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import { format } from "date-fns";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import RNPickerSelect from "react-native-picker-select";
-import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
-import { genderOptions } from "@/constants/genderOptions";
-import { activeOptions } from "@/constants/activeOptions";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { UserGoalResponse, UserInfoResponse } from "@/types/api";
+import { UserGoalResponse } from "@/types/api";
 import { router } from "expo-router";
 import { pfcOptions } from "@/constants/pfcOptions";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
-import { Feather, FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { validateWeight } from "@/lib/validators";
 
 export default function GoalScreen() {
   const [weight, setWeight] = useState("");
   const [goalWeight, setGoalWeight] = useState("");
   const [start, setStart] = useState<Date>(new Date());
   const [finish, setFinish] = useState<Date>(new Date());
-  const [pfc, setPfc] = useState("");
+  const [pfc, setPfc] = useState("0");
 
   const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
   const [isStart, setIsStart] = useState(false);
   const [isFinish, setIsFinish] = useState(false);
 
   const pfcBalanceExplanation = getPfcBalanceExplanation(pfc);
+
+  // ボタン活性・非活性
+  useEffect(() => {
+    if (
+      validateWeight(weight) &&
+      validateWeight(goalWeight) &&
+      !(start >= finish)
+    ) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [weight, goalWeight, start, finish]);
 
   // 開始日ピッカー
   const showStartPicker = () => {
@@ -62,8 +74,8 @@ export default function GoalScreen() {
     hideFinishPicker();
   };
 
-  // 目標設定更新
-  const fetchUpdateGoal = async () => {
+  //更新ボタン押下
+  const onUpdate = async () => {
     const URL = "/users/goal";
     setLoading(true);
     const requestBody = {
@@ -83,31 +95,6 @@ export default function GoalScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  //更新ボタン押下
-  const onUpdate = () => {
-    if (!weight || !goalWeight) {
-      Alert.alert("値を入力してください");
-      return;
-    }
-
-    if (start >= finish) {
-      Alert.alert("終了日は開始日以降を選択してください");
-      return;
-    }
-
-    if (!pfc) {
-      Alert.alert("値を選択してください");
-      return;
-    }
-
-    if (isNaN(parseFloat(weight)) || isNaN(parseFloat(goalWeight))) {
-      Alert.alert("数値を正しく入力してください");
-      return;
-    }
-
-    fetchUpdateGoal();
   };
 
   useEffect(() => {
@@ -150,7 +137,7 @@ export default function GoalScreen() {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
       >
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>目標体重（kg）</Text>
           <View style={styles.row}>
             <TextInput
@@ -168,11 +155,13 @@ export default function GoalScreen() {
             />
           </View>
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>開始日</Text>
-          <Text style={styles.inputValue} onPress={showStartPicker}>
-            {format(start, "yyyy年MM月dd日")}
-          </Text>
+          <TouchableOpacity style={styles.inputValue} onPress={showStartPicker}>
+            <Text style={styles.inputValueText}>
+              {format(start, "yyyy年MM月dd日")}
+            </Text>
+          </TouchableOpacity>
           <DateTimePickerModal
             date={start}
             isVisible={isStart}
@@ -185,11 +174,16 @@ export default function GoalScreen() {
             cancelTextIOS="キャンセル"
           />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>終了日</Text>
-          <Text style={styles.inputValue} onPress={showFinishPicker}>
-            {format(finish, "yyyy年MM月dd日")}
-          </Text>
+          <TouchableOpacity
+            style={styles.inputValue}
+            onPress={showFinishPicker}
+          >
+            <Text style={styles.inputValueText}>
+              {format(finish, "yyyy年MM月dd日")}
+            </Text>
+          </TouchableOpacity>
           <DateTimePickerModal
             date={finish}
             isVisible={isFinish}
@@ -202,23 +196,40 @@ export default function GoalScreen() {
             cancelTextIOS="キャンセル"
           />
         </View>
-        <View style={styles.inputItem}>
+
+        <View style={styles.item}>
           <Text style={styles.label}>PFCバランス</Text>
-          <RNPickerSelect
-            onValueChange={(value) => {
-              setPfc(value);
-            }}
-            items={pfcOptions}
-            value={pfc}
-            placeholder={{ label: "選択してください", value: "" }}
-            style={pickerSelectStyles}
-          />
+          <View style={styles.selectContainer}>
+            {pfcOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.selectButton,
+                  pfc === option.value && styles.selectedButton,
+                ]}
+                onPress={() => setPfc(option.value)}
+              >
+                <Text
+                  style={[
+                    styles.selectText,
+                    pfc === option.value && styles.selectedText,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           {pfcBalanceExplanation ? (
             <Text style={styles.explanation}>{pfcBalanceExplanation}</Text>
           ) : null}
         </View>
-        <TouchableOpacity style={styles.inputItem} onPress={onUpdate}>
-          <Text style={styles.button}>プロフィールを更新</Text>
+        <TouchableOpacity
+          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          onPress={onUpdate}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>目標を更新</Text>
         </TouchableOpacity>
       </ScrollView>
     </TouchableWithoutFeedback>
@@ -227,40 +238,31 @@ export default function GoalScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.background.light,
     flex: 1,
-    padding: theme.spacing[3],
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
   },
-  inputItem: {
-    marginHorizontal: theme.spacing[3],
-    marginVertical: theme.spacing[3],
+
+  // インプットアイテム
+  item: {
+    marginBottom: theme.spacing[4],
   },
   label: {
-    fontSize: theme.fontSizes.medium,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
   inputValue: {
-    fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
+    justifyContent: "center",
     paddingHorizontal: theme.spacing[3],
     borderWidth: 1,
     borderColor: theme.colors.lightGray,
-    backgroundColor: theme.colors.background.lightGray,
-    borderRadius: 8,
-  },
-  button: {
-    marginVertical: theme.spacing[3],
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 5,
+    height: 48,
     fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[3],
-    backgroundColor: theme.colors.primary,
-    color: theme.colors.white,
-    fontWeight: "bold",
-    textAlign: "center",
-    borderRadius: 8,
   },
-  explanation: {
-    margin: theme.spacing[2],
+  inputValueText: {
+    fontSize: theme.fontSizes.medium,
   },
   row: {
     flexDirection: "row",
@@ -269,6 +271,51 @@ const styles = StyleSheet.create({
   },
   smallInput: {
     width: "35%",
+  },
+
+  // 通常ボタン
+  button: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
+    paddingVertical: theme.spacing[3],
+    alignItems: "center",
+    marginVertical: theme.spacing[3],
+    color: theme.colors.white,
+  },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
+  },
+  buttonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
+  },
+
+  explanation: {
+    margin: theme.spacing[2],
+  },
+
+  // 選択肢レイアウト
+  selectContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  selectButton: {
+    padding: theme.spacing[2],
+    backgroundColor: "#DDDDDD",
+    flex: 1,
+  },
+  selectedButton: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
+  selectText: {
+    textAlign: "center",
+  },
+  selectedText: {
+    color: theme.colors.white,
+    fontWeight: "bold",
   },
 });
 
