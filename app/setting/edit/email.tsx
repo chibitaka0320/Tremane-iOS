@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
@@ -15,22 +13,34 @@ import { router } from "expo-router";
 // firebase
 import {
   EmailAuthProvider,
-  fetchSignInMethodsForEmail,
   reauthenticateWithCredential,
   signOut,
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
+import Indicator from "@/components/common/Indicator";
+import CustomTextInput from "@/components/common/CustomTextInput";
+import { validateEmail, validatePassword } from "@/lib/validators";
 
 export default function Email() {
   const currentEmail = auth.currentUser?.email;
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [visible, setVisible] = useState(false);
+
+  const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
+  useEffect(() => {
+    if (validateEmail(newEmail) && validatePassword(password)) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [newEmail, password]);
 
   const handlePress = async () => {
-    setVisible(true);
+    setLoading(true);
     const user = auth.currentUser;
     if (user == null) return;
     if (currentEmail == null) return;
@@ -67,9 +77,13 @@ export default function Email() {
         Alert.alert("エラーが発生しました");
       }
     } finally {
-      setVisible(false);
+      setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Indicator />;
+  }
 
   return (
     <TouchableWithoutFeedback
@@ -79,15 +93,12 @@ export default function Email() {
     >
       <View style={styles.container}>
         <View style={styles.item}>
-          <Text>現在のメールアドレス</Text>
-          <TextInput style={styles.text} editable={false}>
-            {currentEmail}
-          </TextInput>
+          <Text style={styles.label}>現在のメールアドレス</Text>
+          <Text style={styles.inputValueText}>{currentEmail}</Text>
         </View>
         <View style={styles.item}>
           <Text>新しいメールアドレス</Text>
-          <TextInput
-            style={styles.textInput}
+          <CustomTextInput
             autoFocus
             autoCapitalize="none"
             value={newEmail}
@@ -96,31 +107,27 @@ export default function Email() {
             }}
             keyboardType="email-address"
             textContentType="emailAddress"
-          ></TextInput>
+          />
         </View>
         <View style={styles.item}>
           <Text>認証用パスワード</Text>
-          <TextInput
-            style={styles.textInput}
+          <CustomTextInput
             autoCapitalize="none"
-            secureTextEntry
             value={password}
             onChangeText={(value) => {
               setPassword(value);
             }}
-          ></TextInput>
+            isPassword
+          />
         </View>
 
         <TouchableOpacity
-          onPress={() => {
-            void handlePress();
-          }}
-          style={styles.button}
+          onPress={handlePress}
+          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          disabled={isDisabled}
         >
           <Text style={styles.buttonText}>変更</Text>
         </TouchableOpacity>
-
-        {visible && <ActivityIndicator style={styles.active} />}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -129,54 +136,38 @@ export default function Email() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 20,
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
   },
-  active: {
-    ...StyleSheet.absoluteFillObject,
-    flex: 1,
-  },
+
+  // インプットアイテム
   item: {
-    marginBottom: 10,
+    marginBottom: theme.spacing[4],
   },
-  text: {
-    backgroundColor: "#FFFFFF",
-    fontSize: 16,
-    paddingHorizontal: 10,
-    height: 40,
-    marginVertical: 5,
+  label: {
+    marginBottom: theme.spacing[1],
   },
-  textInput: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#DEDDDC",
-    borderRadius: 3,
-    fontSize: 16,
-    paddingHorizontal: 10,
-    height: 40,
-    marginVertical: 10,
+  inputValueText: {
+    fontSize: theme.fontSizes.medium,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
   },
+
+  // 通常ボタン
   button: {
-    backgroundColor: theme.colors.background.light,
-    borderRadius: 3,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
     marginVertical: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: theme.colors.lightGray,
+    color: theme.colors.white,
   },
-  trans: {
-    marginTop: 60,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  transLink: {
-    marginLeft: 10,
-  },
-  transLinkText: {
-    fontWeight: "bold",
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
   },
   buttonText: {
     fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
   },
 });
