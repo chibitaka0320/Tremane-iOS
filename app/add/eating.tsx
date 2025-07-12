@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -16,6 +16,8 @@ import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router, useNavigation } from "expo-router";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
+import CustomTextInput from "@/components/common/CustomTextInput";
+import { validateEatName, validatePfc } from "@/lib/validators";
 
 export default function EatingScreen() {
   const navigation = useNavigation();
@@ -27,6 +29,8 @@ export default function EatingScreen() {
   const [carbo, setCarbo] = useState("0");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
   const [isProtein, setIsProtein] = useState(false);
   const [isFat, setIsFat] = useState(false);
   const [isCarbo, setIsCarbo] = useState(false);
@@ -44,8 +48,21 @@ export default function EatingScreen() {
     hideDatePicker();
   };
 
-  // 食事記録処理
-  const fetchInsertEating = async () => {
+  useEffect(() => {
+    if (
+      validateEatName(name) &&
+      validatePfc(protein) &&
+      validatePfc(fat) &&
+      validatePfc(carbo)
+    ) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [name, protein, fat, carbo]);
+
+  // 食事記録ボタン押下
+  const onRecordEating = async () => {
     const URL = "/eating";
     setLoading(true);
     const requestBody = {
@@ -68,23 +85,6 @@ export default function EatingScreen() {
     }
   };
 
-  // 食事記録ボタン押下
-  const onRecordEating = () => {
-    if (!name) {
-      Alert.alert("名前を入力してください");
-      return;
-    }
-    if (
-      isNaN(parseFloat(protein)) ||
-      isNaN(parseFloat(fat)) ||
-      isNaN(parseFloat(carbo))
-    ) {
-      Alert.alert("数値を正しく入力してください");
-      return;
-    }
-    fetchInsertEating();
-  };
-
   if (isLoading) {
     return <Indicator />;
   }
@@ -95,11 +95,13 @@ export default function EatingScreen() {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
       >
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>日付</Text>
-          <Text style={styles.inputValue} onPress={showDatePicker}>
-            {format(date, "yyyy年MM月dd日")}
-          </Text>
+          <TouchableOpacity style={styles.inputValue} onPress={showDatePicker}>
+            <Text style={styles.inputValueText}>
+              {format(date, "yyyy年MM月dd日")}
+            </Text>
+          </TouchableOpacity>
           <DateTimePickerModal
             date={date}
             isVisible={isDatePickerVisible}
@@ -112,15 +114,11 @@ export default function EatingScreen() {
             cancelTextIOS="キャンセル"
           />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>食事名</Text>
-          <TextInput
-            style={styles.inputValue}
-            onChangeText={setName}
-            value={name}
-          />
+          <CustomTextInput onChangeText={setName} value={name} />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <View style={styles.pfcHeader}>
             <Text style={styles.label}>タンパク質（P）</Text>
             <View style={styles.valuesContainer}>
@@ -144,7 +142,7 @@ export default function EatingScreen() {
             </View>
           </View>
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <View style={styles.pfcHeader}>
             <Text style={styles.label}>脂質（F）</Text>
             <View style={styles.valuesContainer}>
@@ -168,7 +166,7 @@ export default function EatingScreen() {
             </View>
           </View>
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <View style={styles.pfcHeader}>
             <Text style={styles.label}>糖質（C）</Text>
             <View style={styles.valuesContainer}>
@@ -193,8 +191,12 @@ export default function EatingScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.inputItem} onPress={onRecordEating}>
-          <Text style={styles.button}>食事を記録</Text>
+        <TouchableOpacity
+          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          onPress={onRecordEating}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>食事を記録</Text>
         </TouchableOpacity>
       </ScrollView>
     </TouchableWithoutFeedback>
@@ -203,39 +205,51 @@ export default function EatingScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.background.light,
     flex: 1,
-    padding: theme.spacing[3],
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
   },
-  inputItem: {
-    marginHorizontal: theme.spacing[3],
-    marginVertical: theme.spacing[3],
+
+  // インプットアイテム
+  item: {
+    marginBottom: theme.spacing[4],
   },
   label: {
-    fontSize: theme.fontSizes.medium,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
   inputValue: {
-    fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
+    justifyContent: "center",
     paddingHorizontal: theme.spacing[3],
     borderWidth: 1,
     borderColor: theme.colors.lightGray,
-    backgroundColor: theme.colors.background.lightGray,
-    borderRadius: 8,
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 5,
+    height: 48,
   },
-  pfcValue: { width: 80 },
-  button: {
-    marginVertical: theme.spacing[3],
+  inputValueText: {
     fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[3],
-    backgroundColor: theme.colors.primary,
-    color: theme.colors.white,
-    fontWeight: "bold",
-    textAlign: "center",
-    borderRadius: 8,
   },
+
+  pfcValue: { width: 80 },
+
+  // 通常ボタン
+  button: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
+    paddingVertical: theme.spacing[3],
+    alignItems: "center",
+    marginVertical: theme.spacing[3],
+    color: theme.colors.white,
+  },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
+  },
+  buttonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
+  },
+
   pfcHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
