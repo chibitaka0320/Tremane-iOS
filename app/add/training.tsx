@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Text,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
@@ -18,6 +17,8 @@ import Indicator from "@/components/common/Indicator";
 import { router, useNavigation } from "expo-router";
 import { BodyPartExerciseResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
+import CustomTextInput from "@/components/common/CustomTextInput";
+import { validateReps, validateWeight } from "@/lib/validators";
 
 export default function TrainingScreen() {
   const navigation = useNavigation();
@@ -29,6 +30,7 @@ export default function TrainingScreen() {
   const [reps, setReps] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
 
   const [bodyPartData, setBodyPartData] = useState<BodyPartExerciseResponse[]>(
     []
@@ -75,6 +77,14 @@ export default function TrainingScreen() {
       setExercise("");
     }
   }, [bodyParts, bodyPartData]);
+
+  useEffect(() => {
+    if (validateWeight(weight) && validateReps(reps) && bodyParts && exercise) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [bodyParts, exercise, weight, reps]);
 
   const fetchInsertTraining = async () => {
     const URL = "/training";
@@ -134,11 +144,13 @@ export default function TrainingScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>日付</Text>
-          <Text style={styles.inputValue} onPress={showDatePicker}>
-            {format(date, "yyyy年MM月dd日")}
-          </Text>
+          <TouchableOpacity style={styles.inputValue} onPress={showDatePicker}>
+            <Text style={styles.inputValueText}>
+              {format(date, "yyyy年MM月dd日")}
+            </Text>
+          </TouchableOpacity>
           <DateTimePickerModal
             date={date}
             isVisible={isDatePickerVisible}
@@ -151,7 +163,7 @@ export default function TrainingScreen() {
             cancelTextIOS="キャンセル"
           />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>部位</Text>
           <RNPickerSelect
             onValueChange={(value) => {
@@ -163,7 +175,7 @@ export default function TrainingScreen() {
             style={pickerSelectStyles}
           />
         </View>
-        <View style={styles.inputItem}>
+        <View style={styles.item}>
           <Text style={styles.label}>種目</Text>
           <RNPickerSelect
             onValueChange={(value) => {
@@ -176,28 +188,30 @@ export default function TrainingScreen() {
             disabled={!bodyParts}
           />
         </View>
-        <View style={[styles.inputItem, styles.row]}>
+        <View style={[styles.item, styles.row]}>
           <View style={styles.rowItem}>
             <Text style={styles.label}>重量（kg）</Text>
-            <TextInput
+            <CustomTextInput
               onChangeText={setWeight}
-              style={styles.inputValue}
               keyboardType="numeric"
               value={weight}
             />
           </View>
           <View style={styles.rowItem}>
             <Text style={styles.label}>回数</Text>
-            <TextInput
+            <CustomTextInput
               onChangeText={setReps}
-              style={styles.inputValue}
               keyboardType="numeric"
               value={reps}
             />
           </View>
         </View>
-        <TouchableOpacity style={styles.inputItem} onPress={onRecordTraining}>
-          <Text style={styles.button}>トレーニングを記録</Text>
+        <TouchableOpacity
+          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          onPress={onRecordTraining}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>トレーニングを記録</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -206,26 +220,30 @@ export default function TrainingScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.background.light,
     flex: 1,
-    padding: theme.spacing[3],
+    backgroundColor: theme.colors.background.lightGray,
+    paddingTop: theme.spacing[5],
+    paddingHorizontal: theme.spacing[5],
   },
-  inputItem: {
-    marginHorizontal: theme.spacing[3],
-    marginVertical: theme.spacing[3],
+
+  // インプットアイテム
+  item: {
+    marginBottom: theme.spacing[4],
   },
   label: {
-    fontSize: theme.fontSizes.medium,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
   inputValue: {
-    fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
+    justifyContent: "center",
     paddingHorizontal: theme.spacing[3],
     borderWidth: 1,
     borderColor: theme.colors.lightGray,
-    backgroundColor: theme.colors.background.lightGray,
-    borderRadius: 8,
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 5,
+    height: 48,
+  },
+  inputValueText: {
+    fontSize: theme.fontSizes.medium,
   },
   row: {
     flexDirection: "row",
@@ -234,16 +252,22 @@ const styles = StyleSheet.create({
   rowItem: {
     width: "45%",
   },
+
+  // 通常ボタン
   button: {
-    marginVertical: theme.spacing[3],
-    fontSize: theme.fontSizes.medium,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[3],
     backgroundColor: theme.colors.primary,
+    borderRadius: 5,
+    paddingVertical: theme.spacing[3],
+    alignItems: "center",
+    marginVertical: theme.spacing[3],
     color: theme.colors.white,
-    fontWeight: "bold",
-    textAlign: "center",
-    borderRadius: 8,
+  },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
+  },
+  buttonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
   },
 });
 

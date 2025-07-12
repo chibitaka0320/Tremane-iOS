@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   StyleSheet,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   View,

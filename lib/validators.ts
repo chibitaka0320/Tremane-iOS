@@ -23,3 +23,8 @@ export function validateHeight(height: string): boolean {
 export function validateWeight(weight: string): boolean {
   return weight != "" && !isNaN(parseFloat(weight));
 }
+
+// 回数
+export function validateReps(reps: string): boolean {
+  return reps != "" && isNaN(parseInt(reps));
+}
