@@ -14,15 +14,13 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { BodyPartExerciseResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 
 export default function TrainingScreen() {
-  const navigation = useNavigation();
-
   const [date, setDate] = useState(new Date());
   const [bodyParts, setbodyParts] = useState("");
   const [exercise, setExercise] = useState("");
@@ -78,6 +76,7 @@ export default function TrainingScreen() {
     }
   }, [bodyParts, bodyPartData]);
 
+  // ボタン活性・非活性
   useEffect(() => {
     if (validateWeight(weight) && validateReps(reps) && bodyParts && exercise) {
       setDisabled(false);
@@ -86,7 +85,21 @@ export default function TrainingScreen() {
     }
   }, [bodyParts, exercise, weight, reps]);
 
-  const fetchInsertTraining = async () => {
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date: Date) => {
+    setDate(date);
+    hideDatePicker();
+  };
+
+  // トレーニング記録
+  const onRecordTraining = async () => {
     const URL = "/training";
     setLoading(true);
     const requestBody = {
@@ -105,36 +118,6 @@ export default function TrainingScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
-
-  const handleConfirm = (date: Date) => {
-    setDate(date);
-    hideDatePicker();
-  };
-
-  const onRecordTraining = () => {
-    if (!bodyParts || !exercise) {
-      Alert.alert("値を選択してください");
-      return;
-    }
-
-    if (!weight || !reps) {
-      Alert.alert("値を入力してください");
-      return;
-    }
-    if (isNaN(parseFloat(weight)) || isNaN(parseInt(reps))) {
-      Alert.alert("数値を正しく入力してください");
-      return;
-    }
-    fetchInsertTraining();
   };
 
   if (isLoading) {
