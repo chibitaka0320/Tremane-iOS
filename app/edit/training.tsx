@@ -39,7 +39,6 @@ export default function TrainingScreen() {
   const [reps, setReps] = useState("");
 
   // ピッカーデータ
-  const [changeBodyParts, setChangeBodyParts] = useState("");
   const [bodyPartData, setBodyPartData] = useState<BodyPartExerciseResponse[]>(
     []
   );
@@ -185,13 +184,7 @@ export default function TrainingScreen() {
           <Text style={styles.label}>部位</Text>
           <RNPickerSelect
             onValueChange={(value) => {
-              setChangeBodyParts(value);
-            }}
-            onClose={() => {
-              if (changeBodyParts !== bodyParts) {
-                setExercise("");
-              }
-              setBodyParts(changeBodyParts);
+              setBodyParts(value);
             }}
             items={bodyPartOptions}
             value={bodyParts}

@@ -17,7 +17,7 @@ export async function apiRequest<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch("http://192.168.32.43:8080" + url, {
+  const res = await fetch("http://192.168.0.45:8080" + url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,

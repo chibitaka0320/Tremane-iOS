@@ -21,23 +21,28 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 
 export default function TrainingScreen() {
+  // 表示データ
   const [date, setDate] = useState(new Date());
   const [bodyParts, setbodyParts] = useState("");
   const [exercise, setExercise] = useState("");
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
+
+  // フラグ
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
 
+  // ピッカーデータ関連
   const [bodyPartData, setBodyPartData] = useState<BodyPartExerciseResponse[]>(
     []
   );
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
   const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 
+  // 部位・種別情報取得
   useEffect(() => {
-    const fetchApi = async () => {
+    const fetchBodyParts = async () => {
       const URL = "/bodyparts";
       const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
         URL,
@@ -53,15 +58,11 @@ export default function TrainingScreen() {
         );
       }
     };
-    fetchApi();
+    fetchBodyParts();
   }, []);
 
+  // 種目オプション更新
   useEffect(() => {
-    if (!bodyParts) {
-      setExerciseOptions([]);
-      setExercise("");
-      return;
-    }
     const selected = bodyPartData.find(
       (part) => String(part.partsId) === bodyParts
     );
@@ -72,6 +73,8 @@ export default function TrainingScreen() {
           value: String(ex.exerciseId),
         }))
       );
+    } else {
+      setExerciseOptions([]);
       setExercise("");
     }
   }, [bodyParts, bodyPartData]);
@@ -85,14 +88,13 @@ export default function TrainingScreen() {
     }
   }, [bodyParts, exercise, weight, reps]);
 
+  // ピッカー開閉
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
-
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
-
   const handleConfirm = (date: Date) => {
     setDate(date);
     hideDatePicker();
