@@ -11,7 +11,6 @@ import theme from "@/styles/theme";
 import { BodyPartType } from "@/types/training";
 import { useCallback, useEffect, useState } from "react";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import Indicator from "@/components/common/Indicator";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 
@@ -21,7 +20,6 @@ type Props = {
 
 export default function TrainingScreen({ selectedDate }: Props) {
   const [data, setData] = useState<BodyPartType[]>([]);
-  const [isLoading, setLoading] = useState(false);
 
   const URL = "/training?date=" + selectedDate;
 
@@ -46,10 +44,6 @@ export default function TrainingScreen({ selectedDate }: Props) {
       fetchTrainingData();
     }, [selectedDate])
   );
-
-  if (isLoading) {
-    return <Indicator />;
-  }
 
   return (
     <View style={styles.container}>

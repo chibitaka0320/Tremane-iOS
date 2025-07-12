@@ -2,6 +2,7 @@ import theme from "@/styles/theme";
 import { ExerciseType } from "@/types/training";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { router } from "expo-router";
 
 type Props = {
   exercise: ExerciseType;
@@ -9,6 +10,13 @@ type Props = {
 
 export default function Exercise({ exercise }: Props) {
   const { name, sets } = exercise;
+
+  const onTraining = (trainingId: number) => {
+    router.push({
+      pathname: "/edit/training",
+      params: { trainingId },
+    });
+  };
 
   return (
     <View style={styles.exerciseContainer}>
@@ -23,11 +31,15 @@ export default function Exercise({ exercise }: Props) {
         </TouchableOpacity>
       </View>
       {sets.map((set, setIndex) => (
-        <View key={setIndex} style={styles.setContainer}>
+        <TouchableOpacity
+          key={setIndex}
+          style={styles.setContainer}
+          onPress={() => onTraining(set.trainingId)}
+        >
           <Text style={styles.setNumber}>{setIndex + 1}</Text>
           <Text style={styles.setValue}>{set.weight} kg</Text>
           <Text style={styles.setValue}>{set.reps} 回</Text>
-        </View>
+        </TouchableOpacity>
       ))}
     </View>
   );
