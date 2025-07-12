@@ -1,4 +1,5 @@
 interface SetType {
+  trainingId: number;
   weight: number;
   reps: number;
 }
