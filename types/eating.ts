@@ -19,7 +19,8 @@ interface Rate {
 }
 
 interface Meal {
-  id: number;
+  eatingId: number;
+  date: string;
   name: string;
   calories: number;
   protein: number;

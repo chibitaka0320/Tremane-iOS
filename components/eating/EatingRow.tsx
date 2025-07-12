@@ -1,15 +1,23 @@
 import { PFC_LABELS } from "@/constants/pfc";
 import theme from "@/styles/theme";
 import { Meal } from "@/types/eating";
-import { StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   meal: Meal;
 };
 
 export default function EatingRow({ meal }: Props) {
+  const onEating = () => {
+    router.push({
+      pathname: "/edit/eating",
+      params: { eatingId: meal.eatingId },
+    });
+  };
+
   return (
-    <View style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={onEating}>
       <Text style={styles.eating}>{meal.name}</Text>
       <View style={styles.calories}>
         <Text>{meal.calories}</Text>
@@ -21,7 +29,7 @@ export default function EatingRow({ meal }: Props) {
           <Text style={styles.unit}>g</Text>
         </View>
       ))}
-    </View>
+    </TouchableOpacity>
   );
 }
 
