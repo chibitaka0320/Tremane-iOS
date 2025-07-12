@@ -28,7 +28,6 @@ export default function TrainingScreen() {
   const API_ENDPOINTS = {
     bodyParts: "/bodyparts",
     training: (id: string) => `/training/${id}`,
-    saveTraining: (id: string) => `/training/${id}`,
   };
 
   // 表示データ
@@ -130,7 +129,7 @@ export default function TrainingScreen() {
   };
 
   // トレーニング更新処理
-  const onRecordTraining = async () => {
+  const onUpdateTraining = async () => {
     setLoading(true);
     const requestBody = {
       date: format(date, "yyyy-MM-dd"),
@@ -140,7 +139,7 @@ export default function TrainingScreen() {
     };
     try {
       await apiRequestWithRefresh(
-        API_ENDPOINTS.saveTraining(trainingId),
+        API_ENDPOINTS.training(trainingId),
         "PUT",
         requestBody
       );
@@ -152,6 +151,30 @@ export default function TrainingScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // トレーニング削除処理
+  const onDeleteTraining = async () => {
+    Alert.alert("", "データを削除しますか？", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "削除する",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // 削除処理
+            await apiRequestWithRefresh(
+              API_ENDPOINTS.training(trainingId),
+              "DELETE"
+            );
+
+            router.back();
+          } catch (error) {
+            Alert.alert("アカウントの削除に失敗しました。");
+          }
+        },
+      },
+    ]);
   };
 
   if (isLoading) {
@@ -225,10 +248,18 @@ export default function TrainingScreen() {
         </View>
         <TouchableOpacity
           style={[styles.button, isDisabled && styles.buttonDisabled]}
-          onPress={onRecordTraining}
+          onPress={onUpdateTraining}
           disabled={isDisabled}
         >
-          <Text style={styles.buttonText}>トレーニングを記録</Text>
+          <Text style={styles.buttonText}>更新</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.buttonDelete]}
+          onPress={onDeleteTraining}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>削除</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -281,6 +312,9 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: theme.colors.lightGray,
+  },
+  buttonDelete: {
+    backgroundColor: theme.colors.dark,
   },
   buttonText: {
     fontSize: theme.fontSizes.medium,
