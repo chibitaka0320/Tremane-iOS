@@ -114,6 +114,30 @@ export default function EatingScreen() {
     }
   };
 
+  // 食事記録削除処理
+  const onDeleteEating = async () => {
+    Alert.alert("", "データを削除しますか？", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "削除する",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // 削除処理
+            await apiRequestWithRefresh(
+              API_ENDPOINTS.eating(eatingId),
+              "DELETE"
+            );
+
+            router.back();
+          } catch (error) {
+            Alert.alert("データの削除に失敗しました。");
+          }
+        },
+      },
+    ]);
+  };
+
   if (isLoading) {
     return <Indicator />;
   }
@@ -225,7 +249,14 @@ export default function EatingScreen() {
           onPress={onUpdateEating}
           disabled={isDisabled}
         >
-          <Text style={styles.buttonText}>食事を記録</Text>
+          <Text style={styles.buttonText}>更新</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.buttonDelete]}
+          onPress={onDeleteEating}
+          disabled={isDisabled}
+        >
+          <Text style={styles.buttonText}>削除</Text>
         </TouchableOpacity>
       </ScrollView>
     </TouchableWithoutFeedback>
@@ -273,6 +304,9 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: theme.colors.lightGray,
+  },
+  buttonDelete: {
+    backgroundColor: theme.colors.dark,
   },
   buttonText: {
     fontSize: theme.fontSizes.medium,

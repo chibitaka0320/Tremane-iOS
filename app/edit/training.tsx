@@ -170,7 +170,7 @@ export default function TrainingScreen() {
 
             router.back();
           } catch (error) {
-            Alert.alert("アカウントの削除に失敗しました。");
+            Alert.alert("データの削除に失敗しました。");
           }
         },
       },
