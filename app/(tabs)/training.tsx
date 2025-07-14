@@ -13,17 +13,27 @@ import { useCallback, useEffect, useState } from "react";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
+import Indicator from "@/components/common/Indicator";
 
 type Props = {
   selectedDate: string;
 };
 
 export default function TrainingScreen({ selectedDate }: Props) {
-  const [data, setData] = useState<BodyPartType[]>([]);
+  const [trainingData, setData] = useState<BodyPartType[]>([]);
+
+  const [isFetching, setFetching] = useState(true);
+  const [isRefreshing, setRefreshing] = useState(false);
 
   const URL = "/training?date=" + selectedDate;
 
-  const fetchTrainingData = async () => {
+  const fetchTrainingData = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setFetching(true);
+    }
+
     try {
       const data = await apiRequestWithRefresh<BodyPartType[]>(
         URL,
@@ -36,18 +46,32 @@ export default function TrainingScreen({ selectedDate }: Props) {
     } catch (e) {
       Alert.alert("エラー", "時間をおいて再度ログインしてください");
       return;
+    } finally {
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setFetching(false);
+      }
     }
   };
 
+  useEffect(() => {
+    fetchTrainingData(false);
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      fetchTrainingData();
+      fetchTrainingData(true);
     }, [selectedDate])
   );
 
+  if (isFetching) {
+    return <Indicator />;
+  }
+
   return (
     <View style={styles.container}>
-      {data.length == 0 ? (
+      {trainingData.length == 0 ? (
         <TouchableOpacity style={styles.nonDataContainer}>
           <MaterialIcons name="note-add" size={60} color="#ccc" />
           <Text style={styles.text}>データがありません</Text>
@@ -55,12 +79,13 @@ export default function TrainingScreen({ selectedDate }: Props) {
         </TouchableOpacity>
       ) : (
         <FlatList
-          data={data}
+          data={trainingData}
           style={styles.trainingContainer}
           renderItem={({ item }) => <TrainingItem bodyPart={item} />}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.name}
           ListFooterComponent={<View style={styles.trainingItemFooter}></View>}
+          refreshing={isRefreshing}
         />
       )}
     </View>

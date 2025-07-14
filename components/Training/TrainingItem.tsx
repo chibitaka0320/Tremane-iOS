@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: theme.colors.background.light,
     marginBottom: theme.spacing[5],
+    overflow: "hidden",
   },
   categoryContainer: {
     backgroundColor: theme.colors.primary,
