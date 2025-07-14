@@ -49,45 +49,54 @@ export default function TrainingScreen() {
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
 
-  // 部位・種別情報取得
-  useEffect(() => {
-    const fetchBodyParts = async () => {
-      const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
-        API_ENDPOINTS.bodyParts,
-        "GET"
+  // 部位・種目情報取得
+  const fetchBodyParts = async () => {
+    const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
+      API_ENDPOINTS.bodyParts,
+      "GET"
+    );
+    if (res) {
+      setBodyPartData(res);
+      setBodyPartOptions(
+        res.map((part) => ({
+          label: part.name,
+          value: String(part.partsId),
+        }))
       );
-      if (res) {
-        setBodyPartData(res);
-        setBodyPartOptions(
-          res.map((part) => ({
-            label: part.name,
-            value: String(part.partsId),
-          }))
-        );
-      }
-    };
-    fetchBodyParts();
-  }, []);
+    }
+  };
 
   // トレーニング詳細取得
+  const fetchTraining = async () => {
+    if (!trainingId) return;
+    const res = await apiRequestWithRefresh<TrainingResponse>(
+      API_ENDPOINTS.training(trainingId),
+      "GET"
+    );
+    if (res) {
+      setDate(new Date(res.date));
+      setBodyParts(res.partsId.toString());
+      setExercise(res.exerciseId.toString());
+      setWeight(res.weight.toString());
+      setReps(res.reps.toString());
+    }
+  };
+
+  // 表示初期処理
   useEffect(() => {
-    const fetchTraining = async () => {
-      if (!trainingId) return;
-      const res = await apiRequestWithRefresh<TrainingResponse>(
-        API_ENDPOINTS.training(trainingId),
-        "GET"
-      );
-      if (res) {
-        setDate(new Date(res.date));
-        setBodyParts(res.partsId.toString());
-        setExercise(res.exerciseId.toString());
-        setWeight(res.weight.toString());
-        setReps(res.reps.toString());
+    const init = async () => {
+      try {
+        setLoading(true);
+        await fetchBodyParts();
+        await fetchTraining();
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
       }
     };
-
-    fetchTraining();
-  }, [trainingId]);
+    init();
+  }, []);
 
   // 種目オプション更新
   useEffect(() => {
