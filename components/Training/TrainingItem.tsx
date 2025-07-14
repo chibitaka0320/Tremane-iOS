@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default function TrainingItem({ bodyPart }: Props) {
-  const { name, exercises } = bodyPart;
+  const { partsId, name, exercises } = bodyPart;
 
   return (
     <View style={styles.container}>
@@ -16,7 +16,7 @@ export default function TrainingItem({ bodyPart }: Props) {
         <Text style={styles.categoryTitle}>{name}</Text>
       </View>
       {exercises.map((exercise, index) => (
-        <Exercise exercise={exercise} key={index} />
+        <Exercise exercise={exercise} key={index} partsId={partsId} />
       ))}
     </View>
   );

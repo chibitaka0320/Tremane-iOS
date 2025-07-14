@@ -1,3 +1,4 @@
+import Indicator from "@/components/common/Indicator";
 import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import { PFC_LABELS } from "@/constants/pfc";
@@ -5,7 +6,7 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
 import { EatType } from "@/types/eating";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -23,9 +24,18 @@ export default function EatingScreen({ selectedDate }: Props) {
   const [data, setData] = useState<EatType>();
   const [isLoading, setLoading] = useState(false);
 
-  const fetchEatingData = async () => {
+  const [isFetching, setFetching] = useState(true);
+  const [isRefreshing, setRefreshing] = useState(false);
+
+  const fetchEatingData = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setFetching(true);
+    }
+
     const URL = "/eating?date=" + selectedDate;
-    setLoading(true);
+
     try {
       const data = await apiRequestWithRefresh<EatType>(URL, "GET", null);
       if (data != null) {
@@ -35,15 +45,27 @@ export default function EatingScreen({ selectedDate }: Props) {
       Alert.alert("エラー", "時間をおいて再度ログインしてください");
       return;
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setFetching(false);
+      }
     }
   };
 
+  useEffect(() => {
+    fetchEatingData(false);
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      fetchEatingData();
+      fetchEatingData(true);
     }, [selectedDate])
   );
+
+  if (isFetching) {
+    return <Indicator />;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -64,6 +86,7 @@ export default function EatingScreen({ selectedDate }: Props) {
             data={data.meals}
             renderItem={({ item }) => <EatingRow meal={item} />}
             scrollEnabled={false}
+            refreshing={isRefreshing}
           />
         ) : (
           <View style={styles.nonDataContainer}>

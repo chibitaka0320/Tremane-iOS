@@ -47,16 +47,23 @@ export default function EatingScreen() {
   // 食事詳細取得
   useEffect(() => {
     const fetchEating = async () => {
-      const res = await apiRequestWithRefresh<Meal>(
-        API_ENDPOINTS.eating(eatingId),
-        "GET"
-      );
-      if (res) {
-        setDate(new Date(res.date));
-        setName(res.name);
-        setProtein(res.protein.toString());
-        setFat(res.fat.toString());
-        setCarbo(res.carbo.toString());
+      try {
+        setLoading(true);
+        const res = await apiRequestWithRefresh<Meal>(
+          API_ENDPOINTS.eating(eatingId),
+          "GET"
+        );
+        if (res) {
+          setDate(new Date(res.date));
+          setName(res.name);
+          setProtein(res.protein.toString());
+          setFat(res.fat.toString());
+          setCarbo(res.carbo.toString());
+        }
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEating();

@@ -76,7 +76,6 @@ export default function EatingScreen() {
     try {
       await apiRequestWithRefresh(URL, "POST", requestBody);
       router.back();
-      router.replace("/(tabs)/eating");
     } catch (e) {
       Alert.alert("エラー", "時間をおいて再度実行してください");
       return;

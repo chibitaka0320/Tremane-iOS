@@ -5,16 +5,24 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { router } from "expo-router";
 
 type Props = {
+  partsId: number;
   exercise: ExerciseType;
 };
 
-export default function Exercise({ exercise }: Props) {
-  const { name, sets } = exercise;
+export default function Exercise({ partsId, exercise }: Props) {
+  const { exerciseId, name, sets } = exercise;
 
   const onTraining = (trainingId: number) => {
     router.push({
       pathname: "/edit/training",
       params: { trainingId },
+    });
+  };
+
+  const onPlus = () => {
+    router.push({
+      pathname: "/add/trainingWithExercise",
+      params: { partsId, exerciseId },
     });
   };
 
@@ -27,6 +35,7 @@ export default function Exercise({ exercise }: Props) {
             name="pluscircleo"
             color="black"
             style={styles.addButton}
+            onPress={onPlus}
           />
         </TouchableOpacity>
       </View>
