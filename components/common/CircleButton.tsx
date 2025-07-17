@@ -1,4 +1,5 @@
 import theme from "@/styles/theme";
+import { JSX } from "react";
 import { TouchableOpacity, StyleSheet, type ViewStyle } from "react-native";
 
 interface Props {
