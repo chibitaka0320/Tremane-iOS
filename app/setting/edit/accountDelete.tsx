@@ -1,3 +1,4 @@
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -9,6 +10,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 export default function DeleteAccountScreen() {
   const handleDelete = () => {
     const user = auth.currentUser;
+    const URL = "/users";
     if (user === null) return;
 
     Alert.alert(
@@ -21,10 +23,12 @@ export default function DeleteAccountScreen() {
           style: "destructive",
           onPress: async () => {
             try {
+              await apiRequestWithRefresh(URL, "DELETE");
               await deleteUser(user);
               router.dismissAll();
               router.replace("/auth/signIn");
             } catch (error) {
+              console.log(error);
               Alert.alert("アカウントの削除に失敗しました。");
             }
           },
