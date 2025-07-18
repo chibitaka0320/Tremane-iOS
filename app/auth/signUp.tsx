@@ -53,12 +53,11 @@ export default function SignUp() {
         await apiRequest("/auth/signUp", "POST", {
           userId: user.uid,
         });
+        router.replace("/training");
       } catch (error) {
         await deleteUser(user);
         Alert.alert("登録に失敗しました");
       }
-
-      router.replace("/training");
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("すでに登録されているメールアドレスです");
@@ -81,12 +80,11 @@ export default function SignUp() {
         await apiRequest("/auth/signUp", "POST", {
           userId: user.uid,
         });
+        router.replace("/(tabs)/training");
       } catch (error) {
-        await deleteUser(user);
         Alert.alert("登録に失敗しました");
+        await deleteUser(user);
       }
-
-      router.replace("/(tabs)/training");
     } catch (error) {
       Alert.alert("認証に失敗しました");
     } finally {
