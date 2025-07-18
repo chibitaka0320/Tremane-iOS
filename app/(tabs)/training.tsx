@@ -12,7 +12,7 @@ import { BodyPartType } from "@/types/training";
 import { useCallback, useEffect, useState } from "react";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import Indicator from "@/components/common/Indicator";
 
 type Props = {
@@ -22,8 +22,10 @@ type Props = {
 export default function TrainingScreen({ selectedDate }: Props) {
   const [trainingData, setData] = useState<BodyPartType[]>([]);
 
-  const [isFetching, setFetching] = useState(true);
+  const [isFetching, setFetching] = useState(false);
   const [isRefreshing, setRefreshing] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const URL = "/training?date=" + selectedDate;
 
@@ -44,8 +46,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
         setData(data);
       }
     } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度ログインしてください");
-      return;
+      setErrorMessage("時間をおいて再度アプリを起動してください");
     } finally {
       if (isRefresh) {
         setRefreshing(false);
@@ -56,8 +57,18 @@ export default function TrainingScreen({ selectedDate }: Props) {
   };
 
   useEffect(() => {
-    fetchTrainingData(false);
-  }, []);
+    if (errorMessage) {
+      Alert.alert("エラー", errorMessage, [
+        {
+          text: "OK",
+          onPress: () => {
+            router.replace("/auth/signIn");
+          },
+        },
+      ]);
+      setErrorMessage(null);
+    }
+  }, [errorMessage]);
 
   useFocusEffect(
     useCallback(() => {

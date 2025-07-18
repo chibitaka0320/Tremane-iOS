@@ -5,7 +5,7 @@ import { PFC_LABELS } from "@/constants/pfc";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
 import { EatType } from "@/types/eating";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -24,8 +24,10 @@ export default function EatingScreen({ selectedDate }: Props) {
   const [data, setData] = useState<EatType>();
   const [isLoading, setLoading] = useState(false);
 
-  const [isFetching, setFetching] = useState(true);
+  const [isFetching, setFetching] = useState(false);
   const [isRefreshing, setRefreshing] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchEatingData = async (isRefresh = false) => {
     if (isRefresh) {
@@ -42,8 +44,7 @@ export default function EatingScreen({ selectedDate }: Props) {
         setData(data);
       }
     } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度ログインしてください");
-      return;
+      setErrorMessage("時間をおいて再度アプリを起動してください");
     } finally {
       if (isRefresh) {
         setRefreshing(false);
@@ -54,8 +55,18 @@ export default function EatingScreen({ selectedDate }: Props) {
   };
 
   useEffect(() => {
-    fetchEatingData(false);
-  }, []);
+    if (errorMessage) {
+      Alert.alert("エラー", errorMessage, [
+        {
+          text: "OK",
+          onPress: () => {
+            router.replace("/auth/signIn");
+          },
+        },
+      ]);
+      setErrorMessage(null);
+    }
+  });
 
   useFocusEffect(
     useCallback(() => {
