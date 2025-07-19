@@ -22,7 +22,7 @@ type Props = {
 export default function TrainingScreen({ selectedDate }: Props) {
   const [trainingData, setData] = useState<BodyPartType[]>([]);
 
-  const [isFetching, setFetching] = useState(false);
+  const [isFetching, setFetching] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
         setData(data);
       }
     } catch (e) {
-      setErrorMessage("時間をおいて再度アプリを起動してください");
+      setErrorMessage("時間をおいて再度ログインしてください");
     } finally {
       if (isRefresh) {
         setRefreshing(false);
@@ -55,6 +55,10 @@ export default function TrainingScreen({ selectedDate }: Props) {
       }
     }
   };
+
+  useEffect(() => {
+    fetchTrainingData(false);
+  }, []);
 
   useEffect(() => {
     if (errorMessage) {

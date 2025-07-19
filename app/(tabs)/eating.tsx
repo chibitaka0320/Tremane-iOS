@@ -55,6 +55,10 @@ export default function EatingScreen({ selectedDate }: Props) {
   };
 
   useEffect(() => {
+    fetchEatingData(false);
+  }, []);
+
+  useEffect(() => {
     if (errorMessage) {
       Alert.alert("エラー", errorMessage, [
         {
@@ -66,7 +70,7 @@ export default function EatingScreen({ selectedDate }: Props) {
       ]);
       setErrorMessage(null);
     }
-  });
+  }, [errorMessage]);
 
   useFocusEffect(
     useCallback(() => {
