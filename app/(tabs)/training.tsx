@@ -14,12 +14,15 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import Indicator from "@/components/common/Indicator";
+import { useAlert } from "@/context/AlertContext";
 
 type Props = {
   selectedDate: string;
 };
 
 export default function TrainingScreen({ selectedDate }: Props) {
+  const { setError } = useAlert();
+
   const [trainingData, setData] = useState<BodyPartType[]>([]);
 
   const [isFetching, setFetching] = useState(true);
@@ -46,7 +49,9 @@ export default function TrainingScreen({ selectedDate }: Props) {
         setData(data);
       }
     } catch (e) {
-      setErrorMessage("時間をおいて再度ログインしてください");
+      setError("時間をおいて再度アプリを起動してください", () => {
+        router.replace("/auth/signIn");
+      });
     } finally {
       if (isRefresh) {
         setRefreshing(false);
@@ -59,20 +64,6 @@ export default function TrainingScreen({ selectedDate }: Props) {
   useEffect(() => {
     fetchTrainingData(false);
   }, []);
-
-  useEffect(() => {
-    if (errorMessage) {
-      Alert.alert("エラー", errorMessage, [
-        {
-          text: "OK",
-          onPress: () => {
-            router.replace("/auth/signIn");
-          },
-        },
-      ]);
-      setErrorMessage(null);
-    }
-  }, [errorMessage]);
 
   useFocusEffect(
     useCallback(() => {

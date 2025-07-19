@@ -2,6 +2,7 @@ import Indicator from "@/components/common/Indicator";
 import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import { PFC_LABELS } from "@/constants/pfc";
+import { useAlert } from "@/context/AlertContext";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
 import { EatType } from "@/types/eating";
@@ -21,6 +22,8 @@ type Props = {
 };
 
 export default function EatingScreen({ selectedDate }: Props) {
+  const { setError } = useAlert();
+
   const [data, setData] = useState<EatType>();
   const [isLoading, setLoading] = useState(false);
 
@@ -44,7 +47,9 @@ export default function EatingScreen({ selectedDate }: Props) {
         setData(data);
       }
     } catch (e) {
-      setErrorMessage("時間をおいて再度アプリを起動してください");
+      setError("時間をおいて再度アプリを起動してください", () => {
+        router.replace("/auth/signIn");
+      });
     } finally {
       if (isRefresh) {
         setRefreshing(false);
@@ -57,20 +62,6 @@ export default function EatingScreen({ selectedDate }: Props) {
   useEffect(() => {
     fetchEatingData(false);
   }, []);
-
-  useEffect(() => {
-    if (errorMessage) {
-      Alert.alert("エラー", errorMessage, [
-        {
-          text: "OK",
-          onPress: () => {
-            router.replace("/auth/signIn");
-          },
-        },
-      ]);
-      setErrorMessage(null);
-    }
-  }, [errorMessage]);
 
   useFocusEffect(
     useCallback(() => {
