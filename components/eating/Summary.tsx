@@ -1,17 +1,11 @@
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { ProgressChart } from "react-native-chart-kit";
 import Value from "./Value";
 import theme from "@/styles/theme";
 import { Goal, Rate, Total } from "@/types/eating";
 import { PFC_LABELS } from "@/constants/pfc";
+import CircleProgress from "../common/CircleProgress";
 
 const screenWidth = Dimensions.get("window").width / 2.4;
-
-const chartConfig = {
-  backgroundGradientFrom: "#FFFFFF",
-  backgroundGradientTo: "#FFFFFF",
-  color: (opacity = 1) => `rgba(99, 176, 242, ${opacity})`,
-};
 
 type Props = {
   total?: Total;
@@ -20,26 +14,16 @@ type Props = {
 };
 
 export default function Summary({ total, goal, rate }: Props) {
-  const data = {
-    data: [
-      rate?.protein ? rate.protein : 0,
-      rate?.fat ? rate.fat : 0,
-      rate?.carbo ? rate.carbo : 0,
-    ],
-  };
+  const data = [
+    rate?.protein ? rate.protein : 0,
+    rate?.fat ? rate.fat : 0,
+    rate?.carbo ? rate.carbo : 0,
+  ];
 
   return (
     <View style={styles.summaryContainer}>
       <View>
-        <ProgressChart
-          data={data}
-          width={screenWidth}
-          height={screenWidth}
-          strokeWidth={6}
-          radius={40}
-          chartConfig={chartConfig}
-          hideLegend={true}
-        />
+        <CircleProgress size={screenWidth} percentages={data} />
       </View>
       <View style={styles.values}>
         <Text>総摂取カロリー/目標値</Text>
