@@ -53,6 +53,15 @@ export type BodyPart = {
   updatedAt: Timestamp;
 };
 
+// 種目テーブル
+export type Exercise = {
+  exerciseId: number;
+  partsId: number;
+  name: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;
