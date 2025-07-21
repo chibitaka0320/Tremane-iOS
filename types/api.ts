@@ -62,6 +62,25 @@ export type Exercise = {
   updatedAt: Timestamp;
 };
 
+// トレーニングテーブル
+export type Training = {
+  trainingId: number;
+  date: string;
+  userId: string;
+  exerciseId: number;
+  weight: number;
+  reps: number;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+// ユーザーテーブル
+export type User = {
+  userId: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;

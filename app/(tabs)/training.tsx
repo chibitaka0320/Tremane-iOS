@@ -15,6 +15,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import Indicator from "@/components/common/Indicator";
 import { useAlert } from "@/context/AlertContext";
+import { getTrainings } from "@/services/getTrainings";
 
 type Props = {
   selectedDate: string;
@@ -40,11 +41,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
     }
 
     try {
-      const data = await apiRequestWithRefresh<BodyPartType[]>(
-        URL,
-        "GET",
-        null
-      );
+      const data = await getTrainings(selectedDate);
       if (data != null) {
         setData(data);
       }
