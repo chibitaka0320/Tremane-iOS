@@ -1,5 +1,5 @@
 import { BodyPart } from "@/types/api";
-import { db } from "../lib/localDb/db";
+import { db } from "../lib/dbConfig";
 
 // 最新更新日を取得
 export const getLatestBodyPartUpdatedAt = async (): Promise<string> => {

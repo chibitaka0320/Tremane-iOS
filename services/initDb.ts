@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from "../lib/dbConfig";
 
 export const initDatabase = async () => {
   try {

@@ -22,7 +22,7 @@ import { validateReps, validateWeight } from "@/lib/validators";
 import { getBodyPartsWithExercises } from "@/services/getBodyPartsWithExercise";
 import { TrainingRequest } from "@/types/training";
 import { insertTrainings } from "@/dao/trainingDao";
-import { db } from "@/lib/localDb/db";
+import { db } from "@/lib/dbConfig";
 
 export default function TrainingScreen() {
   // 表示データ

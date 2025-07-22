@@ -1,5 +1,5 @@
 import { AlertProvider } from "@/context/AlertContext";
-import { initDatabase } from "@/lib/localDb/dbInit";
+import { initDatabase } from "@/services/initDb";
 import { syncBodyParts } from "@/services/syncBodyParts";
 import { syncExercises } from "@/services/syncExercise";
 import { Stack } from "expo-router";

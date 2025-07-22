@@ -1,4 +1,4 @@
-import { db } from "@/lib/localDb/db";
+import { db } from "@/lib/dbConfig";
 import { BodyPartType } from "@/types/training";
 
 export const getTrainings = async (date: string): Promise<BodyPartType[]> => {
