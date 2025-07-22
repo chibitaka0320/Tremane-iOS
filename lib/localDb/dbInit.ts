@@ -43,6 +43,7 @@ export const initDatabase = async () => {
         exercise_id INTEGER NOT NULL,
         weight INTEGER,
         reps INTEGER,
+        sync_status TEXT DEFAULT 'pending',
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now')),
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,

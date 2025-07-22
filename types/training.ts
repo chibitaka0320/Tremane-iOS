@@ -16,4 +16,11 @@ interface BodyPartType {
   exercises: ExerciseType[];
 }
 
-export type { BodyPartType, ExerciseType };
+interface TrainingRequest {
+  date: string;
+  exerciseId: string;
+  weight: number;
+  reps: number;
+}
+
+export type { BodyPartType, ExerciseType, TrainingRequest };

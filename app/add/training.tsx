@@ -20,6 +20,9 @@ import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import { getBodyPartsWithExercises } from "@/services/getBodyPartsWithExercise";
+import { TrainingRequest } from "@/types/training";
+import { insertTrainings } from "@/lib/localDb/dao/trainingDao";
+import { db } from "@/lib/localDb/db";
 
 export default function TrainingScreen() {
   // 表示データ
@@ -100,20 +103,38 @@ export default function TrainingScreen() {
   // トレーニング記録
   const onRecordTraining = async () => {
     const URL = "/training";
+    let trainingId: number;
     setLoading(true);
-    const requestBody = {
+
+    const requestBody: TrainingRequest = {
       date: format(date, "yyyy-MM-dd"),
       exerciseId: exercise,
       weight: parseFloat(weight),
       reps: parseInt(reps),
     };
+
     try {
-      await apiRequestWithRefresh(URL, "POST", requestBody);
+      trainingId = await insertTrainings(requestBody);
       router.dismissAll();
       router.replace("/(tabs)/training");
+      try {
+        await apiRequestWithRefresh(URL, "POST", {
+          trainingId,
+          ...requestBody,
+        });
+        await db.runAsync(
+          `UPDATE trainings SET sync_status = 'synced' WHERE training_id = ?`,
+          [trainingId]
+        );
+      } catch (e) {
+        await db.runAsync(
+          `UPDATE trainings SET sync_status = 'failed' WHERE training_id = ?`,
+          [trainingId]
+        );
+        return;
+      }
     } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度実行してください");
-      return;
+      console.log(e);
     } finally {
       setLoading(false);
     }

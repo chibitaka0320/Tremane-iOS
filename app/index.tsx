@@ -12,8 +12,8 @@ export default function Index() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        await syncUsers();
-        await syncTrainings();
+        syncUsers();
+        syncTrainings();
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
