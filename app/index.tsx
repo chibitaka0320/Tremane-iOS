@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { syncTrainings } from "@/services/syncTrainings";
-import { syncUsers } from "@/services/syncUsers";
+import { syncTrainings } from "@/services/sync/syncTrainings";
+import { syncUsers } from "@/services/sync/syncUsers";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

@@ -1,7 +1,7 @@
 import { AlertProvider } from "@/context/AlertContext";
-import { initDatabase } from "@/services/initDb";
-import { syncBodyParts } from "@/services/syncBodyParts";
-import { syncExercises } from "@/services/syncExercise";
+import { initDatabase } from "@/services/init/initDb";
+import { syncBodyParts } from "@/services/sync/syncBodyParts";
+import { syncExercises } from "@/services/sync/syncExercise";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";

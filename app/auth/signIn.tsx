@@ -17,8 +17,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
-import { syncTrainings } from "@/services/syncTrainings";
-import { syncUsers } from "@/services/syncUsers";
+import { syncTrainings } from "@/services/sync/syncTrainings";
+import { syncUsers } from "@/services/sync/syncUsers";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
