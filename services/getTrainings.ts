@@ -1,33 +1,9 @@
+import { selectUserTrainings } from "@/dao/trainingDao";
 import { db } from "@/lib/dbConfig";
 import { BodyPartType } from "@/types/training";
 
 export const getTrainings = async (date: string): Promise<BodyPartType[]> => {
-  const rows = await db.getAllAsync<{
-    parts_id: number;
-    body_part_name: string;
-    exercise_id: number;
-    exercise_name: string;
-    training_id: number;
-    weight: number;
-    reps: number;
-  }>(
-    `
-    SELECT
-      b.parts_id,
-      b.name AS body_part_name,
-      e.exercise_id,
-      e.name AS exercise_name,
-      t.training_id,
-      t.weight,
-      t.reps
-    FROM trainings t
-    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
-    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
-    WHERE t.date = ?
-    ORDER BY b.name, e.name
-  `,
-    [date]
-  );
+  const rows = await selectUserTrainings(date);
 
   const partsMap = new Map<number, BodyPartType>();
 

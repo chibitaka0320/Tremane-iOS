@@ -7,3 +7,8 @@ export const upsertUsers = async (item: User) => {
     [item.userId, item.createdAt, item.updatedAt]
   );
 };
+
+// ユーザー削除
+export const deleteUser = async () => {
+  await db.runAsync(`DELETE FROM users`);
+};

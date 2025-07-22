@@ -1,9 +1,8 @@
-import { db } from "@/lib/dbConfig";
+import { deleteUser } from "@/dao/userDao";
 
-export const deleteUser = async (): Promise<void> => {
+export const logoutUser = async (): Promise<void> => {
   try {
-    console.log("hello");
-    await db.runAsync(`DELETE FROM users`);
+    await deleteUser();
   } catch (e) {
     console.log(e);
   }

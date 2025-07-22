@@ -1,24 +1,10 @@
-import { db } from "@/lib/dbConfig";
+import { selectBodyPartsWithExercises } from "@/dao/bodyPartDao";
 import { BodyPartExerciseResponse } from "@/types/api";
 
 export const getBodyPartsWithExercises = async (): Promise<
   BodyPartExerciseResponse[]
 > => {
-  const rows = await db.getAllAsync<{
-    parts_id: number;
-    part_name: string;
-    exercise_id: number;
-    exercise_name: string;
-  }>(`
-    SELECT
-      bp.parts_id,
-      bp.name AS part_name,
-      ex.exercise_id,
-      ex.name AS exercise_name
-    FROM body_parts bp
-    JOIN exercises ex ON ex.parts_id = bp.parts_id
-    ORDER BY bp.parts_id, ex.exercise_id
-  `);
+  const rows = await selectBodyPartsWithExercises();
 
   const map = new Map<number, BodyPartExerciseResponse>();
 
