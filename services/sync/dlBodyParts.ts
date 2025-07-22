@@ -2,7 +2,7 @@ import { apiRequest } from "@/lib/apiClient";
 import { getLatestBodyPartUpdatedAt, upsertBodyParts } from "@/dao/bodyPartDao";
 import { BodyPart } from "@/types/api";
 
-export const syncBodyParts = async () => {
+export const dlBodyParts = async () => {
   try {
     const latest = await getLatestBodyPartUpdatedAt();
     const updates = await apiRequest<BodyPart[]>(

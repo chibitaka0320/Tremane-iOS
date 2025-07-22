@@ -2,7 +2,7 @@ import { apiRequest } from "@/lib/apiClient";
 import { getLatestExerciseUpdatedAt, upsertExercises } from "@/dao/exerciseDao";
 import { Exercise } from "@/types/api";
 
-export const syncExercises = async () => {
+export const dlExercises = async () => {
   try {
     const latest = await getLatestExerciseUpdatedAt();
     const updates = await apiRequest<Exercise[]>(

@@ -2,7 +2,7 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { upsertUsers } from "@/dao/userDao";
 import { User } from "@/types/api";
 
-export const syncUsers = async () => {
+export const dlUsers = async () => {
   try {
     const updates = await apiRequestWithRefresh<User>(`/users`, "GET");
 

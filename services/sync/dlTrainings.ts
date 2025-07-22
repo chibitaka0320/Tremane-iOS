@@ -2,7 +2,7 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { getLatestTrainingUpdatedAt, upsertTrainings } from "@/dao/trainingDao";
 import { Training } from "@/types/api";
 
-export const syncTrainings = async () => {
+export const dlTrainings = async () => {
   try {
     const latest = await getLatestTrainingUpdatedAt();
     const updates = await apiRequestWithRefresh<Training[]>(

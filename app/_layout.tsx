@@ -1,7 +1,7 @@
 import { AlertProvider } from "@/context/AlertContext";
 import { initDatabase } from "@/services/init/initDb";
-import { syncBodyParts } from "@/services/sync/dlBodyParts";
-import { syncExercises } from "@/services/sync/dlExercise";
+import { dlBodyParts } from "@/services/sync/dlBodyParts";
+import { dlExercises } from "@/services/sync/dlExercise";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -9,8 +9,8 @@ export default function RootLayout() {
   useEffect(() => {
     const init = async () => {
       await initDatabase();
-      await syncBodyParts();
-      await syncExercises();
+      await dlBodyParts();
+      await dlExercises();
     };
     init();
   }, []);
