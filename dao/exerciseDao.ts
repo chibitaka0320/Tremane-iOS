@@ -1,5 +1,5 @@
 import { Exercise } from "@/types/api";
-import { db } from "../db";
+import { db } from "../lib/localDb/db";
 
 // 最新更新日を取得
 export const getLatestExerciseUpdatedAt = async (): Promise<string> => {

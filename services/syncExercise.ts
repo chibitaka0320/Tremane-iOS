@@ -1,8 +1,5 @@
 import { apiRequest } from "@/lib/apiClient";
-import {
-  getLatestExerciseUpdatedAt,
-  upsertExercises,
-} from "@/lib/localDb/dao/exerciseDao";
+import { getLatestExerciseUpdatedAt, upsertExercises } from "@/dao/exerciseDao";
 import { Exercise } from "@/types/api";
 
 export const syncExercises = async () => {

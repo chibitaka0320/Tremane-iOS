@@ -1,8 +1,5 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import {
-  getLatestTrainingUpdatedAt,
-  upsertTrainings,
-} from "@/lib/localDb/dao/trainingDao";
+import { getLatestTrainingUpdatedAt, upsertTrainings } from "@/dao/trainingDao";
 import { Training } from "@/types/api";
 
 export const syncTrainings = async () => {

@@ -1,8 +1,5 @@
 import { apiRequest } from "@/lib/apiClient";
-import {
-  getLatestBodyPartUpdatedAt,
-  upsertBodyParts,
-} from "@/lib/localDb/dao/bodyPartDao";
+import { getLatestBodyPartUpdatedAt, upsertBodyParts } from "@/dao/bodyPartDao";
 import { BodyPart } from "@/types/api";
 
 export const syncBodyParts = async () => {

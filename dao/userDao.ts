@@ -1,5 +1,5 @@
 import { User } from "@/types/api";
-import { db } from "../db";
+import { db } from "../lib/localDb/db";
 
 export const upsertUsers = async (item: User) => {
   await db.runAsync(

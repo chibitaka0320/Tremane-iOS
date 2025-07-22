@@ -1,5 +1,5 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { upsertUsers } from "@/lib/localDb/dao/userDao";
+import { upsertUsers } from "@/dao/userDao";
 import { User } from "@/types/api";
 
 export const syncUsers = async () => {

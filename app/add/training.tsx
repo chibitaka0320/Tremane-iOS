@@ -21,7 +21,7 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import { getBodyPartsWithExercises } from "@/services/getBodyPartsWithExercise";
 import { TrainingRequest } from "@/types/training";
-import { insertTrainings } from "@/lib/localDb/dao/trainingDao";
+import { insertTrainings } from "@/dao/trainingDao";
 import { db } from "@/lib/localDb/db";
 
 export default function TrainingScreen() {

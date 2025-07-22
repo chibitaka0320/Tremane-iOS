@@ -37,13 +37,14 @@ export const initDatabase = async () => {
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
       );
       CREATE TABLE IF NOT EXISTS trainings (
-        training_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        training_id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
         user_id TEXT NOT NULL,
         exercise_id INTEGER NOT NULL,
         weight INTEGER,
         reps INTEGER,
-        sync_status TEXT DEFAULT 'pending',
+        is_synced INTEGER DEFAULT 0,
+        deleted INTEGER DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now')),
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
