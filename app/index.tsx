@@ -3,21 +3,13 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { dlTrainings } from "@/services/sync/dlTrainings";
-import { dlUsers } from "@/services/sync/dlUsers";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        dlUsers();
-        dlTrainings();
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-      }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(user !== null);
     });
 
     return () => {

@@ -4,7 +4,6 @@ import { router } from "expo-router";
 import theme from "@/styles/theme";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { logoutUser } from "@/services/logoutUser";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
@@ -35,9 +34,7 @@ export default function Menu() {
 
   const onSignOut = async () => {
     try {
-      await logoutUser();
-      await signOut(auth);
-
+      signOut(auth);
       router.dismissAll();
       router.replace("/auth/signIn");
     } catch (e) {

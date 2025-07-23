@@ -19,10 +19,6 @@ import { BodyPartExerciseResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
-import { getBodyPartsWithExercises } from "@/services/getBodyPartsWithExercise";
-import { TrainingRequest } from "@/types/training";
-import { insertTrainings } from "@/dao/trainingDao";
-import { db } from "@/lib/dbConfig";
 
 export default function TrainingScreen() {
   // 表示データ
@@ -47,7 +43,11 @@ export default function TrainingScreen() {
   // 部位・種別情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await getBodyPartsWithExercises();
+      const URL = "/bodyparts";
+      const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
+        URL,
+        "GET"
+      );
       if (res) {
         setBodyPartData(res);
         setBodyPartOptions(
@@ -103,38 +103,20 @@ export default function TrainingScreen() {
   // トレーニング記録
   const onRecordTraining = async () => {
     const URL = "/training";
-    let trainingId: number;
     setLoading(true);
-
-    const requestBody: TrainingRequest = {
+    const requestBody = {
       date: format(date, "yyyy-MM-dd"),
       exerciseId: exercise,
       weight: parseFloat(weight),
       reps: parseInt(reps),
     };
-
     try {
-      trainingId = await insertTrainings(requestBody);
+      await apiRequestWithRefresh(URL, "POST", requestBody);
       router.dismissAll();
       router.replace("/(tabs)/training");
-      try {
-        await apiRequestWithRefresh(URL, "POST", {
-          trainingId,
-          ...requestBody,
-        });
-        await db.runAsync(
-          `UPDATE trainings SET sync_status = 'synced' WHERE training_id = ?`,
-          [trainingId]
-        );
-      } catch (e) {
-        await db.runAsync(
-          `UPDATE trainings SET sync_status = 'failed' WHERE training_id = ?`,
-          [trainingId]
-        );
-        return;
-      }
     } catch (e) {
-      console.log(e);
+      Alert.alert("エラー", "時間をおいて再度実行してください");
+      return;
     } finally {
       setLoading(false);
     }

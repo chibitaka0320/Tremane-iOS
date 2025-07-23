@@ -1,5 +1,3 @@
-import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
-
 // 部位・種目取得API
 export type BodyPartExerciseResponse = {
   partsId: number;
@@ -43,42 +41,6 @@ export type TrainingResponse = {
   exerciseId: number;
   weight: number;
   reps: number;
-};
-
-// 部位テーブル
-export type BodyPart = {
-  partsId: number;
-  name: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-};
-
-// 種目テーブル
-export type Exercise = {
-  exerciseId: number;
-  partsId: number;
-  name: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-};
-
-// トレーニングテーブル
-export type Training = {
-  trainingId: number;
-  date: string;
-  userId: string;
-  exerciseId: number;
-  weight: number;
-  reps: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-};
-
-// ユーザーテーブル
-export type User = {
-  userId: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
 };
 
 export type ErrorType = {

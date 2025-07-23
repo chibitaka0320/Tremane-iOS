@@ -19,7 +19,6 @@ import { BodyPartExerciseResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
-import { getBodyPartsWithExercises } from "@/services/getBodyPartsWithExercise";
 
 export default function TrainingWithExerciseScreen() {
   //パスパラメータ
@@ -49,7 +48,11 @@ export default function TrainingWithExerciseScreen() {
 
   // 部位・種別情報取得
   const fetchBodyParts = async () => {
-    const res = await getBodyPartsWithExercises();
+    const URL = "/bodyparts";
+    const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
+      URL,
+      "GET"
+    );
     if (res) {
       setBodyPartData(res);
       setBodyPartOptions(
