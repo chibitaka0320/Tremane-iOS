@@ -2,7 +2,7 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
 import theme from "@/styles/theme";
-import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { deleteUser } from "firebase/auth";
 import React from "react";
