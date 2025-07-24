@@ -31,4 +31,6 @@ export const initUser = async () => {
     const userProfileInfo: UserProfile = await userProfileRes.json();
     await insertUserProfileDao(userProfileInfo, 1);
   }
+
+  console.log("データダウンロード完了");
 };

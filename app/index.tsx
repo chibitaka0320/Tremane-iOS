@@ -11,6 +11,7 @@ import {
 import { User, UserProfile } from "@/types/localDb";
 import { initLocalDb } from "@/localDb/initLocalDb";
 import { initUser } from "@/localDb/initUser";
+import { syncLocalDb } from "@/localDb/syncLocalDb";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -26,6 +27,8 @@ export default function Index() {
         } finally {
           setIsAuthenticated(true);
         }
+
+        syncLocalDb();
       } else {
         setIsAuthenticated(false);
       }
