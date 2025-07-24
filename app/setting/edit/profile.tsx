@@ -7,7 +7,6 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
@@ -16,11 +15,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
 import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
-import {
-  apiRequestWithRefresh,
-  apiRequestWithRefreshNew,
-} from "@/lib/apiClient";
-import { UserInfoResponse } from "@/types/api";
+import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import { router } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import {
@@ -31,8 +26,10 @@ import {
 import { getUserProfile } from "@/localDb/service/userProfileService";
 import { auth } from "@/lib/firebaseConfig";
 import { UserProfile } from "@/types/localDb";
-import { insertUserProfileDao } from "@/localDb/dao/userProfileDao";
-import { db } from "@/lib/localDbConfig";
+import {
+  insertUserProfileDao,
+  setUserProfileSynced,
+} from "@/localDb/dao/userProfileDao";
 
 export default function ProfileScreen() {
   const [nickname, setNickname] = useState("");
@@ -109,7 +106,7 @@ export default function ProfileScreen() {
         userProfile
       );
       if (res?.ok) {
-        await db.runAsync(`UPDATE users_profile SET is_synced = 1`);
+        await setUserProfileSynced();
       }
     } catch (e) {
       console.error(e);

@@ -9,6 +9,11 @@ export const getLatestUserProfile = async (): Promise<string> => {
   return row?.last_updated ?? "1970-01-01T00:00:00";
 };
 
+// フラグを同期済みにする
+export const setUserProfileSynced = async () => {
+  await db.runAsync(`UPDATE users_profile SET is_synced = 1`);
+};
+
 // 取得
 export const getUserProfileDao = async (): Promise<UserProfile | null> => {
   const data = await db.getFirstAsync<UserProfile | null>(
