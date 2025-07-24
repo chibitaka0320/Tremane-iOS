@@ -5,6 +5,7 @@ import theme from "@/styles/theme";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
+import { syncLocalDb } from "@/localDb/syncLocalDb";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
@@ -35,6 +36,7 @@ export default function Menu() {
 
   const onSignOut = async () => {
     try {
+      await syncLocalDb();
       await signOut(auth);
       await clearLocalDb();
       router.dismissAll();

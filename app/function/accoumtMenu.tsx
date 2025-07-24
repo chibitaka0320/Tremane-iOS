@@ -2,8 +2,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { MaterialIcons, SimpleLineIcons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import theme from "@/styles/theme";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;

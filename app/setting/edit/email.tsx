@@ -23,6 +23,7 @@ import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
+import { syncLocalDb } from "@/localDb/syncLocalDb";
 
 export default function Email() {
   const currentEmail = auth.currentUser?.email;
@@ -61,6 +62,7 @@ export default function Email() {
             text: "OK",
             onPress: async () => {
               try {
+                await syncLocalDb();
                 await signOut(auth);
                 await clearLocalDb();
                 router.dismissAll();
