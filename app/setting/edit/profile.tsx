@@ -16,7 +16,10 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
 import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import {
+  apiRequestWithRefresh,
+  apiRequestWithRefreshNew,
+} from "@/lib/apiClient";
 import { UserInfoResponse } from "@/types/api";
 import { router } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
@@ -25,6 +28,11 @@ import {
   validateNickname,
   validateWeight,
 } from "@/lib/validators";
+import { getUserProfile } from "@/localDb/service/userProfileService";
+import { auth } from "@/lib/firebaseConfig";
+import { UserProfile } from "@/types/localDb";
+import { insertUserProfileDao } from "@/localDb/dao/userProfileDao";
+import { db } from "@/lib/localDbConfig";
 
 export default function ProfileScreen() {
   const [nickname, setNickname] = useState("");
@@ -69,33 +77,50 @@ export default function ProfileScreen() {
 
   // 更新ボタン押下
   const onUpdate = async () => {
-    const URL = "/users/profile";
     setLoading(true);
-    const requestBody = {
+
+    if (auth.currentUser === null) return;
+
+    const userProfile: UserProfile = {
+      userId: auth.currentUser.uid,
       nickname,
       height: parseFloat(height),
       weight: parseFloat(weight),
       birthday: format(birthday, "yyyy-MM-dd"),
       gender: parseInt(gender),
       activeLevel: parseInt(activeLevel),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     try {
-      await apiRequestWithRefresh(URL, "POST", requestBody);
-      router.back();
-    } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度実行してください");
-      return;
+      await insertUserProfileDao(userProfile, 0);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
+      router.back();
+    }
+
+    try {
+      const res = await apiRequestWithRefreshNew(
+        "/users/profile",
+        "POST",
+        userProfile
+      );
+      if (res?.ok) {
+        await db.runAsync(`UPDATE users_profile SET is_synced = 1`);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
+  // 画面初期表示時
   useEffect(() => {
     const fetchApi = async () => {
-      const URL = "/users/profile";
+      const res = await getUserProfile();
 
-      const res = await apiRequestWithRefresh<UserInfoResponse>(URL, "GET");
       if (res) {
         setNickname(res.nickname);
         if (res.height != null) {

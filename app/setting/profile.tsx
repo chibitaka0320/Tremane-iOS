@@ -3,13 +3,12 @@ import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { UserInfoResponse } from "@/types/api";
 import { router, useFocusEffect } from "expo-router";
 import { genderOptions } from "@/constants/genderOptions";
 import NotSetProfile from "@/components/setting/NotSetProfile";
 import { Feather } from "@expo/vector-icons";
 import { activeOptions } from "@/constants/activeOptions";
+import { getUserProfile } from "@/localDb/service/userProfileService";
 
 export default function ProfileScreen() {
   const [nickname, setNickname] = useState("");
@@ -24,7 +23,6 @@ export default function ProfileScreen() {
   const [isNotSet, setIsNotSet] = useState<Boolean>();
 
   const [isLoading, setLoading] = useState(false);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   const activeLevelExplanation = getActiveLevelExplanation(activeLevel);
 
@@ -32,9 +30,14 @@ export default function ProfileScreen() {
     useCallback(() => {
       setLoading(true);
       const fetchApi = async () => {
-        const URL = "/users/profile";
         try {
-          const res = await apiRequestWithRefresh<UserInfoResponse>(URL, "GET");
+          const res = await getUserProfile();
+
+          if (res === null) {
+            setIsNotSet(true);
+            return;
+          }
+
           if (res) {
             setNickname(res.nickname);
             if (res.height != null) {

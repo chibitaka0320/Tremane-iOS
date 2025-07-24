@@ -3,13 +3,32 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
+import { db } from "@/lib/localDbConfig";
+import {
+  apiRequestWithRefresh,
+  apiRequestWithRefreshNew,
+} from "@/lib/apiClient";
+import { User, UserProfile } from "@/types/localDb";
+import { initLocalDb } from "@/localDb/initLocalDb";
+import { initUser } from "@/localDb/initUser";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(user !== null);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          await initLocalDb();
+          await initUser();
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsAuthenticated(true);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
     });
 
     return () => {
