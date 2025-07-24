@@ -82,3 +82,8 @@ export const insertUserProfileDao = async (
     ]
   );
 };
+
+// 削除
+export const deleteUserProfileDao = async () => {
+  await db.runAsync(`DELETE FROM users_profile`);
+};

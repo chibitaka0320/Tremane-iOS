@@ -8,3 +8,8 @@ export const insertUserDao = async (user: User) => {
     [user.userId, user.createdAt, user.updatedAt]
   );
 };
+
+// 削除
+export const deleteUserDao = async () => {
+  await db.runAsync(`DELETE FROM users`);
+};

@@ -1,5 +1,6 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
+import { clearLocalDb } from "@/localDb/clearLocalDb";
 import theme from "@/styles/theme";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -25,6 +26,7 @@ export default function DeleteAccountScreen() {
             try {
               await apiRequestWithRefresh(URL, "DELETE");
               await deleteUser(user);
+              await clearLocalDb();
               router.dismissAll();
               router.replace("/auth/signIn");
             } catch (error) {

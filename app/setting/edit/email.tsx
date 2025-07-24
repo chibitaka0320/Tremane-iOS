@@ -22,6 +22,7 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEmail, validatePassword } from "@/lib/validators";
+import { clearLocalDb } from "@/localDb/clearLocalDb";
 
 export default function Email() {
   const currentEmail = auth.currentUser?.email;
@@ -58,9 +59,10 @@ export default function Email() {
         [
           {
             text: "OK",
-            onPress: () => {
+            onPress: async () => {
               try {
-                signOut(auth);
+                await signOut(auth);
+                await clearLocalDb();
                 router.dismissAll();
                 router.replace("/auth/signIn");
               } catch (error) {
