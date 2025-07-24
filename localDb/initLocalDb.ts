@@ -29,7 +29,7 @@ export const initLocalDb = async () => {
         );
     `);
 
-    console.log("初期化完了");
+    console.log("データベース初期化完了");
   } catch (error) {
     console.error(error);
   }

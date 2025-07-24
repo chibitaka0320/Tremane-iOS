@@ -1,7 +1,16 @@
 import { AlertProvider } from "@/context/AlertContext";
+import { initLocalDb } from "@/localDb/initLocalDb";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 export default function RootLayout() {
+  useEffect(() => {
+    const init = async () => {
+      await initLocalDb();
+    };
+    init();
+  }, []);
+
   return (
     <AlertProvider>
       <GestureHandlerRootView
