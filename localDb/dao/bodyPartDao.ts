@@ -23,3 +23,23 @@ export const insertBodyPartDao = async (bodyParts: BodyPart[]) => {
     }
   });
 };
+
+// 種目付き部位データ取得
+export const getBodyPartsWithExercisesDao = async () => {
+  const rows = await db.getAllAsync<{
+    parts_id: number;
+    part_name: string;
+    exercise_id: number;
+    exercise_name: string;
+  }>(`
+    SELECT
+      bp.parts_id,
+      bp.name AS part_name,
+      ex.exercise_id,
+      ex.name AS exercise_name
+    FROM body_parts bp
+    JOIN exercises ex ON ex.parts_id = bp.parts_id
+    ORDER BY bp.parts_id, ex.exercise_id
+  `);
+  return rows;
+};

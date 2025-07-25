@@ -15,10 +15,12 @@ import { format } from "date-fns";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
-import { BodyPartExerciseResponse, TrainingResponse } from "@/types/api";
+import { TrainingResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
+import { BodypartWithExercise } from "@/types/bodyPart";
+import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 
 export default function TrainingScreen() {
   // パスパラメーター
@@ -26,7 +28,6 @@ export default function TrainingScreen() {
 
   // API定数
   const API_ENDPOINTS = {
-    bodyParts: "/bodyparts",
     training: (id: string) => `/training/${id}`,
   };
 
@@ -38,9 +39,7 @@ export default function TrainingScreen() {
   const [reps, setReps] = useState("");
 
   // ピッカーデータ
-  const [bodyPartData, setBodyPartData] = useState<BodyPartExerciseResponse[]>(
-    []
-  );
+  const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
   const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 
@@ -51,10 +50,7 @@ export default function TrainingScreen() {
 
   // 部位・種目情報取得
   const fetchBodyParts = async () => {
-    const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
-      API_ENDPOINTS.bodyParts,
-      "GET"
-    );
+    const res = await getBodyPartsWithExercises();
     if (res) {
       setBodyPartData(res);
       setBodyPartOptions(

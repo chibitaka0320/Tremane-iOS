@@ -10,7 +10,7 @@ export const initMaster = async () => {
     const latestBodyPart = await getLatestBodyPart();
 
     const bodyPartRes = await apiRequestNew(
-      "/bodyparts/sync?updatedAt=" +
+      "/bodyparts?updatedAt=" +
         format(latestBodyPart, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
       "GET",
       null

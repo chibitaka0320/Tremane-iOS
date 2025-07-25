@@ -15,10 +15,11 @@ import { format } from "date-fns";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router } from "expo-router";
-import { BodyPartExerciseResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
+import { BodypartWithExercise } from "@/types/bodyPart";
+import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 
 export default function TrainingScreen() {
   // 表示データ
@@ -34,20 +35,14 @@ export default function TrainingScreen() {
   const [isDisabled, setDisabled] = useState(true);
 
   // ピッカーデータ関連
-  const [bodyPartData, setBodyPartData] = useState<BodyPartExerciseResponse[]>(
-    []
-  );
+  const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
   const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 
   // 部位・種別情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const URL = "/bodyparts";
-      const res = await apiRequestWithRefresh<BodyPartExerciseResponse[]>(
-        URL,
-        "GET"
-      );
+      const res = await getBodyPartsWithExercises();
       if (res) {
         setBodyPartData(res);
         setBodyPartOptions(
