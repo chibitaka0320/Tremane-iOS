@@ -12,7 +12,10 @@ import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import {
+  apiRequestWithRefresh,
+  apiRequestWithRefreshNew,
+} from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
 import { selectLabel } from "@/types/common";
@@ -20,6 +23,10 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import { BodypartWithExercise } from "@/types/bodyPart";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
+import { auth } from "@/lib/firebaseConfig";
+import { Training } from "@/types/localDb";
+import uuid from "react-native-uuid";
+import { insertTrainingDao } from "@/localDb/dao/trainingDao";
 
 export default function TrainingWithExerciseScreen() {
   //パスパラメータ
@@ -115,23 +122,40 @@ export default function TrainingWithExerciseScreen() {
 
   // トレーニング記録
   const onRecordTraining = async () => {
-    const URL = "/training";
     setLoading(true);
-    const requestBody = {
-      date: format(date, "yyyy-MM-dd"),
-      exerciseId: exercise,
-      weight: parseFloat(weight),
-      reps: parseInt(reps),
-    };
+
+    if (auth.currentUser === null) return;
+
+    const training: Training[] = [
+      {
+        trainingId: uuid.v4(),
+        date: format(date, "yyyy-MM-dd"),
+        userId: auth.currentUser.uid,
+        exerciseId: parseInt(exercise),
+        weight: parseFloat(weight),
+        reps: parseInt(reps),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
     try {
-      await apiRequestWithRefresh(URL, "POST", requestBody);
+      await insertTrainingDao(training, 0, 0);
+    } catch (error) {
+      console.error(error);
+    } finally {
       router.dismissAll();
       router.replace("/(tabs)/training");
-    } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度実行してください");
-      return;
-    } finally {
       setLoading(false);
+    }
+
+    try {
+      const res = await apiRequestWithRefreshNew("/training", "POST", training);
+      if (res?.ok) {
+        await insertTrainingDao(training, 1, 0);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 

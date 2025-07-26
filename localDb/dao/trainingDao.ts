@@ -9,6 +9,31 @@ export const getLatestTraining = async (): Promise<string> => {
   return row?.last_updated ?? "1970-01-01T00:00:00";
 };
 
+// 非同期データの取得
+export const getUnsyncedTraining = async (
+  deleteFlg: number
+): Promise<Training[]> => {
+  const unsynced = await db.getAllAsync<Training>(
+    `
+    SELECT
+      training_id AS trainingId,
+      date,
+      user_id AS userId,
+      exercise_id AS exerciseId,
+      weight,
+      reps,
+      created_at AS createdAt,
+      updated_at AS updatedAt
+    FROM trainings
+    WHERE is_synced = 0
+    AND is_deleted = ?
+    ;
+    `,
+    [deleteFlg]
+  );
+  return unsynced;
+};
+
 // 日別トレーニング情報取得
 export const getTrainingByDateDao = async (date: string) => {
   const rows = await db.getAllAsync<{
@@ -33,6 +58,7 @@ export const getTrainingByDateDao = async (date: string) => {
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     LEFT JOIN body_parts b ON e.parts_id = b.parts_id
     WHERE t.date = ?
+      AND t.is_deleted = 0
     ORDER BY t.created_at;
   `,
     [date]
