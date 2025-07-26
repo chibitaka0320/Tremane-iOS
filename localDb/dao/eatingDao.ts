@@ -35,6 +35,31 @@ export const getUnsyncedEating = async (
   return unsynced;
 };
 
+// 日別食事情報取得
+export const getEatingByDateDao = async (date: string) => {
+  const rows = await db.getAllAsync<Eating>(
+    `
+    SELECT
+        eating_id AS eatingId,
+        date,
+        user_id AS userId,
+        name,
+        calories,
+        protein,
+        fat,
+        carbo,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+    FROM eatings
+    WHERE date = ?
+    AND is_deleted = 0
+    ORDER BY created_at;
+    `,
+    [date]
+  );
+  return rows;
+};
+
 // 追加
 export const upsertEatingDao = async (
   eatings: Eating[],

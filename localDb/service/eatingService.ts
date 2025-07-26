@@ -1,0 +1,153 @@
+import { EatingByDate, Goal, Meal, Rate, Total } from "@/types/eating";
+import { getEatingByDateDao } from "../dao/eatingDao";
+import { Eating, UserGoal, UserProfile } from "@/types/localDb";
+import { getUserProfileDao } from "../dao/userProfileDao";
+import { getUserGoalDao } from "../dao/userGoalDao";
+import { calcAge, calcBmr, calcDiffDays, calcTotalCalorie } from "@/lib/calc";
+
+export const getEatingByDate = async (
+  date: string
+): Promise<EatingByDate | null> => {
+  const eatings: Eating[] = await getEatingByDateDao(date);
+  const userProfile: UserProfile | null = await getUserProfileDao();
+  const userGoal: UserGoal | null = await getUserGoalDao();
+
+  if (eatings.length === 0) {
+    return null;
+  } else {
+    const total = createTotal(eatings);
+    const goal = createGoal(userProfile, userGoal);
+    const rate = createRate(total, goal);
+    const meals = createMeal(eatings);
+
+    const result: EatingByDate = {
+      date,
+      total,
+      goal,
+      rate,
+      meals,
+    };
+
+    return result;
+  }
+};
+
+const createTotal = (eatings: Eating[]): Total => {
+  let calories = 0;
+  let protein = 0;
+  let fat = 0;
+  let carbo = 0;
+
+  for (const eating of eatings) {
+    calories += eating.calories;
+    protein += eating.protein;
+    fat += eating.fat;
+    carbo += eating.carbo;
+  }
+
+  const total: Total = {
+    calories,
+    protein,
+    fat,
+    carbo,
+  };
+  return total;
+};
+
+const createMeal = (eatings: Eating[]): Meal[] => {
+  const meal: Meal[] = [];
+
+  for (const eating of eatings) {
+    meal.push({
+      eatingId: eating.eatingId,
+      date: eating.date,
+      name: eating.name,
+      calories: eating.calories,
+      protein: eating.protein,
+      fat: eating.fat,
+      carbo: eating.carbo,
+    });
+  }
+
+  return meal;
+};
+
+const createGoal = (prof: UserProfile | null, goal: UserGoal | null): Goal => {
+  let calories = 0;
+  let protein = 0;
+  let fat = 0;
+  let carbo = 0;
+
+  if (prof && goal) {
+    // 目標摂取カロリー算出
+    const age = calcAge(new Date(prof.birthday));
+    const bmr = calcBmr(prof.gender, prof.height, prof.weight, age);
+    const totalCalorie = calcTotalCalorie(bmr, prof.activeLevel);
+
+    const lossWeight = goal.weight - goal.goal_weight;
+    const diffDays = calcDiffDays(new Date(goal.start), new Date(goal.finish));
+    const lossCalorie = (lossWeight * 7200) / diffDays;
+
+    calories = Math.round(totalCalorie - lossCalorie);
+
+    // 目標PFC算出
+    if (calories > 0) {
+      if (goal.pfc === 0) {
+        protein = Math.round((calories * 0.4) / 4);
+        fat = Math.round((calories * 0.2) / 9);
+        carbo = Math.round((calories * 0.4) / 4);
+      } else if (goal.pfc === 1) {
+        protein = Math.round((calories * 0.3) / 4);
+        fat = Math.round((calories * 0.2) / 9);
+        carbo = Math.round((calories * 0.5) / 4);
+      } else if (goal.pfc === 2) {
+        protein = Math.round((calories * 0.55) / 4);
+        fat = Math.round((calories * 0.25) / 9);
+        carbo = Math.round((calories * 0.5) / 4);
+      }
+    }
+  }
+
+  const result: Goal = {
+    calories,
+    protein,
+    fat,
+    carbo,
+  };
+
+  return result;
+};
+
+const createRate = (total: Total, goal: Goal): Rate => {
+  let protein = 0;
+  let fat = 0;
+  let carbo = 0;
+
+  if (goal.protein > 0) {
+    protein = total.protein / goal.protein;
+    if (protein > 1) {
+      protein = 1;
+    }
+  }
+
+  if (goal.fat > 0) {
+    fat = total.fat / goal.fat;
+    if (fat > 1) {
+      fat = 1;
+    }
+  }
+  if (goal.carbo > 0) {
+    carbo = total.carbo / goal.carbo;
+    if (carbo > 1) {
+      carbo = 1;
+    }
+  }
+
+  const rate: Rate = {
+    protein,
+    fat,
+    carbo,
+  };
+
+  return rate;
+};

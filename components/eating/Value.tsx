@@ -9,7 +9,7 @@ type Props = {
 export default function Value({ intake, goal }: Props) {
   return (
     <View style={styles.container}>
-      <Text>{intake}</Text>
+      <Text>{intake ? intake : 0}</Text>
       <Text style={styles.slash}>/</Text>
       <Text>{goal ? goal : "未設定"}</Text>
     </View>

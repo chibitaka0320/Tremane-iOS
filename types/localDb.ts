@@ -18,6 +18,18 @@ export type UserProfile = {
   updatedAt: string;
 };
 
+// ユーザー目標テーブル
+export type UserGoal = {
+  userId: string;
+  weight: number;
+  goal_weight: number;
+  start: string;
+  finish: string;
+  pfc: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // 部位テーブル
 export type BodyPart = {
   partsId: number;

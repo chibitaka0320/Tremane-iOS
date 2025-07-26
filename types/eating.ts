@@ -19,7 +19,7 @@ interface Rate {
 }
 
 interface Meal {
-  eatingId: number;
+  eatingId: string;
   date: string;
   name: string;
   calories: number;
@@ -28,7 +28,7 @@ interface Meal {
   carbo: number;
 }
 
-interface Eating {
+interface EatingByDate {
   date: string;
   total: Total;
   goal: Goal;
@@ -36,4 +36,4 @@ interface Eating {
   meals: Meal[];
 }
 
-export type { Eating, Meal, Goal, Rate, Total };
+export type { EatingByDate, Meal, Goal, Rate, Total };

@@ -4,8 +4,9 @@ import Summary from "@/components/eating/Summary";
 import { PFC_LABELS } from "@/constants/pfc";
 import { useAlert } from "@/context/AlertContext";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
+import { getEatingByDate } from "@/localDb/service/eatingService";
 import theme from "@/styles/theme";
-import { Eating } from "@/types/eating";
+import { EatingByDate } from "@/types/eating";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -24,7 +25,7 @@ type Props = {
 export default function EatingScreen({ selectedDate }: Props) {
   const { setError } = useAlert();
 
-  const [data, setData] = useState<Eating>();
+  const [data, setData] = useState<EatingByDate | null>();
   const [isLoading, setLoading] = useState(false);
 
   const [isFetching, setFetching] = useState(false);
@@ -42,10 +43,8 @@ export default function EatingScreen({ selectedDate }: Props) {
     const URL = "/eating?date=" + selectedDate;
 
     try {
-      const data = await apiRequestWithRefresh<Eating>(URL, "GET", null);
-      if (data != null) {
-        setData(data);
-      }
+      const data = await getEatingByDate(selectedDate);
+      setData(data);
     } catch (e) {
       setError("時間をおいて再度アプリを起動してください", () => {
         router.replace("/auth/signIn");
