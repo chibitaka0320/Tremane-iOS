@@ -66,6 +66,24 @@ export const initLocalDb = async () => {
       );
     `);
 
+    // 食事テーブル
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS eatings (
+        eating_id TEXT PRIMARY KEY,
+        date TEXT,
+        user_id TEXT,
+        name TEXT,
+        calories INTEGER,
+        protein INTEGER,
+        fat INTEGER,
+        carbo INTEGER,
+        is_synced INTEGER DEFAULT 0,
+        is_deleted INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log("データベース初期化完了");
   } catch (error) {
     console.error(error);

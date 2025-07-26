@@ -1,6 +1,6 @@
 import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import { db } from "@/lib/localDbConfig";
-import { Training, User, UserProfile } from "@/types/localDb";
+import { Eating, Training, User, UserProfile } from "@/types/localDb";
 import {
   getLatestUserProfile,
   insertUserProfileDao,
@@ -8,6 +8,7 @@ import {
 import { insertUserDao } from "./dao/userDao";
 import { format } from "date-fns";
 import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
+import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
@@ -46,6 +47,21 @@ export const initUser = async () => {
   if (trainingRes?.ok) {
     const training: Training[] = await trainingRes.json();
     await upsertTrainingDao(training, 1, 0);
+  }
+
+  // 食事テーブル初期化
+  const latestEating = await getLatestEating();
+
+  const eatingRes = await apiRequestWithRefreshNew(
+    "/eating/sync?updatedAt=" +
+      format(latestEating, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+    "GET",
+    null
+  );
+
+  if (eatingRes?.ok) {
+    const eating: Eating[] = await eatingRes.json();
+    await upsertEatingDao(eating, 1, 0);
   }
 
   console.log("データダウンロード完了");

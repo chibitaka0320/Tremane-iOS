@@ -46,3 +46,17 @@ export type Training = {
   createdAt: string;
   updatedAt: string;
 };
+
+// 食事テーブル
+export type Eating = {
+  eatingId: string;
+  date: string;
+  userId: string;
+  name: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbo: number;
+  createdAt: string;
+  updatedAt: string;
+};
