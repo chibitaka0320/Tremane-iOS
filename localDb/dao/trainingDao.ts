@@ -9,6 +9,37 @@ export const getLatestTraining = async (): Promise<string> => {
   return row?.last_updated ?? "1970-01-01T00:00:00";
 };
 
+// 日別トレーニング情報取得
+export const getTrainingByDateDao = async (date: string) => {
+  const rows = await db.getAllAsync<{
+    parts_id: number;
+    parts_name: string;
+    exercise_id: number;
+    exercise_name: string;
+    training_id: string;
+    weight: number;
+    reps: number;
+  }>(
+    `
+    SELECT
+      b.parts_id,
+      b.name AS parts_name,
+      e.exercise_id, 
+      e.name AS exercise_name,
+      t.training_id,
+      t.weight,
+      t.reps
+    FROM trainings t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
+    WHERE t.date = ?
+    ORDER BY t.created_at;
+  `,
+    [date]
+  );
+  return rows;
+};
+
 // 追加
 export const insertTrainingDao = async (
   trainings: Training[],

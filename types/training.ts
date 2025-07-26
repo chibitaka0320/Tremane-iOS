@@ -1,19 +1,17 @@
-interface SetType {
-  trainingId: number;
+export type SetType = {
+  trainingId: string;
   weight: number;
   reps: number;
-}
+};
 
-interface ExerciseType {
+export type ExerciseType = {
   exerciseId: number;
   name: string;
   sets: SetType[];
-}
+};
 
-interface BodyPartType {
+export type TrainingByDate = {
   partsId: number;
   name: string;
   exercises: ExerciseType[];
-}
-
-export type { BodyPartType, ExerciseType };
+};

@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet } from "react-native";
 import theme from "@/styles/theme";
 import Exercise from "./Exercise";
-import { BodyPartType } from "@/types/training";
+import { TrainingByDate } from "@/types/training";
 
 type Props = {
-  bodyPart: BodyPartType;
+  bodyPart: TrainingByDate;
 };
 
 export default function TrainingItem({ bodyPart }: Props) {

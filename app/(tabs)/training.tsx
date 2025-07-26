@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import TrainingItem from "@/components/training/TrainingItem";
 import theme from "@/styles/theme";
-import { BodyPartType } from "@/types/training";
+import { TrainingByDate } from "@/types/training";
 import { useCallback, useEffect, useState } from "react";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import Indicator from "@/components/common/Indicator";
 import { useAlert } from "@/context/AlertContext";
+import { getTrainingByDate } from "@/localDb/service/trainingService";
 
 type Props = {
   selectedDate: string;
@@ -23,14 +23,12 @@ type Props = {
 export default function TrainingScreen({ selectedDate }: Props) {
   const { setError } = useAlert();
 
-  const [trainingData, setData] = useState<BodyPartType[]>([]);
+  const [trainingData, setData] = useState<TrainingByDate[]>([]);
 
   const [isFetching, setFetching] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const URL = "/training?date=" + selectedDate;
 
   const fetchTrainingData = async (isRefresh = false) => {
     if (isRefresh) {
@@ -40,11 +38,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
     }
 
     try {
-      const data = await apiRequestWithRefresh<BodyPartType[]>(
-        URL,
-        "GET",
-        null
-      );
+      const data = await getTrainingByDate(selectedDate);
       if (data != null) {
         setData(data);
       }
