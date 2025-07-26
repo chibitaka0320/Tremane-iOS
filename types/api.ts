@@ -33,16 +33,6 @@ export type UserGoalResponse = {
   pfc: number;
 };
 
-// トレーニング個別情報API
-export type TrainingResponse = {
-  trainingId: number;
-  date: Date;
-  partsId: number;
-  exerciseId: number;
-  weight: number;
-  reps: number;
-};
-
 export type ErrorType = {
   error: string;
   code?: number;

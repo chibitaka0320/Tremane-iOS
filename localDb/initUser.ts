@@ -7,7 +7,7 @@ import {
 } from "./dao/userProfileDao";
 import { insertUserDao } from "./dao/userDao";
 import { format } from "date-fns";
-import { getLatestTraining, insertTrainingDao } from "./dao/trainingDao";
+import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
@@ -45,7 +45,7 @@ export const initUser = async () => {
 
   if (trainingRes?.ok) {
     const training: Training[] = await trainingRes.json();
-    await insertTrainingDao(training, 1, 0);
+    await upsertTrainingDao(training, 1, 0);
   }
 
   console.log("データダウンロード完了");

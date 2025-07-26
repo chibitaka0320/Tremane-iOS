@@ -4,7 +4,11 @@ import {
   setUserProfileSynced,
 } from "./dao/userProfileDao";
 import { apiRequestWithRefreshNew } from "@/lib/apiClient";
-import { getUnsyncedTraining, insertTrainingDao } from "./dao/trainingDao";
+import {
+  getUnsyncedTraining,
+  setTrainingSynced,
+  upsertTrainingDao,
+} from "./dao/trainingDao";
 
 export const syncLocalDb = async () => {
   try {
@@ -26,7 +30,7 @@ export const syncLocalDb = async () => {
       }
     }
 
-    // トレーニングデータの非同期データ送信
+    // トレーニングデータの非同期データ送信（追加）
     const trainingAdd: Training[] = await getUnsyncedTraining(0);
     if (trainingAdd.length > 0) {
       try {
@@ -36,10 +40,29 @@ export const syncLocalDb = async () => {
           trainingAdd
         );
         if (res?.ok) {
-          await insertTrainingDao(trainingAdd, 1, 0);
+          await upsertTrainingDao(trainingAdd, 1, 0);
         }
       } catch (e) {
         console.error(e);
+      }
+    }
+
+    // トレーニングデータの非同期データ送信（削除）
+    const trainingDelete: Training[] = await getUnsyncedTraining(1);
+    if (trainingDelete.length > 0) {
+      for (const training of trainingDelete) {
+        try {
+          const res = await apiRequestWithRefreshNew(
+            `/training/` + training.trainingId,
+            "DELETE",
+            null
+          );
+          if (res?.ok) {
+            await setTrainingSynced(training.trainingId);
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
 

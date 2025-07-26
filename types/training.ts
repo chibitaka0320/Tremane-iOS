@@ -15,3 +15,14 @@ export type TrainingByDate = {
   name: string;
   exercises: ExerciseType[];
 };
+
+// トレーニング情報詳細
+export type TrainingWithExercise = {
+  trainingId: number;
+  date: Date;
+  partsId: number;
+  exerciseId: number;
+  weight: number;
+  reps: number;
+  createdAt: string;
+};

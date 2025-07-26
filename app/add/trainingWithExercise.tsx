@@ -26,7 +26,7 @@ import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import { auth } from "@/lib/firebaseConfig";
 import { Training } from "@/types/localDb";
 import uuid from "react-native-uuid";
-import { insertTrainingDao } from "@/localDb/dao/trainingDao";
+import { upsertTrainingDao } from "@/localDb/dao/trainingDao";
 
 export default function TrainingWithExerciseScreen() {
   //パスパラメータ
@@ -140,7 +140,7 @@ export default function TrainingWithExerciseScreen() {
     ];
 
     try {
-      await insertTrainingDao(training, 0, 0);
+      await upsertTrainingDao(training, 0, 0);
     } catch (error) {
       console.error(error);
     } finally {
@@ -152,7 +152,7 @@ export default function TrainingWithExerciseScreen() {
     try {
       const res = await apiRequestWithRefreshNew("/training", "POST", training);
       if (res?.ok) {
-        await insertTrainingDao(training, 1, 0);
+        await upsertTrainingDao(training, 1, 0);
       }
     } catch (e) {
       console.error(e);

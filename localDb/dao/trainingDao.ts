@@ -1,5 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { Training } from "@/types/localDb";
+import { TrainingWithExercise } from "@/types/training";
 
 // 最新更新日を取得
 export const getLatestTraining = async (): Promise<string> => {
@@ -66,8 +67,29 @@ export const getTrainingByDateDao = async (date: string) => {
   return rows;
 };
 
+// トレーニング詳細取得
+export const getTrainingDao = async (trainingId: string) => {
+  const training = await db.getFirstAsync<TrainingWithExercise>(
+    `
+    SELECT
+      t.training_id AS trainingId,
+      t.date,
+      e.parts_id AS partsId,
+      t.exercise_id AS exerciseId,
+      t.weight,
+      t.reps,
+      t.created_at AS createdAt
+    FROM trainings t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    WHERE t.training_id = ?
+    `,
+    [trainingId]
+  );
+  return training;
+};
+
 // 追加
-export const insertTrainingDao = async (
+export const upsertTrainingDao = async (
   trainings: Training[],
   syncFlg: number,
   deleteFlg: number
@@ -94,4 +116,20 @@ export const insertTrainingDao = async (
       );
     }
   });
+};
+
+// 削除
+export const deleteTrainingDao = async (trainingId: string) => {
+  await db.runAsync(
+    `UPDATE trainings SET is_deleted = 1 WHERE training_id = ?;`,
+    [trainingId]
+  );
+};
+
+// フラグを同期済みにする
+export const setTrainingSynced = async (trainingId: string) => {
+  await db.runAsync(
+    `UPDATE trainings SET is_synced = 1 WHERE training_id = ?;`,
+    [trainingId]
+  );
 };

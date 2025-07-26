@@ -12,15 +12,25 @@ import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import {
+  apiRequestWithRefresh,
+  apiRequestWithRefreshNew,
+} from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
-import { TrainingResponse } from "@/types/api";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import { BodypartWithExercise } from "@/types/bodyPart";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
+import {
+  deleteTrainingDao,
+  getTrainingDao,
+  setTrainingSynced,
+  upsertTrainingDao,
+} from "@/localDb/dao/trainingDao";
+import { Training } from "@/types/localDb";
+import { auth } from "@/lib/firebaseConfig";
 
 export default function TrainingScreen() {
   // パスパラメーター
@@ -37,6 +47,7 @@ export default function TrainingScreen() {
   const [exercise, setExercise] = useState("");
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
 
   // ピッカーデータ
   const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
@@ -65,16 +76,15 @@ export default function TrainingScreen() {
   // トレーニング詳細取得
   const fetchTraining = async () => {
     if (!trainingId) return;
-    const res = await apiRequestWithRefresh<TrainingResponse>(
-      API_ENDPOINTS.training(trainingId),
-      "GET"
-    );
+    const res = await getTrainingDao(trainingId);
+
     if (res) {
       setDate(new Date(res.date));
       setBodyParts(res.partsId.toString());
       setExercise(res.exerciseId.toString());
       setWeight(res.weight.toString());
       setReps(res.reps.toString());
+      setCreatedAt(res.createdAt);
     }
   };
 
@@ -136,25 +146,39 @@ export default function TrainingScreen() {
   // トレーニング更新処理
   const onUpdateTraining = async () => {
     setLoading(true);
-    const requestBody = {
-      date: format(date, "yyyy-MM-dd"),
-      exerciseId: exercise,
-      weight: parseFloat(weight),
-      reps: parseInt(reps),
-    };
+
+    if (auth.currentUser === null) return;
+
+    const training: Training[] = [
+      {
+        trainingId: trainingId,
+        date: format(date, "yyyy-MM-dd"),
+        userId: auth.currentUser.uid,
+        exerciseId: parseInt(exercise),
+        weight: parseFloat(weight),
+        reps: parseInt(reps),
+        createdAt: createdAt,
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
     try {
-      await apiRequestWithRefresh(
-        API_ENDPOINTS.training(trainingId),
-        "PUT",
-        requestBody
-      );
+      await upsertTrainingDao(training, 0, 0);
+    } catch (error) {
+      console.error(error);
+    } finally {
       router.dismissAll();
       router.replace("/(tabs)/training");
-    } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度実行してください");
-      return;
-    } finally {
       setLoading(false);
+    }
+
+    try {
+      const res = await apiRequestWithRefreshNew("/training", "POST", training);
+      if (res?.ok) {
+        await upsertTrainingDao(training, 1, 0);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -166,16 +190,27 @@ export default function TrainingScreen() {
         text: "削除する",
         style: "destructive",
         onPress: async () => {
+          setLoading(true);
+          try {
+            await deleteTrainingDao(trainingId);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            router.back();
+          }
+
           try {
             // 削除処理
-            await apiRequestWithRefresh(
+            const res = await apiRequestWithRefreshNew(
               API_ENDPOINTS.training(trainingId),
-              "DELETE"
+              "DELETE",
+              null
             );
-
-            router.back();
-          } catch (error) {
-            Alert.alert("データの削除に失敗しました。");
+            if (res?.ok) {
+              await setTrainingSynced(trainingId);
+            }
+          } catch (e) {
+            console.error(e);
           }
         },
       },
