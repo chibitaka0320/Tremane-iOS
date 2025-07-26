@@ -5,7 +5,7 @@ import { PFC_LABELS } from "@/constants/pfc";
 import { useAlert } from "@/context/AlertContext";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
-import { EatType } from "@/types/eating";
+import { Eating } from "@/types/eating";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -24,7 +24,7 @@ type Props = {
 export default function EatingScreen({ selectedDate }: Props) {
   const { setError } = useAlert();
 
-  const [data, setData] = useState<EatType>();
+  const [data, setData] = useState<Eating>();
   const [isLoading, setLoading] = useState(false);
 
   const [isFetching, setFetching] = useState(false);
@@ -42,7 +42,7 @@ export default function EatingScreen({ selectedDate }: Props) {
     const URL = "/eating?date=" + selectedDate;
 
     try {
-      const data = await apiRequestWithRefresh<EatType>(URL, "GET", null);
+      const data = await apiRequestWithRefresh<Eating>(URL, "GET", null);
       if (data != null) {
         setData(data);
       }

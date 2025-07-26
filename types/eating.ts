@@ -28,7 +28,7 @@ interface Meal {
   carbo: number;
 }
 
-interface EatType {
+interface Eating {
   date: string;
   total: Total;
   goal: Goal;
@@ -36,4 +36,4 @@ interface EatType {
   meals: Meal[];
 }
 
-export type { EatType, Meal, Goal, Rate, Total };
+export type { Eating, Meal, Goal, Rate, Total };

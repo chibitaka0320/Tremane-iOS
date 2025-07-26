@@ -9,6 +9,32 @@ export const getLatestEating = async (): Promise<string> => {
   return row?.last_updated ?? "1970-01-01T00:00:00";
 };
 
+// 非同期データの取得
+export const getUnsyncedEating = async (
+  deleteFlg: number
+): Promise<Eating[]> => {
+  const unsynced = await db.getAllAsync<Eating>(
+    `
+    SELECT
+        eating_id AS eatingId,
+        date,
+        user_id AS userId,
+        name,
+        calories,
+        protein,
+        fat,
+        carbo,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+    FROM eatings
+    WHERE is_synced = 0
+    AND is_deleted = ?
+    `,
+    [deleteFlg]
+  );
+  return unsynced;
+};
+
 // 追加
 export const upsertEatingDao = async (
   eatings: Eating[],
@@ -39,4 +65,18 @@ export const upsertEatingDao = async (
       );
     }
   });
+};
+
+// 削除
+export const deleteEatingDao = async (eatingId: string) => {
+  await db.runAsync(`UPDATE eatings SET is_deleted = 1 WHERE eating_id = ?;`, [
+    eatingId,
+  ]);
+};
+
+// フラグを同期済みにする
+export const setEatingSynced = async (eatingId: string) => {
+  await db.runAsync(`UPDATE eatings SET is_synced = 1 WHERE eating_id = ?;`, [
+    eatingId,
+  ]);
 };

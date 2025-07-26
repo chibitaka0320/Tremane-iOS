@@ -1,4 +1,4 @@
-import { Training, UserProfile } from "@/types/localDb";
+import { Eating, Training, UserProfile } from "@/types/localDb";
 import {
   getUnsyncedUserProfile,
   setUserProfileSynced,
@@ -9,6 +9,11 @@ import {
   setTrainingSynced,
   upsertTrainingDao,
 } from "./dao/trainingDao";
+import {
+  getUnsyncedEating,
+  setEatingSynced,
+  upsertEatingDao,
+} from "./dao/eatingDao";
 
 export const syncLocalDb = async () => {
   try {
@@ -62,6 +67,42 @@ export const syncLocalDb = async () => {
           }
         } catch (e) {
           console.error(e);
+        }
+      }
+    }
+
+    // 食事データの非同期データ送信（追加）
+    const eatingAdd: Eating[] = await getUnsyncedEating(0);
+    if (eatingAdd.length > 0) {
+      try {
+        const res = await apiRequestWithRefreshNew(
+          `/eating`,
+          "POST",
+          eatingAdd
+        );
+        if (res?.ok) {
+          await upsertEatingDao(eatingAdd, 1, 0);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // 食事データの非同期データ送信（削除）
+    const eatingDelete: Eating[] = await getUnsyncedEating(1);
+    if (eatingDelete.length > 0) {
+      for (const eating of eatingDelete) {
+        try {
+          const res = await apiRequestWithRefreshNew(
+            `/eating/` + eating.eatingId,
+            "DELETE",
+            null
+          );
+          if (res?.ok) {
+            await setEatingSynced(eating.eatingId);
+          }
+        } catch (e) {
+          console.log(e);
         }
       }
     }
