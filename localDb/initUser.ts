@@ -1,12 +1,13 @@
 import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import { db } from "@/lib/localDbConfig";
-import { User, UserProfile } from "@/types/localDb";
+import { Training, User, UserProfile } from "@/types/localDb";
 import {
   getLatestUserProfile,
   insertUserProfileDao,
 } from "./dao/userProfileDao";
 import { insertUserDao } from "./dao/userDao";
 import { format } from "date-fns";
+import { getLatestTraining, insertTrainingDao } from "./dao/trainingDao";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
@@ -30,6 +31,21 @@ export const initUser = async () => {
   if (userProfileRes?.ok) {
     const userProfileInfo: UserProfile = await userProfileRes.json();
     await insertUserProfileDao(userProfileInfo, 1);
+  }
+
+  // トレーニングテーブル初期化
+  const latestTraining = await getLatestTraining();
+
+  const trainingRes = await apiRequestWithRefreshNew(
+    "/training/sync?updatedAt=" +
+      format(latestTraining, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+    "GET",
+    null
+  );
+
+  if (trainingRes?.ok) {
+    const training: Training[] = await trainingRes.json();
+    await insertTrainingDao(training, 1, 0);
   }
 
   console.log("データダウンロード完了");

@@ -34,3 +34,15 @@ export type Exercise = {
   createdAt: string;
   updatedAt: string;
 };
+
+// トレーニングテーブル
+export type Training = {
+  trainingId: string;
+  date: string;
+  userId: string;
+  exerciseId: number;
+  weight: number;
+  reps: number;
+  createdAt: string;
+  updatedAt: string;
+};
