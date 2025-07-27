@@ -131,7 +131,7 @@ export default function SignUp() {
             <TouchableOpacity
               style={[styles.button, isDisabled && styles.buttonDisabled]}
               onPress={handleSignUp}
-              disabled={isDisabled && isLoading}
+              disabled={isDisabled && !isLoading}
             >
               <Text style={styles.buttonText}>新規登録</Text>
             </TouchableOpacity>

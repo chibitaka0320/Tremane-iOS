@@ -11,31 +11,25 @@ import {
   calcTotalCalorie,
 } from "@/lib/calc";
 
-export const getEatingByDate = async (
-  date: string
-): Promise<EatingByDate | null> => {
+export const getEatingByDate = async (date: string): Promise<EatingByDate> => {
   const eatings: Eating[] = await getEatingByDateDao(date);
   const userProfile: UserProfile | null = await getUserProfileDao();
   const userGoal: UserGoal | null = await getUserGoalDao();
 
-  if (eatings.length === 0) {
-    return null;
-  } else {
-    const total = createTotal(eatings);
-    const goal = createGoal(userProfile, userGoal);
-    const rate = createRate(total, goal);
-    const meals = createMeal(eatings);
+  const total = createTotal(eatings);
+  const goal = createGoal(userProfile, userGoal);
+  const rate = createRate(total, goal);
+  const meals = createMeal(eatings);
 
-    const result: EatingByDate = {
-      date,
-      total,
-      goal,
-      rate,
-      meals,
-    };
+  const result: EatingByDate = {
+    date,
+    total,
+    goal,
+    rate,
+    meals,
+  };
 
-    return result;
-  }
+  return result;
 };
 
 const createTotal = (eatings: Eating[]): Total => {
