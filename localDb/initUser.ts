@@ -1,6 +1,6 @@
 import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import { db } from "@/lib/localDbConfig";
-import { Eating, Training, User, UserProfile } from "@/types/localDb";
+import { Eating, Training, User, UserGoal, UserProfile } from "@/types/localDb";
 import {
   getLatestUserProfile,
   insertUserProfileDao,
@@ -9,6 +9,7 @@ import { insertUserDao } from "./dao/userDao";
 import { format } from "date-fns";
 import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
 import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
+import { getLatestUserGoal, insertUserGoalDao } from "./dao/userGoalDao";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
@@ -32,6 +33,21 @@ export const initUser = async () => {
   if (userProfileRes?.ok) {
     const userProfileInfo: UserProfile = await userProfileRes.json();
     await insertUserProfileDao(userProfileInfo, 1);
+  }
+
+  // ユーザー目標テーブル初期化
+  const latestUserGoal = await getLatestUserGoal();
+
+  const userGoalRes = await apiRequestWithRefreshNew(
+    "/users/goal?updatedAt=" +
+      format(latestUserGoal, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+    "GET",
+    null
+  );
+
+  if (userGoalRes?.ok) {
+    const userGoalInfo: UserGoal = await userGoalRes.json();
+    await insertUserGoalDao(userGoalInfo, 1);
   }
 
   // トレーニングテーブル初期化

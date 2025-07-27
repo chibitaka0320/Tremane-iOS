@@ -1,4 +1,4 @@
-import { Eating, Training, UserProfile } from "@/types/localDb";
+import { Eating, Training, UserGoal, UserProfile } from "@/types/localDb";
 import {
   getUnsyncedUserProfile,
   setUserProfileSynced,
@@ -14,6 +14,7 @@ import {
   setEatingSynced,
   upsertEatingDao,
 } from "./dao/eatingDao";
+import { getUnsyncedUserGoal, setUserGoalSynced } from "./dao/userGoalDao";
 
 export const syncLocalDb = async () => {
   try {
@@ -29,6 +30,24 @@ export const syncLocalDb = async () => {
         );
         if (res?.ok) {
           await setUserProfileSynced();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // ユーザー目標の非同期データ送信
+    const userGoal: UserGoal | null = await getUnsyncedUserGoal();
+
+    if (userGoal) {
+      try {
+        const res = await apiRequestWithRefreshNew(
+          "/users/goal",
+          "POST",
+          userGoal
+        );
+        if (res?.ok) {
+          await setUserGoalSynced();
         }
       } catch (e) {
         console.error(e);

@@ -22,7 +22,7 @@ export type UserProfile = {
 export type UserGoal = {
   userId: string;
   weight: number;
-  goal_weight: number;
+  goalWeight: number;
   start: string;
   finish: string;
   pfc: number;
