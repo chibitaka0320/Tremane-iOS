@@ -14,11 +14,7 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import { format } from "date-fns";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import {
-  apiRequestWithRefresh,
-  apiRequestWithRefreshNew,
-} from "@/lib/apiClient";
-import { UserGoalResponse } from "@/types/api";
+import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import { router } from "expo-router";
 import { pfcOptions } from "@/constants/pfcOptions";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";

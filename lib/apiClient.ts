@@ -93,37 +93,3 @@ export async function apiRequest<T>(
 
   return res.json();
 }
-
-export async function apiRequestWithRefresh<T>(
-  url: string,
-  method: ApiMethod = "GET",
-  body?: any
-): Promise<T | null> {
-  const user = auth.currentUser;
-  if (!user) {
-    await authErrorHandler();
-    return null;
-  }
-
-  let token = await user.getIdToken();
-
-  try {
-    return await apiRequest<T>(url, method, body, token);
-  } catch (e) {
-    if (e instanceof Response && e.status === 401) {
-      try {
-        token = await user.getIdToken(true);
-        if (!token) {
-          await authErrorHandler();
-          return null;
-        }
-        return await apiRequest<T>(url, method, body, token);
-      } catch {
-        await authErrorHandler();
-        return null;
-      }
-    } else {
-      throw e;
-    }
-  }
-}

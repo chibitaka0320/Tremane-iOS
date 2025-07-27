@@ -1,5 +1,4 @@
 import { apiRequestWithRefreshNew } from "@/lib/apiClient";
-import { db } from "@/lib/localDbConfig";
 import { Eating, Training, User, UserGoal, UserProfile } from "@/types/localDb";
 import {
   getLatestUserProfile,

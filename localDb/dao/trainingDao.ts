@@ -126,6 +126,10 @@ export const deleteTrainingDao = async (trainingId: string) => {
   );
 };
 
+export const deleteTrainings = async () => {
+  await db.runAsync("DELETE FROM trainings;");
+};
+
 // フラグを同期済みにする
 export const setTrainingSynced = async (trainingId: string) => {
   await db.runAsync(

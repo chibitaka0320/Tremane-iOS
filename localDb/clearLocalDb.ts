@@ -1,4 +1,5 @@
-import { deleteTrainingDao } from "./dao/trainingDao";
+import { deleteEatings } from "./dao/eatingDao";
+import { deleteTrainings } from "./dao/trainingDao";
 import { deleteUserDao } from "./dao/userDao";
 import { deleteUserGoalDao } from "./dao/userGoalDao";
 import { deleteUserProfileDao } from "./dao/userProfileDao";
@@ -8,4 +9,6 @@ export const clearLocalDb = async () => {
   await deleteUserDao();
   await deleteUserProfileDao();
   await deleteUserGoalDao();
+  await deleteEatings();
+  await deleteTrainings();
 };

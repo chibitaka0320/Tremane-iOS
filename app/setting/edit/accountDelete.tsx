@@ -1,4 +1,4 @@
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
 import theme from "@/styles/theme";
@@ -24,7 +24,7 @@ export default function DeleteAccountScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await apiRequestWithRefresh(URL, "DELETE");
+              await apiRequestWithRefreshNew(URL, "DELETE");
               await deleteUser(user);
               await clearLocalDb();
               router.dismissAll();

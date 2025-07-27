@@ -122,6 +122,11 @@ export const deleteEatingDao = async (eatingId: string) => {
   ]);
 };
 
+// 全削除
+export const deleteEatings = async () => {
+  await db.runAsync(`DELETE FROM eatings;`);
+};
+
 // フラグを同期済みにする
 export const setEatingSynced = async (eatingId: string) => {
   await db.runAsync(`UPDATE eatings SET is_synced = 1 WHERE eating_id = ?;`, [

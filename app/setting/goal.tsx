@@ -2,8 +2,6 @@ import React, { useCallback, useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { UserGoalResponse } from "@/types/api";
 import { router, useFocusEffect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import NotSetGoal from "@/components/setting/NotSetGoal";
