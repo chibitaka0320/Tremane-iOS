@@ -1,9 +1,8 @@
 import theme from "@/styles/theme";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   Alert,
@@ -12,16 +11,9 @@ import {
   Keyboard,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { apiRequest } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
-import {
-  deleteUser,
-  EmailAuthProvider,
-  linkWithCredential,
-  signInAnonymously,
-  UserCredential,
-} from "firebase/auth";
+import { EmailAuthProvider, linkWithCredential } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import CustomTextInput from "@/components/common/CustomTextInput";
 
@@ -60,30 +52,6 @@ export default function SignUp() {
       } else {
         Alert.alert("登録に失敗しました");
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const anonymous = async () => {
-    setIsLoading(true);
-    try {
-      const userCredential: UserCredential = await signInAnonymously(auth);
-
-      const user = userCredential.user;
-
-      try {
-        await apiRequest("/auth/signUp", "POST", {
-          userId: user.uid,
-        });
-      } catch (error) {
-        await deleteUser(user);
-        Alert.alert("登録に失敗しました");
-      }
-
-      router.replace("/(tabs)/training");
-    } catch (error) {
-      Alert.alert("認証に失敗しました");
     } finally {
       setIsLoading(false);
     }

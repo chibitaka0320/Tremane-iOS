@@ -15,7 +15,7 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
-import { apiRequestWithRefreshNew } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import {
@@ -134,7 +134,7 @@ export default function EatingScreen() {
     }
 
     try {
-      const res = await apiRequestWithRefreshNew(
+      const res = await apiRequestWithRefresh(
         API_ENDPOINTS.eating(eatingId),
         "PUT",
         eatings
@@ -165,7 +165,7 @@ export default function EatingScreen() {
           }
 
           try {
-            const res = await apiRequestWithRefreshNew(
+            const res = await apiRequestWithRefresh(
               API_ENDPOINTS.eating(eatingId),
               "DELETE",
               null

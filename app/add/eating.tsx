@@ -14,7 +14,7 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router, useNavigation } from "expo-router";
-import { apiRequestWithRefreshNew } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";
@@ -96,7 +96,7 @@ export default function EatingScreen() {
     }
 
     try {
-      const res = await apiRequestWithRefreshNew("/eating", "POST", eatings);
+      const res = await apiRequestWithRefresh("/eating", "POST", eatings);
       if (res?.ok) {
         await upsertEatingDao(eatings, 1, 0);
       }

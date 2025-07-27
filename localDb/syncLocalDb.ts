@@ -3,7 +3,7 @@ import {
   getUnsyncedUserProfile,
   setUserProfileSynced,
 } from "./dao/userProfileDao";
-import { apiRequestWithRefreshNew } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import {
   getUnsyncedTraining,
   setTrainingSynced,
@@ -23,7 +23,7 @@ export const syncLocalDb = async () => {
 
     if (userProfile) {
       try {
-        const res = await apiRequestWithRefreshNew(
+        const res = await apiRequestWithRefresh(
           "/users/profile",
           "POST",
           userProfile
@@ -41,7 +41,7 @@ export const syncLocalDb = async () => {
 
     if (userGoal) {
       try {
-        const res = await apiRequestWithRefreshNew(
+        const res = await apiRequestWithRefresh(
           "/users/goal",
           "POST",
           userGoal
@@ -58,7 +58,7 @@ export const syncLocalDb = async () => {
     const trainingAdd: Training[] = await getUnsyncedTraining(0);
     if (trainingAdd.length > 0) {
       try {
-        const res = await apiRequestWithRefreshNew(
+        const res = await apiRequestWithRefresh(
           `/training`,
           "POST",
           trainingAdd
@@ -76,7 +76,7 @@ export const syncLocalDb = async () => {
     if (trainingDelete.length > 0) {
       for (const training of trainingDelete) {
         try {
-          const res = await apiRequestWithRefreshNew(
+          const res = await apiRequestWithRefresh(
             `/training/` + training.trainingId,
             "DELETE",
             null
@@ -94,11 +94,7 @@ export const syncLocalDb = async () => {
     const eatingAdd: Eating[] = await getUnsyncedEating(0);
     if (eatingAdd.length > 0) {
       try {
-        const res = await apiRequestWithRefreshNew(
-          `/eating`,
-          "POST",
-          eatingAdd
-        );
+        const res = await apiRequestWithRefresh(`/eating`, "POST", eatingAdd);
         if (res?.ok) {
           await upsertEatingDao(eatingAdd, 1, 0);
         }
@@ -112,7 +108,7 @@ export const syncLocalDb = async () => {
     if (eatingDelete.length > 0) {
       for (const eating of eatingDelete) {
         try {
-          const res = await apiRequestWithRefreshNew(
+          const res = await apiRequestWithRefresh(
             `/eating/` + eating.eatingId,
             "DELETE",
             null

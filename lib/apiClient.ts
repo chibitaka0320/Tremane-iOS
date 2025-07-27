@@ -3,7 +3,7 @@ import { auth } from "./firebaseConfig";
 
 type ApiMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-export async function apiRequestNew(
+export async function apiRequest(
   url: string,
   method: ApiMethod = "GET",
   body?: any,
@@ -26,7 +26,7 @@ export async function apiRequestNew(
   return res;
 }
 
-export async function apiRequestWithRefreshNew(
+export async function apiRequestWithRefresh(
   url: string,
   method: ApiMethod = "GET",
   body?: any
@@ -39,7 +39,7 @@ export async function apiRequestWithRefreshNew(
 
   let token = await user.getIdToken();
 
-  const res: Response = await apiRequestNew(url, method, body, token);
+  const res: Response = await apiRequest(url, method, body, token);
 
   // ステータスが401であればトークンをリフレッシュし再実行
   if (res.status === 401) {
@@ -52,7 +52,7 @@ export async function apiRequestWithRefreshNew(
         return null;
       }
 
-      return await apiRequestNew(url, method, body, token);
+      return await apiRequest(url, method, body, token);
     } catch (e) {
       console.error(e);
       await authErrorHandler();
@@ -61,35 +61,4 @@ export async function apiRequestWithRefreshNew(
   } else {
     return res;
   }
-}
-
-export async function apiRequest<T>(
-  url: string,
-  method: ApiMethod = "GET",
-  body?: any,
-  token?: string
-): Promise<T | null> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const res = await fetch(process.env.EXPO_PUBLIC_API_DOMAIN + url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  if (!res.ok) {
-    throw res;
-  }
-
-  if (res.status === 204) {
-    return null;
-  }
-
-  return res.json();
 }

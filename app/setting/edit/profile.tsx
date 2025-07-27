@@ -15,7 +15,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
 import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
-import { apiRequestWithRefreshNew } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { router } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import {
@@ -100,7 +100,7 @@ export default function ProfileScreen() {
     }
 
     try {
-      const res = await apiRequestWithRefreshNew(
+      const res = await apiRequestWithRefresh(
         "/users/profile",
         "POST",
         userProfile

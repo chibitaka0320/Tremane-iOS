@@ -12,7 +12,7 @@ import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { apiRequestWithRefreshNew } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
 import { selectLabel } from "@/types/common";
@@ -147,7 +147,7 @@ export default function TrainingWithExerciseScreen() {
     }
 
     try {
-      const res = await apiRequestWithRefreshNew("/training", "POST", training);
+      const res = await apiRequestWithRefresh("/training", "POST", training);
       if (res?.ok) {
         await upsertTrainingDao(training, 1, 0);
       }

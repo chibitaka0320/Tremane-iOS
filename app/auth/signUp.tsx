@@ -1,9 +1,8 @@
 import theme from "@/styles/theme";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   Alert,
@@ -18,7 +17,6 @@ import Indicator from "@/components/common/Indicator";
 import {
   createUserWithEmailAndPassword,
   deleteUser,
-  sendEmailVerification,
   signInAnonymously,
   UserCredential,
 } from "firebase/auth";
@@ -49,12 +47,12 @@ export default function SignUp() {
 
       const user = userCredential.user;
 
-      try {
-        await apiRequest("/auth/signUp", "POST", {
-          userId: user.uid,
-        });
+      const res = await apiRequest("/auth/signup", "POST", {
+        userId: user.uid,
+      });
+      if (res.ok) {
         router.replace("/training");
-      } catch (error) {
+      } else {
         await deleteUser(user);
         Alert.alert("登録に失敗しました");
       }
@@ -76,12 +74,13 @@ export default function SignUp() {
 
       const user = userCredential.user;
 
-      try {
-        await apiRequest("/auth/signUp", "POST", {
-          userId: user.uid,
-        });
+      const res = await apiRequest("/auth/signUp", "POST", {
+        userId: user.uid,
+      });
+
+      if (res.ok) {
         router.replace("/(tabs)/training");
-      } catch (error) {
+      } else {
         Alert.alert("登録に失敗しました");
         await deleteUser(user);
       }

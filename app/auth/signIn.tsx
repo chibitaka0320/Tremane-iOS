@@ -17,6 +17,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
+import { initUser } from "@/localDb/initUser";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -37,6 +38,7 @@ export default function SignIn() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      await initUser();
       router.replace("/training");
     } catch (error: any) {
       if (error.code === "auth/invalid-credential") {

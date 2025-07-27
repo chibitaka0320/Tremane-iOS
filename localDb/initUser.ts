@@ -1,4 +1,4 @@
-import { apiRequestWithRefreshNew } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { Eating, Training, User, UserGoal, UserProfile } from "@/types/localDb";
 import {
   getLatestUserProfile,
@@ -12,7 +12,7 @@ import { getLatestUserGoal, insertUserGoalDao } from "./dao/userGoalDao";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
-  const userRes = await apiRequestWithRefreshNew("/users", "GET", null);
+  const userRes = await apiRequestWithRefresh("/users", "GET", null);
 
   if (userRes?.ok) {
     const userInfo: User = await userRes.json();
@@ -22,7 +22,7 @@ export const initUser = async () => {
   // ユーザープロフィールテーブル初期化
   const latestUserProfile = await getLatestUserProfile();
 
-  const userProfileRes = await apiRequestWithRefreshNew(
+  const userProfileRes = await apiRequestWithRefresh(
     "/users/profile?updatedAt=" +
       format(latestUserProfile, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
     "GET",
@@ -37,7 +37,7 @@ export const initUser = async () => {
   // ユーザー目標テーブル初期化
   const latestUserGoal = await getLatestUserGoal();
 
-  const userGoalRes = await apiRequestWithRefreshNew(
+  const userGoalRes = await apiRequestWithRefresh(
     "/users/goal?updatedAt=" +
       format(latestUserGoal, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
     "GET",
@@ -52,7 +52,7 @@ export const initUser = async () => {
   // トレーニングテーブル初期化
   const latestTraining = await getLatestTraining();
 
-  const trainingRes = await apiRequestWithRefreshNew(
+  const trainingRes = await apiRequestWithRefresh(
     "/training/sync?updatedAt=" +
       format(latestTraining, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
     "GET",
@@ -67,7 +67,7 @@ export const initUser = async () => {
   // 食事テーブル初期化
   const latestEating = await getLatestEating();
 
-  const eatingRes = await apiRequestWithRefreshNew(
+  const eatingRes = await apiRequestWithRefresh(
     "/eating/sync?updatedAt=" +
       format(latestEating, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
     "GET",
