@@ -3,7 +3,6 @@ import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import { PFC_LABELS } from "@/constants/pfc";
 import { useAlert } from "@/context/AlertContext";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { getEatingByDate } from "@/localDb/service/eatingService";
 import theme from "@/styles/theme";
 import { EatingByDate } from "@/types/eating";

@@ -1,3 +1,5 @@
+import { UserGoal, UserProfile } from "@/types/localDb";
+
 // 年齢計算
 export const calcAge = (birthday: Date) => {
   const year = birthday.getFullYear();
@@ -65,4 +67,19 @@ export const calcDiffDays = (date1: Date, date2: Date): number => {
   const utc1 = Date.UTC(date1.getFullYear(), date1.getMonth(), date1.getDate());
   const utc2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
   return Math.abs(Math.floor((utc2 - utc1) / msPerDay));
+};
+
+// 目標摂取カロリー算出
+export const calcGoalKcal = (prof: UserProfile, goal: UserGoal) => {
+  const age = calcAge(new Date(prof.birthday));
+  const bmr = calcBmr(prof.gender, prof.height, prof.weight, age);
+  const totalCalorie = calcTotalCalorie(bmr, prof.activeLevel);
+
+  const lossWeight = goal.weight - goal.goalWeight;
+  const diffDays = calcDiffDays(new Date(goal.start), new Date(goal.finish));
+  const lossCalorie = (lossWeight * 7200) / diffDays;
+
+  const calories = Math.round(totalCalorie - lossCalorie);
+
+  return calories;
 };

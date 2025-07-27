@@ -14,13 +14,23 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import { format } from "date-fns";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import {
+  apiRequestWithRefresh,
+  apiRequestWithRefreshNew,
+} from "@/lib/apiClient";
 import { UserGoalResponse } from "@/types/api";
 import { router } from "expo-router";
 import { pfcOptions } from "@/constants/pfcOptions";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { validateWeight } from "@/lib/validators";
+import { auth } from "@/lib/firebaseConfig";
+import { UserGoal } from "@/types/localDb";
+import {
+  insertUserGoalDao,
+  setUserGoalSynced,
+} from "@/localDb/dao/userGoalDao";
+import { getUserGoal } from "@/localDb/service/userGoalService";
 
 export default function GoalScreen() {
   const [weight, setWeight] = useState("");
@@ -76,24 +86,41 @@ export default function GoalScreen() {
 
   //更新ボタン押下
   const onUpdate = async () => {
-    const URL = "/users/goal";
     setLoading(true);
-    const requestBody = {
+
+    if (auth.currentUser === null) return;
+
+    const userGoal: UserGoal = {
+      userId: auth.currentUser.uid,
       weight: parseFloat(weight),
       goalWeight: parseFloat(goalWeight),
       start: format(start, "yyyy-MM-dd"),
       finish: format(finish, "yyyy-MM-dd"),
       pfc: parseInt(pfc),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     try {
-      await apiRequestWithRefresh(URL, "POST", requestBody);
-      router.back();
+      await insertUserGoalDao(userGoal, 0);
     } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度実行してください");
-      return;
+      console.error(e);
     } finally {
       setLoading(false);
+      router.back();
+    }
+
+    try {
+      const res = await apiRequestWithRefreshNew(
+        "/users/goal",
+        "POST",
+        userGoal
+      );
+      if (res?.ok) {
+        await setUserGoalSynced();
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -101,7 +128,7 @@ export default function GoalScreen() {
     const fetchApi = async () => {
       const URL = "/users/goal";
 
-      const res = await apiRequestWithRefresh<UserGoalResponse>(URL, "GET");
+      const res = await getUserGoal();
       if (res) {
         if (res.weight != null) {
           setWeight(String(res.weight));

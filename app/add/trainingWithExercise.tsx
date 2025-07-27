@@ -12,10 +12,7 @@ import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import {
-  apiRequestWithRefresh,
-  apiRequestWithRefreshNew,
-} from "@/lib/apiClient";
+import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
 import { selectLabel } from "@/types/common";

@@ -7,7 +7,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
-  Alert,
   ScrollView,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -15,10 +14,7 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router, useNavigation } from "expo-router";
-import {
-  apiRequestWithRefresh,
-  apiRequestWithRefreshNew,
-} from "@/lib/apiClient";
+import { apiRequestWithRefreshNew } from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";

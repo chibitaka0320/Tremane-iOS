@@ -8,6 +8,7 @@ import { router, useFocusEffect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import NotSetGoal from "@/components/setting/NotSetGoal";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
+import { getUserGoal } from "@/localDb/service/userGoalService";
 
 export default function GoalScreen() {
   const [weight, setWeight] = useState("");
@@ -24,11 +25,10 @@ export default function GoalScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setLoading(true);
       const fetchApi = async () => {
-        setLoading(true);
-        const URL = "/users/goal";
         try {
-          const res = await apiRequestWithRefresh<UserGoalResponse>(URL, "GET");
+          const res = await getUserGoal();
           if (res) {
             if (res.weight != null) {
               setWeight(String(res.weight));
@@ -54,6 +54,8 @@ export default function GoalScreen() {
               setPfc(String(res.pfc));
             }
             setIsNotSet(false);
+          } else {
+            setIsNotSet(true);
           }
         } catch (e) {
           if (e instanceof Response && e.status === 404) {

@@ -3,7 +3,13 @@ import { getEatingByDateDao } from "../dao/eatingDao";
 import { Eating, UserGoal, UserProfile } from "@/types/localDb";
 import { getUserProfileDao } from "../dao/userProfileDao";
 import { getUserGoalDao } from "../dao/userGoalDao";
-import { calcAge, calcBmr, calcDiffDays, calcTotalCalorie } from "@/lib/calc";
+import {
+  calcAge,
+  calcBmr,
+  calcDiffDays,
+  calcGoalKcal,
+  calcTotalCalorie,
+} from "@/lib/calc";
 
 export const getEatingByDate = async (
   date: string
@@ -80,27 +86,19 @@ const createGoal = (prof: UserProfile | null, goal: UserGoal | null): Goal => {
 
   if (prof && goal) {
     // 目標摂取カロリー算出
-    const age = calcAge(new Date(prof.birthday));
-    const bmr = calcBmr(prof.gender, prof.height, prof.weight, age);
-    const totalCalorie = calcTotalCalorie(bmr, prof.activeLevel);
-
-    const lossWeight = goal.weight - goal.goal_weight;
-    const diffDays = calcDiffDays(new Date(goal.start), new Date(goal.finish));
-    const lossCalorie = (lossWeight * 7200) / diffDays;
-
-    calories = Math.round(totalCalorie - lossCalorie);
+    calories = calcGoalKcal(prof, goal);
 
     // 目標PFC算出
     if (calories > 0) {
-      if (goal.pfc === 0) {
+      if (goal.pfc == 0) {
         protein = Math.round((calories * 0.4) / 4);
         fat = Math.round((calories * 0.2) / 9);
         carbo = Math.round((calories * 0.4) / 4);
-      } else if (goal.pfc === 1) {
+      } else if (goal.pfc == 1) {
         protein = Math.round((calories * 0.3) / 4);
         fat = Math.round((calories * 0.2) / 9);
         carbo = Math.round((calories * 0.5) / 4);
-      } else if (goal.pfc === 2) {
+      } else if (goal.pfc == 2) {
         protein = Math.round((calories * 0.55) / 4);
         fat = Math.round((calories * 0.25) / 9);
         carbo = Math.round((calories * 0.5) / 4);
