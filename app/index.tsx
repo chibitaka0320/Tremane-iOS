@@ -12,15 +12,13 @@ export default function Index() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setIsAuthenticated(true);
         try {
+          await syncLocalDb();
           await initUser();
         } catch (error) {
           console.error(error);
-        } finally {
-          setIsAuthenticated(true);
         }
-
-        syncLocalDb();
       } else {
         setIsAuthenticated(false);
       }

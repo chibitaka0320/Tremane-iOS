@@ -8,7 +8,7 @@ export default function RootLayout() {
   useEffect(() => {
     const init = async () => {
       await initLocalDb();
-      await initMaster();
+      initMaster();
     };
     init();
   }, []);
