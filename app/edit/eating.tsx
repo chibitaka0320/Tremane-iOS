@@ -15,10 +15,22 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import {
+  apiRequestWithRefresh,
+  apiRequestWithRefreshNew,
+} from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import { Meal } from "@/types/eating";
+import {
+  deleteEatingDao,
+  getEatingDao,
+  setEatingSynced,
+  upsertEatingDao,
+} from "@/localDb/dao/eatingDao";
+import { auth } from "@/lib/firebaseConfig";
+import { Eating } from "@/types/localDb";
+import { calcKcal } from "@/lib/calc";
 
 export default function EatingScreen() {
   // パスパラメーター
@@ -35,6 +47,7 @@ export default function EatingScreen() {
   const [protein, setProtein] = useState("0");
   const [fat, setFat] = useState("0");
   const [carbo, setCarbo] = useState("0");
+  const [createdAt, setCreatedAt] = useState("");
 
   // フラグ
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -47,21 +60,20 @@ export default function EatingScreen() {
   // 食事詳細取得
   useEffect(() => {
     const fetchEating = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const res = await apiRequestWithRefresh<Meal>(
-          API_ENDPOINTS.eating(eatingId),
-          "GET"
-        );
+        const res = await getEatingDao(eatingId);
+
         if (res) {
           setDate(new Date(res.date));
           setName(res.name);
           setProtein(res.protein.toString());
           setFat(res.fat.toString());
           setCarbo(res.carbo.toString());
+          setCreatedAt(res.createdAt);
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -98,26 +110,44 @@ export default function EatingScreen() {
   // 食事記録更新
   const onUpdateEating = async () => {
     setLoading(true);
-    const requestBody = {
-      date: format(date, "yyyy-MM-dd"),
-      name,
-      protein: parseFloat(protein),
-      fat: parseFloat(fat),
-      carbo: parseFloat(carbo),
-    };
+
+    if (auth.currentUser === null) return;
+
+    const eatings: Eating[] = [
+      {
+        eatingId,
+        date: format(date, "yyyy-MM-dd"),
+        userId: auth.currentUser.uid,
+        name,
+        calories: calcKcal(protein, fat, carbo),
+        protein: parseFloat(protein),
+        fat: parseFloat(fat),
+        carbo: parseFloat(carbo),
+        createdAt: createdAt,
+        updatedAt: new Date().toISOString(),
+      },
+    ];
 
     try {
-      await apiRequestWithRefresh(
+      await upsertEatingDao(eatings, 0, 0);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      router.back();
+      setLoading(false);
+    }
+
+    try {
+      const res = await apiRequestWithRefreshNew(
         API_ENDPOINTS.eating(eatingId),
         "PUT",
-        requestBody
+        eatings
       );
-      router.back();
+      if (res?.ok) {
+        await upsertEatingDao(eatings, 1, 0);
+      }
     } catch (e) {
-      Alert.alert("エラー", "時間をおいて再度実行してください");
-      return;
-    } finally {
-      setLoading(false);
+      console.error(e);
     }
   };
 
@@ -129,16 +159,26 @@ export default function EatingScreen() {
         text: "削除する",
         style: "destructive",
         onPress: async () => {
+          setLoading(true);
           try {
-            // 削除処理
-            await apiRequestWithRefresh(
-              API_ENDPOINTS.eating(eatingId),
-              "DELETE"
-            );
-
+            await deleteEatingDao(eatingId);
+          } catch (e) {
+            console.error(e);
+          } finally {
             router.back();
-          } catch (error) {
-            Alert.alert("データの削除に失敗しました。");
+          }
+
+          try {
+            const res = await apiRequestWithRefreshNew(
+              API_ENDPOINTS.eating(eatingId),
+              "DELETE",
+              null
+            );
+            if (res?.ok) {
+              await setEatingSynced(eatingId);
+            }
+          } catch (e) {
+            console.error(e);
           }
         },
       },

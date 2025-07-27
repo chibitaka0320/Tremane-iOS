@@ -60,6 +60,29 @@ export const getEatingByDateDao = async (date: string) => {
   return rows;
 };
 
+// 食事詳細取得
+export const getEatingDao = async (eatingId: string) => {
+  const eating = await db.getFirstAsync<Eating>(
+    `
+    SELECT
+      eating_id AS eatingId,
+      date,
+      user_id AS userId,
+      name,
+      calories,
+      protein,
+      fat,
+      carbo,
+      created_at,
+      updated_at
+    FROM eatings
+    WHERE eating_id = ?
+    `,
+    [eatingId]
+  );
+  return eating;
+};
+
 // 追加
 export const upsertEatingDao = async (
   eatings: Eating[],

@@ -34,6 +34,14 @@ export const calcBmr = (
   return Math.round(bmr);
 };
 
+// 摂取カロリー計算（１回）
+export const calcKcal = (protein: string, fat: string, carbo: string) => {
+  const calorie = Math.round(
+    parseFloat(protein) * 4 + parseFloat(fat) * 9 + parseFloat(carbo) * 4
+  );
+  return calorie;
+};
+
 // 総消費カロリー計算
 export const calcTotalCalorie = (bmr: number, activeLevel: number) => {
   let totalCalorie;
