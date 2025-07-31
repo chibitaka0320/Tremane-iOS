@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -137,6 +137,24 @@ export default function TrainingScreen() {
     }
   };
 
+  const handleBodyPartChange = useCallback(
+    (value: string) => {
+      if (value !== bodyParts) {
+        setbodyParts(value);
+      }
+    },
+    [bodyParts]
+  );
+
+  const handleExerciseChange = useCallback(
+    (value: string) => {
+      if (value !== exercise) {
+        setExercise(value);
+      }
+    },
+    [exercise]
+  );
+
   if (isLoading) {
     return <Indicator />;
   }
@@ -166,9 +184,7 @@ export default function TrainingScreen() {
         <View style={styles.item}>
           <Text style={styles.label}>部位</Text>
           <RNPickerSelect
-            onValueChange={(value) => {
-              setbodyParts(value);
-            }}
+            onValueChange={handleBodyPartChange}
             items={bodyPartOptions}
             value={bodyParts}
             placeholder={{ label: "選択してください", value: "" }}
@@ -178,9 +194,8 @@ export default function TrainingScreen() {
         <View style={styles.item}>
           <Text style={styles.label}>種目</Text>
           <RNPickerSelect
-            onValueChange={(value) => {
-              setExercise(value);
-            }}
+            key={bodyParts}
+            onValueChange={handleExerciseChange}
             items={exerciseOptions}
             value={exercise}
             placeholder={{ label: "選択してください", value: "" }}
