@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { initUser } from "@/localDb/initUser";
 import { syncLocalDb } from "@/localDb/syncLocalDb";
+import { initMaster } from "@/localDb/initMaster";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -14,12 +15,14 @@ export default function Index() {
       if (user) {
         setIsAuthenticated(true);
         try {
+          initMaster();
           await syncLocalDb();
           await initUser();
         } catch (error) {
           console.error(error);
         }
       } else {
+        await initMaster();
         setIsAuthenticated(false);
       }
     });

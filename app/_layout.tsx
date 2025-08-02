@@ -1,28 +1,36 @@
 import { AlertProvider } from "@/context/AlertContext";
 import { initLocalDb } from "@/localDb/initLocalDb";
-import { initMaster } from "@/localDb/initMaster";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 export default function RootLayout() {
+  const [isDbReady, setisDbReady] = useState(false);
+
   useEffect(() => {
     const init = async () => {
       await initLocalDb();
-      initMaster();
+      setisDbReady(true);
     };
     init();
   }, []);
+
+  if (!isDbReady) {
+    return (
+      <GestureHandlerRootView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
+        <ActivityIndicator size="large" color="white" />
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <AlertProvider>
       <GestureHandlerRootView
         style={{ flex: 1, backgroundColor: "grey", justifyContent: "center" }}
       >
-        <Stack
-          screenOptions={{
-            headerTitle: "",
-          }}
-        >
+        <Stack screenOptions={{ headerTitle: "" }}>
           <Stack.Screen name="auth" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" />
         </Stack>
