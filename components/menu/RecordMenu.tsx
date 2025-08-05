@@ -20,7 +20,10 @@ export const RecordMenu = ({ bottomSheetRef }: Props) => {
     router.push("/add/eating");
   };
   const onBody = () => {};
-  const onEventList = () => {};
+  const onEventList = () => {
+    bottomSheetRef.current?.dismiss();
+    router.push("/eventList/exercise");
+  };
 
   return (
     <View style={styles.container}>
@@ -50,7 +53,7 @@ export const RecordMenu = ({ bottomSheetRef }: Props) => {
           <CircleButton style={styles.circleButton} onPress={onBody}>
             <FontAwesome5 name="camera" size={30} color={theme.colors.white} />
           </CircleButton>
-        </View>
+        </View> */}
         <View style={styles.item}>
           <Text style={styles.menuTitle}>種目リスト</Text>
           <CircleButton style={styles.circleButton} onPress={onEventList}>
@@ -60,7 +63,7 @@ export const RecordMenu = ({ bottomSheetRef }: Props) => {
               color={theme.colors.white}
             />
           </CircleButton>
-        </View> */}
+        </View>
       </View>
     </View>
   );
