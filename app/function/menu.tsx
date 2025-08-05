@@ -30,7 +30,7 @@ export default function Menu() {
     if (user?.isAnonymous) {
       router.push("/function/anonymousMenu");
     } else {
-      router.push("/function/accoumtMenu");
+      router.push("/function/accountMenu");
     }
   };
 
