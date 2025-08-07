@@ -49,9 +49,6 @@ export default function EatingScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
-  const [isProtein, setIsProtein] = useState(false);
-  const [isFat, setIsFat] = useState(false);
-  const [isCarbo, setIsCarbo] = useState(false);
 
   // 食事詳細取得
   useEffect(() => {
@@ -222,10 +219,13 @@ export default function EatingScreen() {
                 keyboardType="numeric"
                 style={[styles.inputValue, styles.pfcValue]}
                 onChangeText={setProtein}
-                value={isProtein ? (protein === "0" ? "" : protein) : protein}
-                onFocus={() => setIsProtein(true)}
+                value={protein}
+                onFocus={() => {
+                  if (protein === "0") {
+                    setProtein("");
+                  }
+                }}
                 onBlur={() => {
-                  setIsProtein(false);
                   if (protein === "" || isNaN(Number(protein))) {
                     setProtein("0");
                   } else if (/^0\d+/.test(protein)) {
@@ -246,10 +246,13 @@ export default function EatingScreen() {
                 keyboardType="numeric"
                 style={[styles.inputValue, styles.pfcValue]}
                 onChangeText={setFat}
-                value={isFat ? (fat === "0" ? "" : fat) : fat}
-                onFocus={() => setIsFat(true)}
+                value={fat}
+                onFocus={() => {
+                  if (fat === "0") {
+                    setFat("");
+                  }
+                }}
                 onBlur={() => {
-                  setIsFat(false);
                   if (fat === "" || isNaN(Number(fat))) {
                     setFat("0");
                   } else if (/^0\d+/.test(fat)) {
@@ -270,10 +273,13 @@ export default function EatingScreen() {
                 keyboardType="numeric"
                 style={[styles.inputValue, styles.pfcValue]}
                 onChangeText={setCarbo}
-                value={isCarbo ? (carbo === "0" ? "" : carbo) : carbo}
-                onFocus={() => setIsCarbo(true)}
+                value={carbo}
+                onFocus={() => {
+                  if (carbo === "0") {
+                    setCarbo("");
+                  }
+                }}
                 onBlur={() => {
-                  setIsCarbo(false);
                   if (carbo === "" || isNaN(Number(carbo))) {
                     setCarbo("0");
                   } else if (/^0\d+/.test(carbo)) {
