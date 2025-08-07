@@ -3,13 +3,7 @@ import { getEatingByDateDao } from "../dao/eatingDao";
 import { Eating, UserGoal, UserProfile } from "@/types/localDb";
 import { getUserProfileDao } from "../dao/userProfileDao";
 import { getUserGoalDao } from "../dao/userGoalDao";
-import {
-  calcAge,
-  calcBmr,
-  calcDiffDays,
-  calcGoalKcal,
-  calcTotalCalorie,
-} from "@/lib/calc";
+import { calcGoalKcal } from "@/lib/calc";
 
 export const getEatingByDate = async (date: string): Promise<EatingByDate> => {
   const eatings: Eating[] = await getEatingByDateDao(date);
@@ -46,10 +40,10 @@ const createTotal = (eatings: Eating[]): Total => {
   }
 
   const total: Total = {
-    calories,
-    protein,
-    fat,
-    carbo,
+    calories: Math.round(calories * 10) / 10,
+    protein: Math.round(protein * 10) / 10,
+    fat: Math.round(fat * 10) / 10,
+    carbo: Math.round(carbo * 10) / 10,
   };
   return total;
 };
