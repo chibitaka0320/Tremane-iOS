@@ -1,5 +1,12 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { Eating, Training, User, UserGoal, UserProfile } from "@/types/localDb";
+import {
+  Eating,
+  Exercise,
+  Training,
+  User,
+  UserGoal,
+  UserProfile,
+} from "@/types/localDb";
 import {
   getLatestUserProfile,
   insertUserProfileDao,
@@ -9,6 +16,7 @@ import { format } from "date-fns";
 import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
 import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
 import { getLatestUserGoal, insertUserGoalDao } from "./dao/userGoalDao";
+import { getLatestMyExercise, updateMyExerciseDao } from "./dao/myExerciseDao";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
@@ -77,6 +85,21 @@ export const initUser = async () => {
   if (eatingRes?.ok) {
     const eating: Eating[] = await eatingRes.json();
     await upsertEatingDao(eating, 1, 0);
+  }
+
+  // マイ種目テーブル初期化
+  const latestExercise = await getLatestMyExercise();
+
+  const myExerciseRes = await apiRequestWithRefresh(
+    "/exercise/myself?updatedAt=" +
+      format(latestExercise, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+    "GET",
+    null
+  );
+
+  if (myExerciseRes?.ok) {
+    const exercise: Exercise[] = await myExerciseRes.json();
+    await updateMyExerciseDao(exercise, 1, 0);
   }
 
   console.log("データダウンロード完了");

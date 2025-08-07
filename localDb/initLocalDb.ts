@@ -25,6 +25,19 @@ export const initLocalDb = async () => {
       );
     `);
 
+    // マイ種目テーブル
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS my_exercises (
+        exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        parts_id INTEGER,
+        name TEXT,
+        is_synced INTEGER DEFAULT 0,
+        is_deleted INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // ユーザーテーブル
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS users (

@@ -43,3 +43,24 @@ export const getBodyPartsWithExercisesDao = async () => {
   `);
   return rows;
 };
+
+// マイ種目付き部位データ取得
+export const getBodyPartsWithMyExercisesDao = async () => {
+  const rows = await db.getAllAsync<{
+    parts_id: number;
+    part_name: string;
+    exercise_id: number;
+    exercise_name: string;
+  }>(`
+    SELECT
+      bp.parts_id,
+      bp.name AS part_name,
+      ex.exercise_id,
+      ex.name AS exercise_name
+    FROM body_parts bp
+    JOIN my_exercises ex ON ex.parts_id = bp.parts_id
+    WHERE is_deleted = 0
+    ORDER BY bp.parts_id, ex.exercise_id
+  `);
+  return rows;
+};

@@ -1,4 +1,10 @@
-import { Eating, Training, UserGoal, UserProfile } from "@/types/localDb";
+import {
+  Eating,
+  Exercise,
+  Training,
+  UserGoal,
+  UserProfile,
+} from "@/types/localDb";
 import {
   getUnsyncedUserProfile,
   setUserProfileSynced,
@@ -15,6 +21,11 @@ import {
   upsertEatingDao,
 } from "./dao/eatingDao";
 import { getUnsyncedUserGoal, setUserGoalSynced } from "./dao/userGoalDao";
+import {
+  getUnsyncedMyExercise,
+  setMyExercisesSynced,
+  updateMyExerciseDao,
+} from "./dao/myExerciseDao";
 
 export const syncLocalDb = async () => {
   try {
@@ -118,6 +129,42 @@ export const syncLocalDb = async () => {
           }
         } catch (e) {
           console.log(e);
+        }
+      }
+    }
+
+    // マイ種別データ（追加）
+    const myExerciseAdd: Exercise[] = await getUnsyncedMyExercise(0);
+    if (myExerciseAdd.length > 0) {
+      try {
+        const res = await apiRequestWithRefresh(
+          `/exercise/myself`,
+          "POST",
+          myExerciseAdd
+        );
+        if (res?.ok) {
+          await updateMyExerciseDao(myExerciseAdd, 1, 0);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // マイ種別データ（削除）
+    const myExerciseDelete: Exercise[] = await getUnsyncedMyExercise(1);
+    if (myExerciseDelete.length > 0) {
+      for (const exercise of myExerciseDelete) {
+        try {
+          const res = await apiRequestWithRefresh(
+            `/exercise/myself/` + exercise.exerciseId,
+            "DELETE",
+            null
+          );
+          if (res?.ok) {
+            await setMyExercisesSynced(exercise.exerciseId);
+          }
+        } catch (e) {
+          console.error(e);
         }
       }
     }
