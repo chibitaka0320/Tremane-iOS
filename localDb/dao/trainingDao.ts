@@ -35,6 +35,25 @@ export const getUnsyncedTraining = async (
   return unsynced;
 };
 
+// 日別部位別トレーニング集計
+export const getTrainingPartsDao = async () => {
+  const rows = await db.getAllAsync<{
+    date: string;
+    parts_id: number;
+    name: string;
+  }>(
+    `
+    SELECT t.date, b.parts_id, b.name
+    FROM trainings t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
+    GROUP BY t.date, b.parts_id;
+    `
+  );
+
+  return rows;
+};
+
 // 日別トレーニング情報取得
 export const getTrainingByDateDao = async (date: string) => {
   const rows = await db.getAllAsync<{

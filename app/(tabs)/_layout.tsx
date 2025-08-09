@@ -2,7 +2,7 @@ import { JSX, useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { CalendarProvider, WeekCalendar } from "react-native-calendars";
+import { CalendarProvider, Agenda } from "react-native-calendars";
 
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
@@ -20,6 +20,8 @@ import {
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { CircleButton } from "@/components/common/CircleButton";
 import { RecordMenu } from "@/components/menu/RecordMenu";
+import { MarkedDates } from "react-native-calendars/src/types";
+import { getMarkedDate } from "@/lib/getMarkedDate";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -27,7 +29,16 @@ export default function Layout() {
   const [selectedDate, setSelectedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
+  const [markedDates, setMarkedDates] = useState<MarkedDates>({});
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetch = async () => {
+      const res = await getMarkedDate(selectedDate);
+      setMarkedDates(res);
+    };
+    fetch();
+  }, [selectedDate]);
 
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -74,16 +85,31 @@ export default function Layout() {
       }}
     >
       <BottomSheetModalProvider>
-        <WeekCalendar onDayPress={(day) => setSelectedDate(day.dateString)} />
-        <Tab.Navigator>
-          <Tab.Screen name="トレーニング">
-            {() => <TrainingScreen selectedDate={selectedDate} />}
-          </Tab.Screen>
-          <Tab.Screen name="食事">
-            {() => <EatingScreen selectedDate={selectedDate} />}
-          </Tab.Screen>
-          {/* <Tab.Screen name="ボディ" component={BodyScreen} /> */}
-        </Tab.Navigator>
+        <Agenda
+          selected={selectedDate}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
+          items={{}}
+          renderItem={() => null}
+          markingType={"multi-dot"}
+          markedDates={markedDates}
+          theme={{
+            selectedDayBackgroundColor: theme.colors.primary,
+            todayTextColor: theme.colors.primary,
+            agendaDayTextColor: theme.colors.font.black,
+            agendaDayNumColor: theme.colors.font.black,
+            agendaTodayColor: theme.colors.primary,
+          }}
+          renderEmptyData={() => (
+            <Tab.Navigator>
+              <Tab.Screen name="トレーニング">
+                {() => <TrainingScreen selectedDate={selectedDate} />}
+              </Tab.Screen>
+              <Tab.Screen name="食事">
+                {() => <EatingScreen selectedDate={selectedDate} />}
+              </Tab.Screen>
+            </Tab.Navigator>
+          )}
+        />
 
         <CircleButton onPress={onPlusButton} style={styles.button}>
           <Entypo name="plus" size={40} color={theme.colors.white} />
