@@ -79,7 +79,7 @@ export default function SignUp() {
       });
 
       if (res.ok) {
-        router.replace("/(tabs)/training");
+        router.replace("/(tabs)/(main)/training");
       } else {
         Alert.alert("登録に失敗しました");
         await deleteUser(user);

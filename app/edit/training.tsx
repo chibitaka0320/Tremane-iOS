@@ -165,7 +165,7 @@ export default function TrainingScreen() {
       console.error(error);
     } finally {
       router.dismissAll();
-      router.replace("/(tabs)/training");
+      router.replace("/(tabs)/(main)/training");
       setLoading(false);
     }
 
