@@ -19,7 +19,6 @@ export const getMarkedDate = async (
           selectedColor: theme.colors.primary,
         };
       }
-      console.log(item.parts_id);
       const color = partsColors[item.parts_id];
       marked[item.date].dots?.push({
         key: String(item.parts_id),
