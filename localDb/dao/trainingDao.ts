@@ -47,6 +47,7 @@ export const getTrainingPartsDao = async () => {
     FROM trainings t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     LEFT JOIN body_parts b ON e.parts_id = b.parts_id
+    WHERE t.is_deleted = 0
     GROUP BY t.date, b.parts_id;
     `
   );
@@ -82,6 +83,53 @@ export const getTrainingByDateDao = async (date: string) => {
     ORDER BY t.created_at;
   `,
     [date]
+  );
+  return rows;
+};
+
+// トレーニング分析データ取得
+export const getTrainingDataByMaxWeightDao = async (partsId: string) => {
+  const rows = await db.getAllAsync<{
+    parts_id: number;
+    exercise_id: number;
+    name: string;
+    date: string;
+    weight: number;
+  }>(
+    `
+    WITH daily_max AS (
+      SELECT
+        date,
+        exercise_id,
+        MAX(weight) AS weight
+      FROM trainings
+      WHERE is_deleted = 0
+      GROUP BY date, exercise_id
+    ),
+    ranked AS (
+      SELECT
+        exercise_id,
+        date,
+        weight,
+        ROW_NUMBER() OVER (
+          PARTITION BY exercise_id
+          ORDER BY weight DESC, date DESC
+        ) AS rn
+      FROM daily_max
+    )
+    SELECT
+      e.parts_id,
+      t.exercise_id,
+      e.name,
+      t.date,
+      t.weight
+    FROM ranked t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    WHERE e.parts_id = ?
+      AND t.rn <= 6
+    ORDER BY t.exercise_id, t.date ASC;
+  `,
+    [partsId]
   );
   return rows;
 };

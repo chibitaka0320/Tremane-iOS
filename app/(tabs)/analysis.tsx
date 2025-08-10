@@ -1,44 +1,124 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import theme from "@/styles/theme";
+import { LineChart } from "react-native-chart-kit";
+import { selectLabel } from "@/types/common";
+import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
+import { getTrainingByMaxWeight } from "@/localDb/service/trainingService";
+import { TrainingAnalysis } from "@/types/training";
 
 export default function AnalysisScreen() {
+  const [bodyParts, setbodyParts] = useState("1");
+  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
+  const [datas, setDatas] = useState<TrainingAnalysis[]>([]);
+
+  // 部位・種別情報取得
+  useEffect(() => {
+    const fetchBodyParts = async () => {
+      const res = await getBodyPartsWithExercises();
+      if (res) {
+        setBodyPartOptions(
+          res.map((part) => ({
+            label: part.name,
+            value: String(part.partsId),
+          }))
+        );
+      }
+    };
+    fetchBodyParts();
+  }, []);
+
+  const screenWidth = Dimensions.get("window").width;
+
+  const chartConfig = {
+    backgroundGradientFrom: theme.colors.background.light,
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: theme.colors.background.light,
+    backgroundGradientToOpacity: 0,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    strokeWidth: 2,
+    propsForDots: {
+      r: "4",
+      strokeWidth: "2",
+      stroke: theme.colors.primary,
+      fill: theme.colors.primary,
+    },
+  };
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await getTrainingByMaxWeight(bodyParts);
+        if (res) {
+          setDatas(res);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetch();
+  }, [bodyParts]);
+
+  const dataRange = (target: TrainingAnalysis) => {
+    const targetData = target.datasets[0].data;
+    if (targetData.length === 0) return 0;
+    const max = Math.max(...targetData);
+    const min = Math.min(...targetData);
+
+    return max - min;
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📊 分析</Text>
-        <Text style={styles.description}>
-          トレーニングと食事の記録を分析して、あなたの進歩を確認しましょう
-        </Text>
+      <View style={styles.selectContainer}>
+        {bodyPartOptions.map((item) => (
+          <TouchableOpacity
+            key={item.value}
+            style={[
+              styles.selectButton,
+              bodyParts === item.value && styles.selectedButton,
+            ]}
+            onPress={() => setbodyParts(item.value)}
+          >
+            <Text
+              style={[
+                styles.selectText,
+                bodyParts === item.value && styles.selectedText,
+              ]}
+            >
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>💪 トレーニング分析</Text>
-        <Text style={styles.cardText}>• 週間・月間のトレーニング頻度</Text>
-        <Text style={styles.cardText}>• 部位別のトレーニング回数</Text>
-        <Text style={styles.cardText}>• 重量・回数の推移</Text>
-      </View>
+      {datas.map((data) => (
+        <View style={styles.itemContainer} key={data.name}>
+          <Text style={styles.exercise}>{data.name}</Text>
+          <LineChart
+            data={data}
+            width={screenWidth}
+            height={200}
+            chartConfig={chartConfig}
+            withVerticalLines={false}
+            withHorizontalLines={false}
+            xLabelsOffset={5}
+            yLabelsOffset={18}
+            segments={dataRange(data) == 0 ? 2 : 4}
+            bezier
+          />
+        </View>
+      ))}
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>🍽️ 食事分析</Text>
-        <Text style={styles.cardText}>• カロリー摂取量の推移</Text>
-        <Text style={styles.cardText}>• PFCバランスの分析</Text>
-        <Text style={styles.cardText}>• 目標達成率</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>📈 総合分析</Text>
-        <Text style={styles.cardText}>• 体重・体脂肪率の変化</Text>
-        <Text style={styles.cardText}>• トレーニングと食事の相関</Text>
-        <Text style={styles.cardText}>• 改善提案</Text>
-      </View>
-
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>分析機能は開発中です</Text>
-        <Text style={styles.placeholderSubText}>
-          今後、詳細な分析機能を追加予定です
-        </Text>
-      </View>
+      <View style={styles.footer}></View>
     </ScrollView>
   );
 }
@@ -49,58 +129,47 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.main,
     padding: theme.spacing[3],
   },
-  section: {
-    marginBottom: theme.spacing[4],
-  },
-  sectionTitle: {
-    fontSize: theme.fontSizes.large,
-    fontWeight: "bold",
-    color: theme.colors.font.black,
-    marginBottom: theme.spacing[2],
-  },
-  description: {
-    fontSize: theme.fontSizes.medium,
-    color: theme.colors.font.gray,
-    lineHeight: 24,
-  },
-  card: {
+  itemContainer: {
     backgroundColor: theme.colors.background.light,
-    borderRadius: 12,
-    padding: theme.spacing[3],
-    marginBottom: theme.spacing[3],
-    shadowColor: theme.colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    padding: theme.spacing[2],
+    marginTop: theme.spacing[5],
+    borderRadius: 5,
   },
-  cardTitle: {
-    fontSize: theme.fontSizes.medium,
-    fontWeight: "bold",
-    color: theme.colors.font.black,
-    marginBottom: theme.spacing[2],
-  },
-  cardText: {
-    fontSize: theme.fontSizes.small,
-    color: theme.colors.font.gray,
-    marginBottom: theme.spacing[1],
-  },
-  placeholder: {
-    alignItems: "center",
-    paddingVertical: theme.spacing[8],
-  },
-  placeholderText: {
-    fontSize: theme.fontSizes.medium,
-    fontWeight: "bold",
-    color: theme.colors.font.gray,
-    marginBottom: theme.spacing[2],
-  },
-  placeholderSubText: {
-    fontSize: theme.fontSizes.small,
-    color: theme.colors.font.gray,
+  exercise: {
     textAlign: "center",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    marginVertical: theme.spacing[3],
+  },
+
+  // 選択肢レイアウト
+  selectContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    borderRadius: 5,
+    overflow: "hidden",
+    backgroundColor: theme.colors.background.light,
+    padding: theme.spacing[2],
+  },
+  selectButton: {
+    padding: theme.spacing[2],
+    margin: theme.spacing[2],
+    backgroundColor: "#DDDDDD",
+    width: 70,
+  },
+  selectedButton: {
+    backgroundColor: theme.colors.primary,
+  },
+  selectText: {
+    textAlign: "center",
+  },
+  selectedText: {
+    color: theme.colors.white,
+    fontWeight: "bold",
+  },
+
+  footer: {
+    height: theme.spacing[7],
   },
 });

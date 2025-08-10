@@ -1,5 +1,9 @@
-import { TrainingByDate } from "@/types/training";
-import { getTrainingByDateDao } from "../dao/trainingDao";
+import { TrainingAnalysis, TrainingByDate } from "@/types/training";
+import {
+  getTrainingByDateDao,
+  getTrainingDataByMaxWeightDao,
+} from "../dao/trainingDao";
+import { format } from "date-fns";
 
 export const getTrainingByDate = async (
   date: string
@@ -39,6 +43,34 @@ export const getTrainingByDate = async (
         reps: row.reps,
       });
     }
+  }
+
+  return Array.from(map.values());
+};
+
+export const getTrainingByMaxWeight = async (
+  partsId: string
+): Promise<TrainingAnalysis[]> => {
+  const rows = await getTrainingDataByMaxWeightDao(partsId);
+
+  const map = new Map<number, TrainingAnalysis>();
+
+  for (const row of rows) {
+    if (!map.has(row.exercise_id)) {
+      map.set(row.exercise_id, {
+        labels: [],
+        datasets: [
+          {
+            data: [],
+          },
+        ],
+        name: row.name,
+      });
+    }
+
+    const training = map.get(row.exercise_id);
+    training?.labels.push(format(row.date, "MM/dd"));
+    training?.datasets[0].data.push(row.weight);
   }
 
   return Array.from(map.values());
