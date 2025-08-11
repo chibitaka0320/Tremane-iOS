@@ -27,7 +27,7 @@ export default function ExerciseScreen({ data }: Props) {
     setExercises(data.exercises);
   }, [data.exercises]);
 
-  const onDelete = async (exerciseId: number) => {
+  const onDelete = async (exerciseId: string) => {
     Alert.alert("", "種目を削除しますか？", [
       { text: "キャンセル", style: "cancel" },
       {

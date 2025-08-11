@@ -36,21 +36,17 @@ export const insertMyExerciseDao = async (
   syncFlg: number,
   deleteFlg: number
 ) => {
-  const insertedIds: number[] = [];
   await db.withTransactionAsync(async () => {
     for (const e of exercises) {
-      const result = await db.runAsync(
+      await db.runAsync(
         `
         INSERT INTO my_exercises (parts_id, name, is_synced, is_deleted, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?)
         `,
         [e.partsId, e.name, syncFlg, deleteFlg, e.createdAt, e.updatedAt]
       );
-      insertedIds.push(result.lastInsertRowId);
     }
   });
-
-  return insertedIds;
 };
 
 // 更新
@@ -81,7 +77,7 @@ export const updateMyExerciseDao = async (
 };
 
 // 削除
-export const deleteMyExerciseDao = async (exerciseId: number) => {
+export const deleteMyExerciseDao = async (exerciseId: string) => {
   await db.runAsync(
     `UPDATE my_exercises SET is_deleted = 1 WHERE exercise_id = ?;`,
     [exerciseId]
@@ -93,7 +89,7 @@ export const deleteMyExercises = async () => {
 };
 
 // フラグを同期済みにする
-export const setMyExercisesSynced = async (exerciseId: number) => {
+export const setMyExercisesSynced = async (exerciseId: string) => {
   await db.runAsync(
     `UPDATE my_exercises SET is_synced = 1 WHERE exercise_id = ?;`,
     [exerciseId]

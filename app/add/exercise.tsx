@@ -21,6 +21,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
+import uuid from "react-native-uuid";
 
 export default function ExerciseScreen() {
   const [bodyParts, setBodyParts] = useState("");
@@ -73,7 +74,7 @@ export default function ExerciseScreen() {
 
     const exercises: Exercise[] = [
       {
-        exerciseId: 0,
+        exerciseId: uuid.v4(),
         partsId: Number(bodyParts),
         name: exercise,
         createdAt: new Date().toISOString(),
@@ -81,37 +82,26 @@ export default function ExerciseScreen() {
       },
     ];
 
-    let insertedIds: number[] = [];
-
     try {
       const result = await insertMyExerciseDao(exercises, 0, 0);
-      if (result) {
-        insertedIds = result;
-      }
     } catch (error) {
       console.error(error);
     } finally {
-      insertedIds.map((id) => {
-        router.back();
-        setLoading(false);
-      });
+      router.back();
+      setLoading(false);
     }
 
-    if (insertedIds.length === 1) {
-      exercises[0].exerciseId = insertedIds[0];
-
-      try {
-        const res = await apiRequestWithRefresh(
-          "/exercise/myself",
-          "POST",
-          exercises
-        );
-        if (res?.ok) {
-          await updateMyExerciseDao(exercises, 1, 0);
-        }
-      } catch (e) {
-        console.error(e);
+    try {
+      const res = await apiRequestWithRefresh(
+        "/exercise/myself",
+        "POST",
+        exercises
+      );
+      if (res?.ok) {
+        await updateMyExerciseDao(exercises, 1, 0);
       }
+    } catch (e) {
+      console.error(e);
     }
   };
 

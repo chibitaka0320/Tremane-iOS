@@ -29,7 +29,7 @@ export const getBodyPartsWithExercisesDao = async () => {
   const rows = await db.getAllAsync<{
     parts_id: number;
     part_name: string;
-    exercise_id: number;
+    exercise_id: string;
     exercise_name: string;
   }>(`
     SELECT
@@ -49,7 +49,7 @@ export const getBodyPartsWithMyExercisesDao = async () => {
   const rows = await db.getAllAsync<{
     parts_id: number;
     part_name: string;
-    exercise_id: number;
+    exercise_id: string;
     exercise_name: string;
   }>(`
     SELECT

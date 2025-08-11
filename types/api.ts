@@ -6,7 +6,7 @@ export type BodyPartExerciseResponse = {
 };
 
 type ExerciseResponse = {
-  exerciseId: number;
+  exerciseId: string;
   name: string;
 };
 

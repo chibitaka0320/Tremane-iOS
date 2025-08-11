@@ -151,7 +151,7 @@ export default function TrainingScreen() {
         trainingId: trainingId,
         date: format(date, "yyyy-MM-dd"),
         userId: auth.currentUser.uid,
-        exerciseId: parseInt(exercise),
+        exerciseId: exercise,
         weight: parseFloat(weight),
         reps: parseInt(reps),
         createdAt: createdAt,

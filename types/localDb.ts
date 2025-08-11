@@ -40,7 +40,7 @@ export type BodyPart = {
 
 // 種目テーブル
 export type Exercise = {
-  exerciseId: number;
+  exerciseId: string;
   partsId: number;
   name: string;
   createdAt: string;
@@ -52,7 +52,7 @@ export type Training = {
   trainingId: string;
   date: string;
   userId: string;
-  exerciseId: number;
+  exerciseId: string;
   weight: number;
   reps: number;
   createdAt: string;

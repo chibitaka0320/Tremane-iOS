@@ -53,7 +53,7 @@ export const getTrainingByMaxWeight = async (
 ): Promise<TrainingAnalysis[]> => {
   const rows = await getTrainingDataByMaxWeightDao(partsId);
 
-  const map = new Map<number, TrainingAnalysis>();
+  const map = new Map<string, TrainingAnalysis>();
 
   for (const row of rows) {
     if (!map.has(row.exercise_id)) {

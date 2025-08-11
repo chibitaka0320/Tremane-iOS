@@ -5,7 +5,7 @@ export type BodypartWithExercise = {
 };
 
 type Exercise = {
-  exerciseId: number;
+  exerciseId: string;
   name: string;
   myFlg?: boolean;
 };

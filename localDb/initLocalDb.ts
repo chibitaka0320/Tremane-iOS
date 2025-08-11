@@ -17,7 +17,7 @@ export const initLocalDb = async () => {
     // 種目マスタテーブル
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS exercises (
-        exercise_id INTEGER PRIMARY KEY,
+        exercise_id TEXT PRIMARY KEY,
         parts_id INTEGER,
         name TEXT,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -28,7 +28,7 @@ export const initLocalDb = async () => {
     // マイ種目テーブル
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS my_exercises (
-        exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        exercise_id TEXT PRIMARY KEY,
         parts_id INTEGER,
         name TEXT,
         is_synced INTEGER DEFAULT 0,
@@ -84,7 +84,7 @@ export const initLocalDb = async () => {
         training_id TEXT PRIMARY KEY,
         date TEXT,
         user_id TEXT,
-        exercise_id INTEGER,
+        exercise_id TEXT,
         weight INTEGER,
         reps INTEGER,
         is_synced INTEGER DEFAULT 0,

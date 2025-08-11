@@ -60,7 +60,7 @@ export const getTrainingByDateDao = async (date: string) => {
   const rows = await db.getAllAsync<{
     parts_id: number;
     parts_name: string;
-    exercise_id: number;
+    exercise_id: string;
     exercise_name: string;
     training_id: string;
     weight: number;
@@ -91,7 +91,7 @@ export const getTrainingByDateDao = async (date: string) => {
 export const getTrainingDataByMaxWeightDao = async (partsId: string) => {
   const rows = await db.getAllAsync<{
     parts_id: number;
-    exercise_id: number;
+    exercise_id: string;
     name: string;
     date: string;
     weight: number;

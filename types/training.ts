@@ -5,7 +5,7 @@ export type SetType = {
 };
 
 export type ExerciseType = {
-  exerciseId: number;
+  exerciseId: string;
   name: string;
   sets: SetType[];
 };
@@ -21,7 +21,7 @@ export type TrainingWithExercise = {
   trainingId: number;
   date: Date;
   partsId: number;
-  exerciseId: number;
+  exerciseId: string;
   weight: number;
   reps: number;
   createdAt: string;

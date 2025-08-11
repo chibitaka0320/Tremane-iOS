@@ -128,7 +128,7 @@ export default function TrainingWithExerciseScreen() {
         trainingId: uuid.v4(),
         date: format(date, "yyyy-MM-dd"),
         userId: auth.currentUser.uid,
-        exerciseId: parseInt(exercise),
+        exerciseId: exercise,
         weight: parseFloat(weight),
         reps: parseInt(reps),
         createdAt: new Date().toISOString(),

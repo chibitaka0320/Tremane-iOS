@@ -12,7 +12,7 @@ type Props = {
 export default function Exercise({ partsId, exercise }: Props) {
   const { exerciseId, name, sets } = exercise;
 
-  const onTraining = (trainingId: number) => {
+  const onTraining = (trainingId: string) => {
     router.push({
       pathname: "/edit/training",
       params: { trainingId },
