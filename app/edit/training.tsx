@@ -294,7 +294,6 @@ export default function TrainingScreen() {
         <TouchableOpacity
           style={[styles.button, styles.buttonDelete]}
           onPress={onDeleteTraining}
-          disabled={isDisabled}
         >
           <Text style={styles.buttonText}>削除</Text>
         </TouchableOpacity>

@@ -6,6 +6,7 @@ import {
 import theme from "@/styles/theme";
 import { BodypartWithExercise } from "@/types/bodyPart";
 import { AntDesign } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -61,6 +62,10 @@ export default function ExerciseScreen({ data }: Props) {
     ]);
   };
 
+  const onEdit = (exerciseId: string) => {
+    router.push({ pathname: "/edit/exercise", params: { exerciseId } });
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -69,7 +74,12 @@ export default function ExerciseScreen({ data }: Props) {
       {exercises.map((exercise, idx) =>
         exercise.myFlg ? (
           <View style={styles.itemContainer} key={idx}>
-            <TouchableOpacity style={styles.itemTextContainer}>
+            <TouchableOpacity
+              style={styles.itemTextContainer}
+              onPress={() => {
+                onEdit(exercise.exerciseId);
+              }}
+            >
               <Text style={styles.itemText}>{exercise.name}</Text>
             </TouchableOpacity>
             <TouchableOpacity

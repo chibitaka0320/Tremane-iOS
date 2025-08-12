@@ -4,9 +4,30 @@ import { Exercise } from "@/types/localDb";
 // 最新更新日を取得
 export const getLatestMyExercise = async (): Promise<string> => {
   const row = await db.getFirstAsync<{ last_updated: string }>(
-    `SELECT MAX(updated_at) as last_updated FROM my_exercises;`
+    `SELECT MAX(updated_at) as last_updated FROM exercises WHERE owner_user_id IS NOT null;`
   );
   return row?.last_updated ?? "1970-01-01T00:00:00";
+};
+
+// 詳細取得
+export const getMyExercise = async (
+  exerciseId: string
+): Promise<Exercise | null> => {
+  const row = await db.getFirstAsync<Exercise | null>(
+    `
+    SELECT
+        exercise_id AS exerciseId,
+        parts_id AS partsId,
+        name,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+    FROM exercises
+    WHERE exercise_id = ?
+    `,
+    [exerciseId]
+  );
+
+  return row;
 };
 
 // 非同期データの取得
@@ -21,8 +42,9 @@ export const getUnsyncedMyExercise = async (
         name,
         created_at AS createdAt,
         updated_at AS updatedAt
-    FROM my_exercises
-    WHERE is_synced = 0
+    FROM exercises
+    WHERE owner_user_id IS NOT NULL
+    AND is_synced = 0
     AND is_deleted = ?
     `,
     [deleteFlg]
@@ -38,13 +60,24 @@ export const insertMyExerciseDao = async (
 ) => {
   await db.withTransactionAsync(async () => {
     for (const e of exercises) {
-      await db.runAsync(
-        `
-        INSERT INTO my_exercises (parts_id, name, is_synced, is_deleted, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+      if (e.ownerUserId) {
+        await db.runAsync(
+          `
+        INSERT INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `,
-        [e.partsId, e.name, syncFlg, deleteFlg, e.createdAt, e.updatedAt]
-      );
+          [
+            e.exerciseId,
+            e.ownerUserId,
+            e.partsId,
+            e.name,
+            syncFlg,
+            deleteFlg,
+            e.createdAt,
+            e.updatedAt,
+          ]
+        );
+      }
     }
   });
 };
@@ -57,21 +90,24 @@ export const updateMyExerciseDao = async (
 ) => {
   await db.withTransactionAsync(async () => {
     for (const e of exercises) {
-      const result = await db.runAsync(
-        `
-        REPLACE INTO my_exercises (exercise_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
-        VALUES(?, ?, ?, ?, ?, ?, ?)
+      if (e.ownerUserId) {
+        const result = await db.runAsync(
+          `
+        REPLACE INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
         `,
-        [
-          e.exerciseId,
-          e.partsId,
-          e.name,
-          syncFlg,
-          deleteFlg,
-          e.createdAt,
-          e.updatedAt,
-        ]
-      );
+          [
+            e.exerciseId,
+            e.ownerUserId,
+            e.partsId,
+            e.name,
+            syncFlg,
+            deleteFlg,
+            e.createdAt,
+            e.updatedAt,
+          ]
+        );
+      }
     }
   });
 };
@@ -79,19 +115,19 @@ export const updateMyExerciseDao = async (
 // 削除
 export const deleteMyExerciseDao = async (exerciseId: string) => {
   await db.runAsync(
-    `UPDATE my_exercises SET is_deleted = 1 WHERE exercise_id = ?;`,
+    `UPDATE exercises SET is_deleted = 1 WHERE exercise_id = ?;`,
     [exerciseId]
   );
 };
 
 export const deleteMyExercises = async () => {
-  await db.runAsync("DELETE FROM my_exercises;");
+  await db.runAsync("DELETE FROM exercises WHERE owner_user_id != null;");
 };
 
 // フラグを同期済みにする
 export const setMyExercisesSynced = async (exerciseId: string) => {
   await db.runAsync(
-    `UPDATE my_exercises SET is_synced = 1 WHERE exercise_id = ?;`,
+    `UPDATE exercises SET is_synced = 1 WHERE exercise_id = ?;`,
     [exerciseId]
   );
 };

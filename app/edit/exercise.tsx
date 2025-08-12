@@ -3,6 +3,7 @@ import Indicator from "@/components/common/Indicator";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import {
+  getMyExercise,
   insertMyExerciseDao,
   updateMyExerciseDao,
 } from "@/localDb/dao/myExerciseDao";
@@ -10,7 +11,7 @@ import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
 import { Exercise } from "@/types/localDb";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -24,8 +25,12 @@ import RNPickerSelect from "react-native-picker-select";
 import uuid from "react-native-uuid";
 
 export default function ExerciseScreen() {
+  // パスパラメーター
+  const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
+
   const [bodyParts, setBodyParts] = useState("");
   const [exercise, setExercise] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
 
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
 
@@ -41,6 +46,16 @@ export default function ExerciseScreen() {
     [bodyParts]
   );
 
+  // 部位詳細取得
+  const fetchExercise = async () => {
+    const res = await getMyExercise(exerciseId);
+    if (res) {
+      setBodyParts(res.partsId.toString());
+      setExercise(res.name);
+      setCreatedAt(res.createdAt);
+    }
+  };
+
   // 部位情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
@@ -55,6 +70,7 @@ export default function ExerciseScreen() {
       }
     };
     fetchBodyParts();
+    fetchExercise();
   }, []);
 
   // ボタン活性・非活性
@@ -74,17 +90,17 @@ export default function ExerciseScreen() {
 
     const exercises: Exercise[] = [
       {
-        exerciseId: uuid.v4(),
+        exerciseId,
         ownerUserId: auth.currentUser.uid,
         partsId: Number(bodyParts),
         name: exercise,
-        createdAt: new Date().toISOString(),
+        createdAt: createdAt,
         updatedAt: new Date().toISOString(),
       },
     ];
 
     try {
-      const result = await insertMyExerciseDao(exercises, 0, 0);
+      const result = await updateMyExerciseDao(exercises, 0, 0);
     } catch (error) {
       console.error(error);
     } finally {
