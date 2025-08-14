@@ -47,7 +47,7 @@ export default function SignUp() {
 
       const user = userCredential.user;
 
-      const res = await apiRequest("/auth/signup", "POST", {
+      const res = await apiRequest("/auth/signUp", "POST", {
         userId: user.uid,
       });
       if (res.ok) {
@@ -57,6 +57,7 @@ export default function SignUp() {
         Alert.alert("登録に失敗しました");
       }
     } catch (error: any) {
+      console.error(error);
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("すでに登録されているメールアドレスです");
       } else {
