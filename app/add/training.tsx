@@ -194,7 +194,6 @@ export default function TrainingScreen() {
         <View style={styles.item}>
           <Text style={styles.label}>種目</Text>
           <RNPickerSelect
-            key={bodyParts}
             onValueChange={handleExerciseChange}
             items={exerciseOptions}
             value={exercise}

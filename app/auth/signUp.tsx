@@ -11,12 +11,13 @@ import {
   Keyboard,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { apiRequest } from "@/lib/apiClient";
+import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
 import {
   createUserWithEmailAndPassword,
   deleteUser,
+  sendEmailVerification,
   signInAnonymously,
   UserCredential,
 } from "firebase/auth";
@@ -50,18 +51,25 @@ export default function SignUp() {
       const res = await apiRequest("/auth/signUp", "POST", {
         userId: user.uid,
       });
-      if (res.ok) {
-        router.replace("/training");
-      } else {
+
+      if (!res.ok) {
         await deleteUser(user);
-        Alert.alert("登録に失敗しました");
+        Alert.alert("登録処理に失敗しました");
+      }
+
+      try {
+        await sendEmailVerification(user);
+        router.replace("/auth/authMail");
+      } catch (e) {
+        await apiRequestWithRefresh("/users", "DELETE");
+        await deleteUser(user);
+        Alert.alert("登録処理に失敗しました");
       }
     } catch (error: any) {
-      console.error(error);
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("すでに登録されているメールアドレスです");
       } else {
-        Alert.alert("登録に失敗しました");
+        Alert.alert("登録処理に失敗しました");
       }
     } finally {
       setIsLoading(false);

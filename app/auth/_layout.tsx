@@ -23,6 +23,13 @@ export default function RootLayout() {
           headerTitle: "パスワード再設定",
         }}
       />
+      <Stack.Screen
+        name="authMail"
+        options={{
+          headerShown: true,
+          headerTitle: "メールアドレス認証",
+        }}
+      />
     </Stack>
   );
 }

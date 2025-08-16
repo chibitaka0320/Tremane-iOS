@@ -13,7 +13,10 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/lib/validators";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
@@ -37,9 +40,38 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      await initUser();
-      router.replace("/training");
+      const userCredentical = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      if (userCredentical.user.emailVerified) {
+        await initUser();
+        router.replace("/training");
+      } else {
+        Alert.alert(
+          "メールアドレスが未認証です。",
+          "メールアドレスの認証を完了させてください。",
+          [
+            {
+              text: "OK",
+              style: "default",
+              onPress: async () => {
+                setIsLoading(true);
+                try {
+                  await sendEmailVerification(userCredentical.user);
+                  router.replace("/auth/authMail");
+                } catch (e) {
+                  console.error(e);
+                } finally {
+                  setIsLoading(false);
+                }
+              },
+            },
+          ]
+        );
+      }
     } catch (error: any) {
       if (error.code === "auth/invalid-credential") {
         Alert.alert("メールアドレスまたはパスワードが違います");

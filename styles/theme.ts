@@ -4,6 +4,7 @@ const spacing = [2, 4, 8, 16, 24, 32, 64, 128, 256, 512];
 // 色
 const colors = {
   primary: "#72D2FF",
+  secondary: "#42A9E6",
   error: "#E53935",
   warn: "#FFB900",
   white: "#FFFFFF",
