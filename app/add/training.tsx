@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -6,8 +6,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
+  Modal,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
@@ -23,11 +23,12 @@ import { Training } from "@/types/localDb";
 import uuid from "react-native-uuid";
 import { auth } from "@/lib/firebaseConfig";
 import { upsertTrainingDao } from "@/localDb/dao/trainingDao";
+import { Picker } from "@react-native-picker/picker";
 
 export default function TrainingScreen() {
   // 表示データ
   const [date, setDate] = useState(new Date());
-  const [bodyParts, setbodyParts] = useState("");
+  const [bodyParts, setBodyParts] = useState("");
   const [exercise, setExercise] = useState("");
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
@@ -36,11 +37,21 @@ export default function TrainingScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
+  const [bodyPartsModal, setBodyPartsModal] = useState(false);
+  const [exerciseModal, setExerciseModal] = useState(false);
 
   // ピッカーデータ関連
   const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
   const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
+
+  const selectedBodyParts =
+    bodyPartOptions.find((o) => o.value === bodyParts)?.label ||
+    "選択してください";
+
+  const selectedExercise =
+    exerciseOptions.find((o) => o.value === exercise)?.label ||
+    "選択してください";
 
   // 部位・種別情報取得
   useEffect(() => {
@@ -137,24 +148,6 @@ export default function TrainingScreen() {
     }
   };
 
-  const handleBodyPartChange = useCallback(
-    (value: string) => {
-      if (value !== bodyParts) {
-        setbodyParts(value);
-      }
-    },
-    [bodyParts]
-  );
-
-  const handleExerciseChange = useCallback(
-    (value: string) => {
-      if (value !== exercise) {
-        setExercise(value);
-      }
-    },
-    [exercise]
-  );
-
   if (isLoading) {
     return <Indicator />;
   }
@@ -183,24 +176,72 @@ export default function TrainingScreen() {
         </View>
         <View style={styles.item}>
           <Text style={styles.label}>部位</Text>
-          <RNPickerSelect
-            onValueChange={handleBodyPartChange}
-            items={bodyPartOptions}
-            value={bodyParts}
-            placeholder={{ label: "選択してください", value: "" }}
-            style={pickerSelectStyles}
-          />
+          <TouchableOpacity
+            style={styles.inputValue}
+            onPress={() => setBodyPartsModal(true)}
+          >
+            <Text>{selectedBodyParts}</Text>
+          </TouchableOpacity>
+
+          <Modal visible={bodyPartsModal} transparent animationType="slide">
+            <TouchableWithoutFeedback onPress={() => setBodyPartsModal(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalContent}>
+                    <View style={styles.header}>
+                      <TouchableOpacity
+                        onPress={() => setBodyPartsModal(false)}
+                      >
+                        <Text style={styles.headerText}>Done</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Picker
+                      selectedValue={bodyParts}
+                      onValueChange={(itemValue) => setBodyParts(itemValue)}
+                    >
+                      {bodyPartOptions.map(({ label, value }) => (
+                        <Picker.Item key={value} label={label} value={value} />
+                      ))}
+                    </Picker>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
         </View>
         <View style={styles.item}>
           <Text style={styles.label}>種目</Text>
-          <RNPickerSelect
-            onValueChange={handleExerciseChange}
-            items={exerciseOptions}
-            value={exercise}
-            placeholder={{ label: "選択してください", value: "" }}
-            style={pickerSelectStyles}
+          <TouchableOpacity
+            style={styles.inputValue}
+            onPress={() => setExerciseModal(true)}
             disabled={!bodyParts}
-          />
+          >
+            <Text>{selectedExercise}</Text>
+          </TouchableOpacity>
+
+          <Modal visible={exerciseModal} transparent animationType="slide">
+            <TouchableWithoutFeedback onPress={() => setExerciseModal(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalContent}>
+                    <View style={styles.header}>
+                      <TouchableOpacity onPress={() => setExerciseModal(false)}>
+                        <Text style={styles.headerText}>Done</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Picker
+                      selectedValue={exercise}
+                      onValueChange={(itemValue) => setExercise(itemValue)}
+                    >
+                      {exerciseOptions.map(({ label, value }) => (
+                        <Picker.Item key={value} label={label} value={value} />
+                      ))}
+                    </Picker>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
         </View>
         <View style={[styles.item, styles.row]}>
           <View style={styles.rowItem}>
@@ -283,11 +324,27 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.medium,
     color: theme.colors.white,
   },
-});
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: styles.inputValue,
-  inputIOSContainer: {
-    pointerEvents: "none",
+  // モーダル
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    borderTopWidth: 1,
+    borderTopColor: "#d5d9da8f",
+    backgroundColor: "#d7e0e2ff",
+    paddingBottom: theme.spacing[5],
+  },
+  header: {
+    backgroundColor: theme.colors.background.light,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerText: {
+    fontSize: 16,
+    color: "blue",
+    textAlign: "right",
   },
 });

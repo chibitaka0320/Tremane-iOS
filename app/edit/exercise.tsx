@@ -4,7 +4,6 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import {
   getMyExercise,
-  insertMyExerciseDao,
   updateMyExerciseDao,
 } from "@/localDb/dao/myExerciseDao";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
@@ -20,9 +19,9 @@ import {
   Keyboard,
   StyleSheet,
   TouchableOpacity,
+  Modal,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
-import uuid from "react-native-uuid";
+import { Picker } from "@react-native-picker/picker";
 
 export default function ExerciseScreen() {
   // パスパラメーター
@@ -30,12 +29,17 @@ export default function ExerciseScreen() {
 
   const [bodyParts, setBodyParts] = useState("");
   const [exercise, setExercise] = useState("");
+  const [bodyPartsModal, setBodyPartsModal] = useState(false);
   const [createdAt, setCreatedAt] = useState("");
 
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
 
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
+
+  const selectedBodyParts =
+    bodyPartOptions.find((o) => o.value === bodyParts)?.label ||
+    "選択してください";
 
   const handleBodyPartChange = useCallback(
     (value: string) => {
@@ -131,14 +135,37 @@ export default function ExerciseScreen() {
       <View style={styles.container}>
         <View style={styles.item}>
           <Text style={styles.label}>部位</Text>
-          <RNPickerSelect
-            onValueChange={handleBodyPartChange}
-            items={bodyPartOptions}
-            value={bodyParts}
-            placeholder={{ label: "選択してください", value: "" }}
-            style={pickerSelectStyles}
-          />
+          <TouchableOpacity
+            style={styles.inputValue}
+            onPress={() => setBodyPartsModal(true)}
+          >
+            <Text>{selectedBodyParts}</Text>
+          </TouchableOpacity>
         </View>
+
+        <Modal visible={bodyPartsModal} transparent animationType="slide">
+          <TouchableWithoutFeedback onPress={() => setBodyPartsModal(false)}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback>
+                <View style={styles.modalContent}>
+                  <View style={styles.header}>
+                    <TouchableOpacity onPress={() => setBodyPartsModal(false)}>
+                      <Text style={styles.headerText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Picker
+                    selectedValue={bodyParts}
+                    onValueChange={(itemValue) => setBodyParts(itemValue)}
+                  >
+                    {bodyPartOptions.map(({ label, value }) => (
+                      <Picker.Item key={value} label={label} value={value} />
+                    ))}
+                  </Picker>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
         <View style={styles.item}>
           <Text style={styles.label}>種目名</Text>
           <CustomTextInput onChangeText={setExercise} value={exercise} />
@@ -200,11 +227,27 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.medium,
     color: theme.colors.white,
   },
-});
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: styles.inputValue,
-  inputIOSContainer: {
-    pointerEvents: "none",
+  // モーダル
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    borderTopWidth: 1,
+    borderTopColor: "#d5d9da8f",
+    backgroundColor: "#d7e0e2ff",
+    paddingBottom: theme.spacing[5],
+  },
+  header: {
+    backgroundColor: theme.colors.background.light,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerText: {
+    fontSize: 16,
+    color: "blue",
+    textAlign: "right",
   },
 });
