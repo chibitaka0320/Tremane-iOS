@@ -1,13 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import theme from "@/styles/theme";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function NotSetAccount() {
+export default function AnonymousScreen() {
   const onPress = () => {
-    router.push("/function/signUpWithAnonymous");
+    router.push("/(main)/(menu)/account/anonymous/signup");
   };
 
   return (

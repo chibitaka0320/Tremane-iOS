@@ -28,9 +28,9 @@ export default function MenuScreen() {
     const user = auth.currentUser;
 
     if (user?.isAnonymous) {
-      router.push("/function/anonymousMenu");
+      router.push("/(main)/(menu)/account/anonymous");
     } else {
-      router.push("/function/accountMenu");
+      router.push("/(main)/(menu)/account/menu");
     }
   };
 

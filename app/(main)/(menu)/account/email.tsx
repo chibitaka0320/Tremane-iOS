@@ -25,7 +25,7 @@ import { validateEmail, validatePassword } from "@/lib/validators";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
 import { syncLocalDb } from "@/localDb/syncLocalDb";
 
-export default function Email() {
+export default function EmailEditScreen() {
   const currentEmail = auth.currentUser?.email;
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");

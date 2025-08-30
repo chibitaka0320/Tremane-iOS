@@ -1,22 +1,22 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { MaterialIcons, SimpleLineIcons, Feather } from "@expo/vector-icons";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import theme from "@/styles/theme";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
 
-export default function AccountMenu() {
+export default function AccountMenuScreen() {
   const onChangeMail = () => {
-    router.push("/setting/edit/email");
+    router.push("/(main)/(menu)/account/email");
   };
 
   const onChangePassword = () => {
-    router.push("/setting/edit/password");
+    router.push("/(main)/(menu)/account/password");
   };
 
   const onDeleteAccount = () => {
-    router.push("/setting/edit/accountDelete");
+    router.push("/(main)/(menu)/account/delete");
   };
 
   return (

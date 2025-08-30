@@ -17,7 +17,7 @@ import { EmailAuthProvider, linkWithCredential } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import CustomTextInput from "@/components/common/CustomTextInput";
 
-export default function SignUp() {
+export default function AnonymousSignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
