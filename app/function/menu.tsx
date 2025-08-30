@@ -40,7 +40,7 @@ export default function Menu() {
       await signOut(auth);
       await clearLocalDb();
       router.dismissAll();
-      router.replace("/auth/signIn");
+      router.replace("/(auth)/signIn");
     } catch (e) {
       Alert.alert("ログアウトに失敗しました");
     }

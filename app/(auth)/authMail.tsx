@@ -18,7 +18,7 @@ export default function AuthMail() {
   const currentUser = auth.currentUser;
 
   if (!currentUser) {
-    return <Redirect href={"/auth/signUp"} />;
+    return <Redirect href={"/(auth)/signUp"} />;
   }
 
   // メール認証ボタン
@@ -54,7 +54,7 @@ export default function AuthMail() {
   const backSignUp = async () => {
     await apiRequestWithRefresh("/users", "DELETE");
     await deleteUser(currentUser);
-    router.replace("/auth/signUp");
+    router.replace("/(auth)/signUp");
   };
 
   return (

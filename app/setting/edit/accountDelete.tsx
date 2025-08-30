@@ -28,7 +28,7 @@ export default function DeleteAccountScreen() {
               await deleteUser(user);
               await clearLocalDb();
               router.dismissAll();
-              router.replace("/auth/signIn");
+              router.replace("/(auth)/signIn");
             } catch (error) {
               console.log(error);
               Alert.alert("アカウントの削除に失敗しました。");

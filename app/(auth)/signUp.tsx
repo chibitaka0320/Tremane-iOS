@@ -59,7 +59,7 @@ export default function SignUp() {
 
       try {
         await sendEmailVerification(user);
-        router.replace("/auth/authMail");
+        router.replace("/(auth)/authMail");
       } catch (e) {
         await apiRequestWithRefresh("/users", "DELETE");
         await deleteUser(user);
@@ -150,7 +150,7 @@ export default function SignUp() {
 
             <TouchableOpacity
               onPress={() => {
-                router.navigate("/auth/signIn");
+                router.navigate("/(auth)/signIn");
               }}
             >
               <Text style={styles.link}>すでにアカウントをお持ちの場合</Text>

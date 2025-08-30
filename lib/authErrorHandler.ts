@@ -8,5 +8,5 @@ export async function authErrorHandler() {
   Alert.alert("再度ログインしてください");
   signOut(auth);
   clearLocalDb();
-  router.replace("/auth/signIn");
+  router.replace("/(auth)/signIn");
 }

@@ -46,7 +46,7 @@ export default function EatingScreen({ selectedDate }: Props) {
       setData(data);
     } catch (e) {
       setError("時間をおいて再度アプリを起動してください", () => {
-        router.replace("/auth/signIn");
+        router.replace("/(auth)/signIn");
       });
     } finally {
       if (isRefresh) {

@@ -66,7 +66,7 @@ export default function Email() {
                 await signOut(auth);
                 await clearLocalDb();
                 router.dismissAll();
-                router.replace("/auth/signIn");
+                router.replace("/(auth)/signIn");
               } catch (error) {
                 Alert.alert("エラー");
               }
