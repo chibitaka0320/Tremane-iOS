@@ -14,7 +14,7 @@ export default function Layout() {
   const navigation = useNavigation();
 
   const onMenu = () => {
-    router.push("/function/menu");
+    router.push("/(main)/(menu)/menu");
   };
 
   useEffect(() => {
