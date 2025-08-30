@@ -31,7 +31,7 @@ import {
   setUserProfileSynced,
 } from "@/localDb/dao/userProfileDao";
 
-export default function ProfileScreen() {
+export default function ProfileEditScreen() {
   const [nickname, setNickname] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");

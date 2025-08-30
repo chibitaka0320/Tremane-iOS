@@ -10,13 +10,13 @@ import { syncLocalDb } from "@/localDb/syncLocalDb";
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
 
-export default function Menu() {
+export default function MenuScreen() {
   const onHome = () => {
     router.back();
   };
 
   const onProf = () => {
-    router.push("/setting/profile");
+    router.push("/(main)/(menu)/profile");
   };
 
   const onGoal = () => {

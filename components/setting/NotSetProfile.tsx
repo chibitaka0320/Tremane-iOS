@@ -5,7 +5,7 @@ import { Text, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function NotSetProfile() {
   const onPress = () => {
-    router.push("/setting/edit/profile");
+    router.push("/(main)/(menu)/profile/edit");
   };
 
   return (

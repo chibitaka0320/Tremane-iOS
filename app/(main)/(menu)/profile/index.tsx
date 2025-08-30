@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
   );
 
   const onEdit = () => {
-    router.push("/setting/edit/profile");
+    router.push("/(main)/(menu)/profile/edit");
   };
 
   if (isLoading && isNotSet == null) {
