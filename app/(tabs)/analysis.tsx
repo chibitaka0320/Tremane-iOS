@@ -13,6 +13,8 @@ import { selectLabel } from "@/types/common";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import { getTrainingByMaxWeight } from "@/localDb/service/trainingService";
 import { TrainingAnalysis } from "@/types/training";
+import { Octicons } from "@expo/vector-icons";
+import { partsColors } from "@/styles/partsColor";
 
 export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState("1");
@@ -84,7 +86,9 @@ export default function AnalysisScreen() {
             key={item.value}
             style={[
               styles.selectButton,
-              bodyParts === item.value && styles.selectedButton,
+              bodyParts === item.value && {
+                backgroundColor: partsColors[Number(item.value)],
+              },
             ]}
             onPress={() => setbodyParts(item.value)}
           >
@@ -100,23 +104,32 @@ export default function AnalysisScreen() {
         ))}
       </View>
 
-      {datas.map((data) => (
-        <View style={styles.itemContainer} key={data.name}>
-          <Text style={styles.exercise}>{data.name}</Text>
-          <LineChart
-            data={data}
-            width={screenWidth}
-            height={200}
-            chartConfig={chartConfig}
-            withVerticalLines={false}
-            withHorizontalLines={false}
-            xLabelsOffset={5}
-            yLabelsOffset={18}
-            segments={dataRange(data) == 0 ? 2 : 4}
-            bezier
-          />
+      {datas.length === 0 ? (
+        <View style={styles.itemContainer}>
+          <View style={styles.noContent}>
+            <Octicons name="graph" size={56} color="black" />
+            <Text style={styles.exercise}>データが存在しません</Text>
+          </View>
         </View>
-      ))}
+      ) : (
+        datas.map((data) => (
+          <View style={styles.itemContainer} key={data.name}>
+            <Text style={styles.exercise}>{data.name}</Text>
+            <LineChart
+              data={data}
+              width={screenWidth}
+              height={200}
+              chartConfig={chartConfig}
+              withVerticalLines={false}
+              withHorizontalLines={false}
+              xLabelsOffset={5}
+              yLabelsOffset={18}
+              segments={dataRange(data) == 0 ? 2 : 4}
+              bezier
+            />
+          </View>
+        ))
+      )}
 
       <View style={styles.footer}></View>
     </ScrollView>
@@ -140,6 +153,10 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
     marginVertical: theme.spacing[3],
+  },
+  noContent: {
+    alignItems: "center",
+    paddingVertical: theme.spacing[5],
   },
 
   // 選択肢レイアウト
