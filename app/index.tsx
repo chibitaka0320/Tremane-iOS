@@ -45,7 +45,7 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? "/training" : "/auth/signIn"} />;
+  return <Redirect href={isAuthenticated ? "/training" : "/(auth)/signIn"} />;
 }
 
 const styles = StyleSheet.create({

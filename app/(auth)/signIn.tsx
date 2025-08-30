@@ -61,7 +61,7 @@ export default function SignIn() {
                 setIsLoading(true);
                 try {
                   await sendEmailVerification(userCredentical.user);
-                  router.replace("/auth/authMail");
+                  router.replace("/(auth)/authMail");
                 } catch (e) {
                   console.error(e);
                 } finally {
@@ -130,12 +130,12 @@ export default function SignIn() {
             >
               <Text style={styles.buttonText}>ログイン</Text>
             </TouchableOpacity>
-            <Link href={"/auth/resetPassword"} style={styles.link}>
+            <Link href={"/(auth)/resetPassword"} style={styles.link}>
               パスワードを忘れた場合
             </Link>
             <TouchableOpacity
               onPress={() => {
-                router.navigate("/auth/signUp");
+                router.navigate("/(auth)/signUp");
               }}
             >
               <Text style={styles.link}>アカウントをお持ちでない場合</Text>
