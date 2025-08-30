@@ -5,7 +5,7 @@ import { Text, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function NotSetGoal() {
   const onPress = () => {
-    router.push("/setting/edit/goal");
+    router.push("/(main)/(menu)/goal/edit");
   };
 
   return (

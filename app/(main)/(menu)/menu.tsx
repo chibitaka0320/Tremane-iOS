@@ -20,7 +20,7 @@ export default function MenuScreen() {
   };
 
   const onGoal = () => {
-    router.push("/setting/goal");
+    router.push("/(main)/(menu)/goal");
   };
 
   // TODO: 画面ができ次第の実装

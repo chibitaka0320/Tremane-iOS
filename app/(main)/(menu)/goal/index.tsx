@@ -68,7 +68,7 @@ export default function GoalScreen() {
   );
 
   const onEdit = () => {
-    router.push("/setting/edit/goal");
+    router.push("/(main)/(menu)/goal/edit");
   };
 
   if (isLoading && isNotSet == null) {

@@ -28,7 +28,7 @@ import {
 } from "@/localDb/dao/userGoalDao";
 import { getUserGoal } from "@/localDb/service/userGoalService";
 
-export default function GoalScreen() {
+export default function GoalEditScreen() {
   const [weight, setWeight] = useState("");
   const [goalWeight, setGoalWeight] = useState("");
   const [start, setStart] = useState<Date>(new Date());
