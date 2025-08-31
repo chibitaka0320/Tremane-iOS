@@ -23,7 +23,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
-export default function ExerciseScreen() {
+export default function ExerciseEditScreen() {
   // パスパラメーター
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
 

@@ -28,7 +28,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { Eating } from "@/types/localDb";
 import { calcKcal } from "@/lib/calc";
 
-export default function EatingScreen() {
+export default function EatingEditScreen() {
   // パスパラメーター
   const { eatingId } = useLocalSearchParams<{ eatingId: string }>();
 

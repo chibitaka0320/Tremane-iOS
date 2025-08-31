@@ -11,7 +11,7 @@ import { router, useFocusEffect } from "expo-router";
 
 const Tab = createMaterialTopTabNavigator();
 
-export default function Layout() {
+export default function ExerciseLayout() {
   const [dataList, setDataList] = useState<BodypartWithExercise[] | null>(null);
 
   const onPlusButton = () => {

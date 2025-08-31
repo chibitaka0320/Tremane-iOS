@@ -30,7 +30,7 @@ import { Training } from "@/types/localDb";
 import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 
-export default function TrainingScreen() {
+export default function TrainingEditScreen() {
   // パスパラメーター
   const { trainingId } = useLocalSearchParams<{ trainingId: string }>();
 

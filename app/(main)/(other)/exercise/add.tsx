@@ -24,7 +24,7 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
-export default function ExerciseScreen() {
+export default function ExerciseAddScreen() {
   const [bodyParts, setBodyParts] = useState("");
   const [exercise, setExercise] = useState("");
   const [bodyPartsModal, setBodyPartsModal] = useState(false);

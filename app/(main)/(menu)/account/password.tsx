@@ -22,7 +22,7 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
 import { validatePassword } from "@/lib/validators";
 
-export default function Password() {
+export default function PasswordEditScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [changePassword, setChangePassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

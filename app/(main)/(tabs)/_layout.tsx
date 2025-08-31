@@ -10,7 +10,7 @@ import MainScreen from "./(home)/main";
 
 const BottomTab = createBottomTabNavigator();
 
-export default function Layout() {
+export default function TabsLayout() {
   const navigation = useNavigation();
 
   const onMenu = () => {
