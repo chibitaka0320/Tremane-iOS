@@ -45,7 +45,13 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? "/training" : "/(auth)/signIn"} />;
+  return (
+    <Redirect
+      href={
+        isAuthenticated ? "/(main)/(tabs)/(home)/training" : "/(auth)/signIn"
+      }
+    />
+  );
 }
 
 const styles = StyleSheet.create({

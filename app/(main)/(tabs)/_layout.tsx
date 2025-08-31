@@ -3,10 +3,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 
-import MainScreen from "./(main)/main";
 import AnalysisScreen from "./analysis";
 import { router, useNavigation } from "expo-router";
 import { useEffect } from "react";
+import MainScreen from "./(home)/main";
 
 const BottomTab = createBottomTabNavigator();
 

@@ -11,7 +11,7 @@ type Props = {
 export default function EatingRow({ meal }: Props) {
   const onEating = () => {
     router.push({
-      pathname: "/edit/eating",
+      pathname: "/(main)/(edit)/eating/edit",
       params: { eatingId: meal.eatingId },
     });
   };

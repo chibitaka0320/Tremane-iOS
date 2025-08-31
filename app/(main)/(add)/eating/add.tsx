@@ -23,7 +23,7 @@ import uuid from "react-native-uuid";
 import { calcKcal } from "@/lib/calc";
 import { upsertEatingDao } from "@/localDb/dao/eatingDao";
 
-export default function EatingScreen() {
+export default function EatingAddScreen() {
   const navigation = useNavigation();
 
   const [date, setDate] = useState(new Date());

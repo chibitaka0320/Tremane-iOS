@@ -63,7 +63,10 @@ export default function ExerciseScreen({ data }: Props) {
   };
 
   const onEdit = (exerciseId: string) => {
-    router.push({ pathname: "/edit/exercise", params: { exerciseId } });
+    router.push({
+      pathname: "/(main)/(edit)/exercise/edit",
+      params: { exerciseId },
+    });
   };
 
   return (

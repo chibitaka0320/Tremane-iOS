@@ -14,14 +14,14 @@ export default function Exercise({ partsId, exercise }: Props) {
 
   const onTraining = (trainingId: string) => {
     router.push({
-      pathname: "/edit/training",
+      pathname: "/(main)/(edit)/training/edit",
       params: { trainingId },
     });
   };
 
   const onPlus = () => {
     router.push({
-      pathname: "/add/trainingWithExercise",
+      pathname: "/(main)/(add)/training/addExercise",
       params: { partsId, exerciseId },
     });
   };

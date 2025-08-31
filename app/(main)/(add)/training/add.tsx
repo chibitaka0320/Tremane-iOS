@@ -25,7 +25,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { upsertTrainingDao } from "@/localDb/dao/trainingDao";
 import { Picker } from "@react-native-picker/picker";
 
-export default function TrainingScreen() {
+export default function TrainingAddScreen() {
   // 表示データ
   const [date, setDate] = useState(new Date());
   const [bodyParts, setBodyParts] = useState("");
@@ -134,7 +134,7 @@ export default function TrainingScreen() {
       console.error(error);
     } finally {
       router.dismissAll();
-      router.replace("/(tabs)/(main)/training");
+      router.replace("/(main)/(tabs)/(home)/training");
       setLoading(false);
     }
 

@@ -6,7 +6,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
-  Alert,
   Modal,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -20,37 +19,25 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import { BodypartWithExercise } from "@/types/bodyPart";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
-import {
-  deleteTrainingDao,
-  getTrainingDao,
-  setTrainingSynced,
-  upsertTrainingDao,
-} from "@/localDb/dao/trainingDao";
-import { Training } from "@/types/localDb";
 import { auth } from "@/lib/firebaseConfig";
+import { Training } from "@/types/localDb";
+import uuid from "react-native-uuid";
+import { upsertTrainingDao } from "@/localDb/dao/trainingDao";
 import { Picker } from "@react-native-picker/picker";
 
-export default function TrainingScreen() {
-  // パスパラメーター
-  const { trainingId } = useLocalSearchParams<{ trainingId: string }>();
-
-  // API定数
-  const API_ENDPOINTS = {
-    training: (id: string) => `/training/${id}`,
-  };
+export default function TrainingWithExerciseScreen() {
+  //パスパラメータ
+  const { partsId, exerciseId } = useLocalSearchParams<{
+    partsId: string;
+    exerciseId: string;
+  }>();
 
   // 表示データ
   const [date, setDate] = useState(new Date());
-  const [bodyParts, setBodyParts] = useState("");
-  const [exercise, setExercise] = useState("");
+  const [bodyParts, setBodyParts] = useState(partsId);
+  const [exercise, setExercise] = useState(exerciseId);
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
-  const [createdAt, setCreatedAt] = useState("");
-
-  // ピッカーデータ
-  const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
-  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
-  const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 
   // フラグ
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -58,6 +45,11 @@ export default function TrainingScreen() {
   const [isDisabled, setDisabled] = useState(true);
   const [bodyPartsModal, setBodyPartsModal] = useState(false);
   const [exerciseModal, setExerciseModal] = useState(false);
+
+  // ピッカーデータ関連
+  const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
+  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
+  const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 
   const selectedBodyParts =
     bodyPartOptions.find((o) => o.value === bodyParts)?.label ||
@@ -67,7 +59,7 @@ export default function TrainingScreen() {
     exerciseOptions.find((o) => o.value === exercise)?.label ||
     "選択してください";
 
-  // 部位・種目情報取得
+  // 部位・種別情報取得
   const fetchBodyParts = async () => {
     const res = await getBodyPartsWithExercises();
     if (res) {
@@ -81,28 +73,11 @@ export default function TrainingScreen() {
     }
   };
 
-  // トレーニング詳細取得
-  const fetchTraining = async () => {
-    if (!trainingId) return;
-    const res = await getTrainingDao(trainingId);
-
-    if (res) {
-      setDate(new Date(res.date));
-      setBodyParts(res.partsId.toString());
-      setExercise(res.exerciseId.toString());
-      setWeight(res.weight.toString());
-      setReps(res.reps.toString());
-      setCreatedAt(res.createdAt);
-    }
-  };
-
-  // 表示初期処理
   useEffect(() => {
     const init = async () => {
       try {
         setLoading(true);
         await fetchBodyParts();
-        await fetchTraining();
       } catch (e) {
         console.log(e);
       } finally {
@@ -124,6 +99,7 @@ export default function TrainingScreen() {
           value: String(ex.exerciseId),
         }))
       );
+      setExercise(exerciseId);
     } else {
       setExerciseOptions([]);
       setExercise("");
@@ -151,21 +127,21 @@ export default function TrainingScreen() {
     hideDatePicker();
   };
 
-  // トレーニング更新処理
-  const onUpdateTraining = async () => {
+  // トレーニング記録
+  const onRecordTraining = async () => {
     setLoading(true);
 
     if (auth.currentUser === null) return;
 
     const training: Training[] = [
       {
-        trainingId: trainingId,
+        trainingId: uuid.v4(),
         date: format(date, "yyyy-MM-dd"),
         userId: auth.currentUser.uid,
         exerciseId: exercise,
         weight: parseFloat(weight),
         reps: parseInt(reps),
-        createdAt: createdAt,
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
     ];
@@ -176,7 +152,7 @@ export default function TrainingScreen() {
       console.error(error);
     } finally {
       router.dismissAll();
-      router.replace("/(tabs)/(main)/training");
+      router.replace("/(main)/(tabs)/(home)/training");
       setLoading(false);
     }
 
@@ -188,41 +164,6 @@ export default function TrainingScreen() {
     } catch (e) {
       console.error(e);
     }
-  };
-
-  // トレーニング削除処理
-  const onDeleteTraining = async () => {
-    Alert.alert("", "データを削除しますか？", [
-      { text: "キャンセル", style: "cancel" },
-      {
-        text: "削除する",
-        style: "destructive",
-        onPress: async () => {
-          setLoading(true);
-          try {
-            await deleteTrainingDao(trainingId);
-          } catch (e) {
-            console.error(e);
-          } finally {
-            router.back();
-          }
-
-          try {
-            // 削除処理
-            const res = await apiRequestWithRefresh(
-              API_ENDPOINTS.training(trainingId),
-              "DELETE",
-              null
-            );
-            if (res?.ok) {
-              await setTrainingSynced(trainingId);
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        },
-      },
-    ]);
   };
 
   if (isLoading) {
@@ -340,17 +281,10 @@ export default function TrainingScreen() {
         </View>
         <TouchableOpacity
           style={[styles.button, isDisabled && styles.buttonDisabled]}
-          onPress={onUpdateTraining}
+          onPress={onRecordTraining}
           disabled={isDisabled}
         >
-          <Text style={styles.buttonText}>更新</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.buttonDelete]}
-          onPress={onDeleteTraining}
-        >
-          <Text style={styles.buttonText}>削除</Text>
+          <Text style={styles.buttonText}>トレーニングを記録</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -403,9 +337,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: theme.colors.lightGray,
-  },
-  buttonDelete: {
-    backgroundColor: theme.colors.dark,
   },
   buttonText: {
     fontSize: theme.fontSizes.medium,

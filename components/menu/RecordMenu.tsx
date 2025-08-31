@@ -13,16 +13,16 @@ interface Props {
 export const RecordMenu = ({ bottomSheetRef }: Props) => {
   const onTraining = () => {
     bottomSheetRef.current?.dismiss();
-    router.push("/add/training");
+    router.push("/(main)/(add)/training/add");
   };
   const onEating = () => {
     bottomSheetRef.current?.dismiss();
-    router.push("/add/eating");
+    router.push("/(main)/(add)/eating/add");
   };
   const onBody = () => {};
   const onEventList = () => {
     bottomSheetRef.current?.dismiss();
-    router.push("/eventList/exercise");
+    router.push("/(main)/(add)/exercise");
   };
 
   return (

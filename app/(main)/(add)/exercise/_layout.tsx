@@ -1,5 +1,5 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import ExerciseScreen from "./exercise";
+import ExerciseScreen from ".";
 import { useCallback, useEffect, useState } from "react";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import { BodypartWithExercise } from "@/types/bodyPart";
@@ -15,7 +15,7 @@ export default function Layout() {
   const [dataList, setDataList] = useState<BodypartWithExercise[] | null>(null);
 
   const onPlusButton = () => {
-    router.push("/add/exercise");
+    router.push("/(main)/(other)/exercise/add");
   };
 
   const fetchData = async () => {
