@@ -135,6 +135,11 @@ export default function ExerciseScreen() {
                       selectedValue={bodyParts}
                       onValueChange={(itemValue) => setBodyParts(itemValue)}
                     >
+                      <Picker.Item
+                        label="選択してください"
+                        value=""
+                        enabled={false}
+                      />
                       {bodyPartOptions.map(({ label, value }) => (
                         <Picker.Item key={value} label={label} value={value} />
                       ))}

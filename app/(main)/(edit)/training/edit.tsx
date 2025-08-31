@@ -276,6 +276,11 @@ export default function TrainingScreen() {
                       selectedValue={bodyParts}
                       onValueChange={(itemValue) => setBodyParts(itemValue)}
                     >
+                      <Picker.Item
+                        label="選択してください"
+                        value=""
+                        enabled={false}
+                      />
                       {bodyPartOptions.map(({ label, value }) => (
                         <Picker.Item key={value} label={label} value={value} />
                       ))}
@@ -310,6 +315,11 @@ export default function TrainingScreen() {
                       selectedValue={exercise}
                       onValueChange={(itemValue) => setExercise(itemValue)}
                     >
+                      <Picker.Item
+                        label="選択してください"
+                        value=""
+                        enabled={false}
+                      />
                       {exerciseOptions.map(({ label, value }) => (
                         <Picker.Item key={value} label={label} value={value} />
                       ))}
