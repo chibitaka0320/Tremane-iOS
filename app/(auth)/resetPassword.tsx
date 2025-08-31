@@ -16,7 +16,7 @@ import {
   Alert,
 } from "react-native";
 
-export default function resetPassword() {
+export default function ResetPasswordScreen() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);

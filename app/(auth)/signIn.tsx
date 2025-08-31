@@ -22,7 +22,7 @@ import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { initUser } from "@/localDb/initUser";
 
-export default function SignIn() {
+export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);

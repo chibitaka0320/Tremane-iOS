@@ -14,7 +14,7 @@ import {
   Alert,
 } from "react-native";
 
-export default function AuthMail() {
+export default function AuthMailScreen() {
   const currentUser = auth.currentUser;
 
   if (!currentUser) {

@@ -25,7 +25,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
 
-export default function SignUp() {
+export default function SignUpScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +88,7 @@ export default function SignUp() {
       });
 
       if (res.ok) {
-        router.replace("/(tabs)/(main)/training");
+        router.replace("/(main)/(tabs)/(home)/training");
       } else {
         Alert.alert("登録に失敗しました");
         await deleteUser(user);
