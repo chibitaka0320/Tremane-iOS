@@ -87,7 +87,91 @@ export const getTrainingByDateDao = async (date: string) => {
   return rows;
 };
 
-// トレーニング分析データ取得
+// トレーニング件数取得(全部位)
+export const getTrainingAllCount = async (started: string, ended: string) => {
+  const rows = await db.getFirstAsync<{ count: number }>(
+    `
+    SELECT
+      COUNT(DISTINCT(date)) AS count
+    FROM trainings
+    WHERE date BETWEEN ? AND ?
+      AND is_deleted = 0;
+    `,
+    [started, ended]
+  );
+
+  return rows?.count ?? 0;
+};
+
+// トレーニング件数取得（部位別）
+export const getTrainingCount = async (
+  started: string,
+  ended: string,
+  partsId: string
+) => {
+  const rows = await db.getFirstAsync<{ count: number }>(
+    `
+    SELECT
+      COUNT(DISTINCT(t.date)) AS count
+    FROM trainings t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
+    WHERE t.date BETWEEN ? AND ?
+      AND b.parts_id = ?
+      AND t.is_deleted = 0;
+    `,
+    [started, ended, partsId]
+  );
+
+  return rows?.count ?? 0;
+};
+
+// トレーニング分析データ取得(全部)
+export const getTrainingAllDataByMaxWeightDao = async () => {
+  const rows = await db.getAllAsync<{
+    parts_id: number;
+    exercise_id: string;
+    name: string;
+    date: string;
+    weight: number;
+  }>(
+    `
+    WITH daily_max AS (
+      SELECT
+        date,
+        exercise_id,
+        MAX(weight) AS weight
+      FROM trainings
+      WHERE is_deleted = 0
+      GROUP BY date, exercise_id
+    ),
+    ranked AS (
+      SELECT
+        exercise_id,
+        date,
+        weight,
+        ROW_NUMBER() OVER (
+          PARTITION BY exercise_id
+          ORDER BY weight DESC, date DESC
+        ) AS rn
+      FROM daily_max
+    )
+    SELECT
+      e.parts_id,
+      t.exercise_id,
+      e.name,
+      t.date,
+      t.weight
+    FROM ranked t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    WHERE t.rn <= 6
+    ORDER BY e.parts_id, t.exercise_id, t.date ASC;
+  `
+  );
+  return rows;
+};
+
+// トレーニング分析データ取得(部位別)
 export const getTrainingDataByMaxWeightDao = async (partsId: string) => {
   const rows = await db.getAllAsync<{
     parts_id: number;

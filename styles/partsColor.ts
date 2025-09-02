@@ -1,5 +1,5 @@
 export const partsColors = [
-  "#FFFFFF",
+  "#000000",
   "#3976A6",
   "#B74667",
   "#2E865F",
