@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { initUser } from "@/localDb/initUser";
 import { syncLocalDb } from "@/localDb/syncLocalDb";
 import { initMaster } from "@/localDb/initMaster";
+import Indicator from "@/components/common/Indicator";
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -38,11 +39,7 @@ export default function Index() {
   }, []);
 
   if (isAuthenticated === null) {
-    return (
-      <View style={styles.active}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <Indicator />;
   }
 
   return (
@@ -53,11 +50,3 @@ export default function Index() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  active: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

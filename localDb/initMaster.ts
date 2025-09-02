@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { getLatestBodyPart, insertBodyPartDao } from "./dao/bodyPartDao";
 import { getLatestExercise, insertExerciseDao } from "./dao/exerciseDao";
 
+// マスタテーブル初期化
 export const initMaster = async () => {
   try {
     // 部位テーブル初期化
