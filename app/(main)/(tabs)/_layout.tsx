@@ -1,12 +1,13 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { Feather, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 
 import AnalysisScreen from "./analysis";
 import { router, useNavigation } from "expo-router";
 import { useEffect } from "react";
 import MainScreen from "./(home)/main";
+import FriendTabs from "./friend";
 
 const BottomTab = createBottomTabNavigator();
 
@@ -16,18 +17,6 @@ export default function TabsLayout() {
   const onMenu = () => {
     router.push("/(main)/(menu)/menu");
   };
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity onPress={onMenu}>
-            <Feather name="menu" size={25} />
-          </TouchableOpacity>
-        );
-      },
-    });
-  }, []);
 
   return (
     <BottomTab.Navigator
@@ -40,7 +29,15 @@ export default function TabsLayout() {
           paddingBottom: 5,
           paddingTop: 5,
         },
-        headerShown: false,
+        headerShown: true,
+        headerTitle: "",
+        headerRight: () => {
+          return (
+            <TouchableOpacity onPress={onMenu} style={{ marginRight: 16 }}>
+              <Feather name="menu" size={25} />
+            </TouchableOpacity>
+          );
+        },
       }}
     >
       <BottomTab.Screen
@@ -58,6 +55,15 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="analytics" size={size} color={color} />
+          ),
+        }}
+      />
+      <BottomTab.Screen
+        name="友達"
+        component={FriendTabs}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome6 name="user-group" size={size - 6} color={color} />
           ),
         }}
       />

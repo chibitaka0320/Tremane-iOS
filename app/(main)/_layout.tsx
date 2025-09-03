@@ -7,6 +7,8 @@ export default function MainLayout() {
         headerTitle: "",
         headerShown: true,
       }}
-    />
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 }
