@@ -6,12 +6,16 @@ import { Feather } from "@expo/vector-icons";
 import { TouchableOpacity, Modal } from "react-native";
 import RankingScreen from "./ranking";
 import FriendAddScreen from "./add";
+import { auth } from "@/lib/firebaseConfig";
+import AnonymousScreen from "../../(menu)/account/anonymous";
 
 const TopTab = createMaterialTopTabNavigator();
 
 export default function FriendTabs() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+
+  const user = auth.currentUser;
 
   const addUser = () => {
     setModalVisible(true);
@@ -20,33 +24,39 @@ export default function FriendTabs() {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => {
-        return (
-          <TouchableOpacity
-            onPress={addUser}
-            style={{ marginRight: 16, marginBottom: 8 }}
-          >
-            <Feather name="user-plus" size={26} />
-          </TouchableOpacity>
-        );
+        if (!user?.isAnonymous) {
+          return (
+            <TouchableOpacity
+              onPress={addUser}
+              style={{ marginRight: 16, marginBottom: 8 }}
+            >
+              <Feather name="user-plus" size={26} />
+            </TouchableOpacity>
+          );
+        }
       },
     });
   }, []);
 
-  return (
-    <>
-      <TopTab.Navigator>
-        <TopTab.Screen name="タイムライン" component={FriendScreen} />
-        <TopTab.Screen name="ランキング" component={RankingScreen} />
-      </TopTab.Navigator>
+  if (!user?.isAnonymous) {
+    return (
+      <>
+        <TopTab.Navigator>
+          <TopTab.Screen name="タイムライン" component={FriendScreen} />
+          <TopTab.Screen name="ランキング" component={RankingScreen} />
+        </TopTab.Navigator>
 
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <FriendAddScreen onClose={() => setModalVisible(false)} />
-      </Modal>
-    </>
-  );
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <FriendAddScreen onClose={() => setModalVisible(false)} />
+        </Modal>
+      </>
+    );
+  } else {
+    return <AnonymousScreen />;
+  }
 }
