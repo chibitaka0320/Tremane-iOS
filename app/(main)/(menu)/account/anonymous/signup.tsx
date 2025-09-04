@@ -13,23 +13,28 @@ import {
 import { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
-import { EmailAuthProvider, linkWithCredential } from "firebase/auth";
+import {
+  EmailAuthProvider,
+  linkWithCredential,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import CustomTextInput from "@/components/common/CustomTextInput";
 
 export default function AnonymousSignupScreen() {
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
 
   useEffect(() => {
-    if (validateEmail(email) && validatePassword(password)) {
+    if (nickname && validateEmail(email) && validatePassword(password)) {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [email, password]);
+  }, [nickname, email, password]);
 
   const handleSignUp = async () => {
     setIsLoading(true);
@@ -41,6 +46,9 @@ export default function AnonymousSignupScreen() {
 
       if (user === null) return;
 
+      await updateProfile(user, {
+        displayName: nickname,
+      });
       await linkWithCredential(user, credential);
 
       router.dismissAll();
@@ -66,6 +74,15 @@ export default function AnonymousSignupScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>TREMANEアカウントを登録する</Text>
+          <View style={styles.item}>
+            <Text style={styles.label}>ニックネーム</Text>
+            <CustomTextInput
+              placeholder="Nickname"
+              value={nickname}
+              onChangeText={setNickname}
+              autoCapitalize="none"
+            />
+          </View>
           <View style={styles.item}>
             <Text style={styles.label}>メールアドレス</Text>
             <CustomTextInput
@@ -101,7 +118,7 @@ export default function AnonymousSignupScreen() {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    height: "30%",
+    height: "25%",
   },
   contentContainer: {
     flex: 1,

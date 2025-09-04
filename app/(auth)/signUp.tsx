@@ -40,7 +40,7 @@ export default function SignUpScreen() {
     } else {
       setDisabled(true);
     }
-  }, [email, password]);
+  }, [nickname, email, password]);
 
   const handleSignUp = async () => {
     setIsLoading(true);
