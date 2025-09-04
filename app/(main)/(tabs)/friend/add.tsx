@@ -5,9 +5,9 @@ import { auth } from "@/lib/firebaseConfig";
 import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { UserAccountInfoResponse } from "@/types/api";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import { User } from "firebase/auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from "react-native";
 
 interface Props {
@@ -29,18 +28,22 @@ export default function FriendAddScreen({ onClose }: Props) {
   const [user, setUser] = useState<UserAccountInfoResponse | null>();
 
   const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(true);
+
+  useEffect(() => {
+    if (validateEmail(email)) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
+    }
+  }, [email]);
 
   const search = async () => {
     setLoading(true);
     setUser(null);
-    if (!validateEmail(email)) {
-      Alert.alert("エラー");
-      return;
-    }
-
-    if (auth.currentUser === null) return;
 
     try {
+      if (auth.currentUser === null) return;
       const res = await apiRequestWithRefresh(`/users/search?email=${email}`);
       if (res?.ok) {
         const data: UserAccountInfoResponse = await res.json();
@@ -52,6 +55,7 @@ export default function FriendAddScreen({ onClose }: Props) {
       }
     } catch (e) {
       console.error(e);
+      setResultText("見つかりませんでした");
     } finally {
       setLoading(false);
     }
@@ -74,7 +78,14 @@ export default function FriendAddScreen({ onClose }: Props) {
                 keyboardType="email-address"
               />
             </View>
-            <TouchableOpacity style={styles.button} onPress={search}>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (isDisabled || isLoading) && styles.buttonDisabled,
+              ]}
+              onPress={search}
+              disabled={isDisabled || isLoading}
+            >
               <Text style={styles.buttonText}>検索</Text>
             </TouchableOpacity>
           </View>
@@ -83,8 +94,21 @@ export default function FriendAddScreen({ onClose }: Props) {
           {user ? (
             <View style={styles.resultUserContainer}>
               <Text style={styles.userName}>{user.nickname}</Text>
-              <TouchableOpacity style={styles.addFriendButton}>
-                <Text style={styles.addFriendButtonText}>友達に追加</Text>
+              <TouchableOpacity>
+                <Text
+                  style={[
+                    styles.addFriendButtonText,
+                    user.status !== null && styles.already,
+                  ]}
+                >
+                  {user.status === null && "+ 友達に追加"}
+                  {user.status === "accepted" && (
+                    <Text>
+                      <FontAwesome name="check" color="white" size={16} /> 友達
+                    </Text>
+                  )}
+                  {user.status === "pennding" && "申請中"}
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -131,12 +155,17 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.black,
     width: "25%",
     borderRadius: 4,
   },
+  buttonDisabled: {
+    backgroundColor: theme.colors.lightGray,
+  },
   buttonText: {
     fontSize: theme.fontSizes.medium,
+    color: theme.colors.white,
+    fontWeight: "bold",
   },
 
   searchResultContainer: {
@@ -158,15 +187,17 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.large,
     marginVertical: theme.spacing[4],
   },
-  addFriendButton: {
-    width: 150,
-    alignItems: "center",
-    borderWidth: 0.5,
-    borderColor: theme.colors.font.gray,
-    paddingVertical: theme.spacing[2],
-    borderRadius: 4,
-  },
   addFriendButtonText: {
     fontWeight: "700",
+    width: 150,
+    textAlign: "center",
+    paddingVertical: theme.spacing[2],
+    borderColor: theme.colors.font.gray,
+    borderWidth: 0.5,
+    borderRadius: 4,
+  },
+  already: {
+    color: theme.colors.white,
+    backgroundColor: theme.colors.black,
   },
 });

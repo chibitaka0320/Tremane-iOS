@@ -38,7 +38,7 @@ export type UserAccountInfoResponse = {
   userId: string;
   email: string;
   nickname: string;
-  ifFriend: boolean;
+  status: string;
 };
 
 export type ErrorType = {
