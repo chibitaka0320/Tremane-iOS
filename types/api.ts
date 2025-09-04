@@ -33,6 +33,14 @@ export type UserGoalResponse = {
   pfc: number;
 };
 
+// ユーザーアカウント情報API
+export type UserAccountInfoResponse = {
+  userId: string;
+  email: string;
+  nickname: string;
+  ifFriend: boolean;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;

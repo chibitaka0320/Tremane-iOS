@@ -1,7 +1,10 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
+import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
+import { UserAccountInfoResponse } from "@/types/api";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { User } from "firebase/auth";
 import { useState } from "react";
@@ -13,6 +16,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 
 interface Props {
@@ -22,14 +26,35 @@ interface Props {
 export default function FriendAddScreen({ onClose }: Props) {
   const [email, setEmail] = useState("");
   const [resultText, setResultText] = useState("検索してください");
-  const [user, setUser] = useState<User | null>();
+  const [user, setUser] = useState<UserAccountInfoResponse | null>();
 
   const [isLoading, setLoading] = useState(false);
 
   const search = async () => {
     setLoading(true);
-    setUser(auth.currentUser);
-    setLoading(false);
+    setUser(null);
+    if (!validateEmail(email)) {
+      Alert.alert("エラー");
+      return;
+    }
+
+    if (auth.currentUser === null) return;
+
+    try {
+      const res = await apiRequestWithRefresh(`/users/search?email=${email}`);
+      if (res?.ok) {
+        const data: UserAccountInfoResponse = await res.json();
+        setUser(data);
+      } else {
+        setResultText("見つかりませんでした");
+        const data = await res?.json();
+        console.log(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,7 +77,7 @@ export default function FriendAddScreen({ onClose }: Props) {
         <View style={styles.searchResultContainer}>
           {user ? (
             <View style={styles.resultUserContainer}>
-              <Text style={styles.userName}>ちびたか</Text>
+              <Text style={styles.userName}>{user.nickname}</Text>
               <TouchableOpacity style={styles.addFriendButton}>
                 <Text style={styles.addFriendButtonText}>友達に追加</Text>
               </TouchableOpacity>
