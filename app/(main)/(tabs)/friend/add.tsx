@@ -67,7 +67,12 @@ export default function FriendAddScreen({ onClose }: Props) {
           <Text style={styles.searchText}>メールアドレスで友達を探す</Text>
           <View style={styles.searchParts}>
             <View style={styles.textInput}>
-              <CustomTextInput onChangeText={setEmail} value={email} />
+              <CustomTextInput
+                onChangeText={setEmail}
+                value={email}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
             </View>
             <TouchableOpacity style={styles.button} onPress={search}>
               <Text style={styles.buttonText}>検索</Text>

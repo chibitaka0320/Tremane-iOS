@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
@@ -19,6 +20,7 @@ import {
   deleteUser,
   sendEmailVerification,
   signInAnonymously,
+  updateProfile,
   UserCredential,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
@@ -26,13 +28,14 @@ import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
 
 export default function SignUpScreen() {
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
 
   useEffect(() => {
-    if (validateEmail(email) && validatePassword(password)) {
+    if (nickname && validateEmail(email) && validatePassword(password)) {
       setDisabled(false);
     } else {
       setDisabled(true);
@@ -47,6 +50,10 @@ export default function SignUpScreen() {
         await createUserWithEmailAndPassword(auth, email, password);
 
       const user = userCredential.user;
+
+      await updateProfile(user, {
+        displayName: nickname,
+      });
 
       const res = await apiRequest("/auth/signUp", "POST", {
         userId: user.uid,
@@ -106,65 +113,82 @@ export default function SignUpScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          <View style={styles.headerContainer}>
-            <Header />
-          </View>
-          <View style={styles.contentContainer}>
-            <View style={styles.titleContainer}>
-              <View style={styles.line} />
-              <Text style={styles.title}>新規登録</Text>
-              <View style={styles.line} />
+      <ScrollView
+        style={{ backgroundColor: theme.colors.background.lightGray }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <View style={styles.headerContainer}>
+              <Header />
             </View>
-            <View style={styles.item}>
-              <Text style={styles.label}>メールアドレス</Text>
-              <CustomTextInput
-                placeholder="Email address"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-            </View>
-            <View style={styles.item}>
-              <Text style={styles.label}>パスワード</Text>
-              <CustomTextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                isPassword
-              />
-            </View>
-            <TouchableOpacity
-              style={[styles.button, isDisabled && styles.buttonDisabled]}
-              onPress={handleSignUp}
-              disabled={isDisabled && !isLoading}
-            >
-              <Text style={styles.buttonText}>新規登録</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={anonymous}>
-              <Text style={styles.link}>登録せずに使用する</Text>
-            </TouchableOpacity>
+            <View style={styles.contentContainer}>
+              <View style={styles.titleContainer}>
+                <View style={styles.line} />
+                <Text style={styles.title}>新規登録</Text>
+                <View style={styles.line} />
+              </View>
+              <View style={styles.item}>
+                <Text style={styles.label}>ニックネーム</Text>
+                <CustomTextInput
+                  placeholder="Nickname"
+                  value={nickname}
+                  onChangeText={setNickname}
+                  autoCapitalize="none"
+                />
+              </View>
+              <View style={styles.item}>
+                <Text style={styles.label}>メールアドレス</Text>
+                <CustomTextInput
+                  placeholder="Email address"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+              <View style={styles.item}>
+                <Text style={styles.label}>パスワード</Text>
+                <CustomTextInput
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  autoCapitalize="none"
+                  isPassword
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.button, isDisabled && styles.buttonDisabled]}
+                onPress={handleSignUp}
+                disabled={isDisabled && !isLoading}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.buttonText}>新規登録</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={anonymous} activeOpacity={0.7}>
+                <Text style={styles.link}>登録せずに使用する</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                router.navigate("/(auth)/signIn");
-              }}
-            >
-              <Text style={styles.link}>すでにアカウントをお持ちの場合</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  router.navigate("/(auth)/signIn");
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.link}>すでにアカウントをお持ちの場合</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   headerContainer: {
-    height: "30%",
+    height: "25%",
   },
   contentContainer: {
     flex: 1,

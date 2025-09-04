@@ -149,7 +149,7 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    height: "30%",
+    height: "25%",
   },
   contentContainer: {
     flex: 1,
