@@ -11,7 +11,6 @@ import { activeOptions } from "@/constants/activeOptions";
 import { getUserProfile } from "@/localDb/service/userProfileService";
 
 export default function ProfileScreen() {
-  const [nickname, setNickname] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [birthday, setBirthday] = useState<Date>();
@@ -39,7 +38,6 @@ export default function ProfileScreen() {
           }
 
           if (res) {
-            setNickname(res.nickname);
             if (res.height != null) {
               setHeight(String(res.height));
             }
@@ -104,10 +102,6 @@ export default function ProfileScreen() {
         <TouchableOpacity onPress={onEdit}>
           <Feather name="edit" size={24} />
         </TouchableOpacity>
-      </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>ニックネーム</Text>
-        <Text style={styles.value}>{nickname}</Text>
       </View>
       <View style={styles.item}>
         <Text style={styles.label}>身長</Text>

@@ -76,6 +76,7 @@ export default function SignInScreen() {
       if (error.code === "auth/invalid-credential") {
         Alert.alert("メールアドレスまたはパスワードが違います");
       } else {
+        console.error(error);
         Alert.alert("ログインに失敗しました");
       }
     } finally {

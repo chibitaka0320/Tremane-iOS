@@ -15,7 +15,6 @@ export const getUnsyncedUserProfile = async (): Promise<UserProfile | null> => {
     `
     SELECT
       user_id AS userId,
-      nickname,
       height,
       weight,
       birthday,
@@ -44,7 +43,6 @@ export const getUserProfileDao = async (): Promise<UserProfile | null> => {
     `
       SELECT
           user_id AS userId,
-          nickname,
           height,
           weight,
           birthday,
@@ -67,10 +65,9 @@ export const insertUserProfileDao = async (
   syncFlg: number
 ) => {
   await db.runAsync(
-    `INSERT OR REPLACE INTO users_profile (user_id, nickname, height, weight, birthday, gender, active_level, is_synced, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    `INSERT OR REPLACE INTO users_profile (user_id, height, weight, birthday, gender, active_level, is_synced, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
       userProfile.userId,
-      userProfile.nickname,
       userProfile.height,
       userProfile.weight,
       userProfile.birthday,

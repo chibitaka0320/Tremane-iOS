@@ -12,7 +12,6 @@ type ExerciseResponse = {
 
 // ユーザー情報API
 export type UserInfoResponse = {
-  nickname: string;
   height: number;
   weight: number;
   birthday: Date;

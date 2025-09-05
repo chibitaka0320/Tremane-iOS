@@ -18,11 +18,7 @@ import { activeOptions } from "@/constants/activeOptions";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { router } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
-import {
-  validateHeight,
-  validateNickname,
-  validateWeight,
-} from "@/lib/validators";
+import { validateHeight, validateWeight } from "@/lib/validators";
 import { getUserProfile } from "@/localDb/service/userProfileService";
 import { auth } from "@/lib/firebaseConfig";
 import { UserProfile } from "@/types/localDb";
@@ -32,7 +28,6 @@ import {
 } from "@/localDb/dao/userProfileDao";
 
 export default function ProfileEditScreen() {
-  const [nickname, setNickname] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [birthday, setBirthday] = useState<Date>(new Date("2000-01-01"));
@@ -61,16 +56,12 @@ export default function ProfileEditScreen() {
 
   // ボタン活性・非活性
   useEffect(() => {
-    if (
-      validateNickname(nickname) &&
-      validateHeight(height) &&
-      validateWeight(weight)
-    ) {
+    if (validateHeight(height) && validateWeight(weight)) {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [nickname, height, weight]);
+  }, [height, weight]);
 
   // 更新ボタン押下
   const onUpdate = async () => {
@@ -80,7 +71,6 @@ export default function ProfileEditScreen() {
 
     const userProfile: UserProfile = {
       userId: auth.currentUser.uid,
-      nickname,
       height: parseFloat(height),
       weight: parseFloat(weight),
       birthday: format(birthday, "yyyy-MM-dd"),
@@ -119,7 +109,6 @@ export default function ProfileEditScreen() {
       const res = await getUserProfile();
 
       if (res) {
-        setNickname(res.nickname);
         if (res.height != null) {
           setHeight(String(res.height));
         }
@@ -153,10 +142,6 @@ export default function ProfileEditScreen() {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
       >
-        <View style={styles.item}>
-          <Text style={styles.label}>ニックネーム</Text>
-          <CustomTextInput onChangeText={setNickname} value={nickname} />
-        </View>
         <View style={styles.item}>
           <Text style={styles.label}>身長（cm）</Text>
           <CustomTextInput

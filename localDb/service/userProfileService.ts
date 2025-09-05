@@ -13,7 +13,6 @@ export const getUserProfile = async () => {
     const totalCalorie = calcTotalCalorie(bmr, data.activeLevel);
 
     const userProfile: UserInfoResponse = {
-      nickname: data.nickname,
       height: data.height,
       weight: data.weight,
       birthday,

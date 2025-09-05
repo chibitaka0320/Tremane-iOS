@@ -8,7 +8,6 @@ export type User = {
 // ユーザープロフィールテーブル
 export type UserProfile = {
   userId: string;
-  nickname: string;
   height: number;
   weight: number;
   birthday: string;

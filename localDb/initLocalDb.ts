@@ -54,7 +54,6 @@ export const initLocalDb = async () => {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS users_profile (
         user_id TEXT PRIMARY KEY,
-        nickname TEXT,
         height INTEGER,
         weight INTEGER,
         birthday TEXT,
