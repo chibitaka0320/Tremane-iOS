@@ -7,6 +7,10 @@ const COLOR = "#8C8C88";
 const FONTSIZE = 16;
 
 export default function AccountMenuScreen() {
+  const onChangeNickname = () => {
+    router.push("/(main)/(menu)/account/nickname");
+  };
+
   const onChangeMail = () => {
     router.push("/(main)/(menu)/account/email");
   };
@@ -21,6 +25,14 @@ export default function AccountMenuScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.item} onPress={onChangeNickname}>
+        <View style={styles.itemLeft}>
+          <Feather name="user" size={20} style={styles.itemIcon} />
+          <Text style={styles.itemName}>ニックネームを変更</Text>
+        </View>
+        <MaterialIcons name="arrow-forward-ios" size={20} color={COLOR} />
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.item} onPress={onChangeMail}>
         <View style={styles.itemLeft}>
           <Feather name="mail" size={20} style={styles.itemIcon} />
