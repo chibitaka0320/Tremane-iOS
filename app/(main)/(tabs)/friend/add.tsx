@@ -16,6 +16,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 
 interface Props {
@@ -23,13 +25,17 @@ interface Props {
 }
 
 export default function FriendAddScreen({ onClose }: Props) {
-  const [email, setEmail] = useState("");
-  const [resultText, setResultText] = useState("検索してください");
-  const [user, setUser] = useState<UserAccountInfoResponse | null>();
+  const [email, setEmail] = useState(""); // メールアドレス
+  const [resultText, setResultText] = useState("検索してください"); // 結果テキスト
+  const [user, setUser] = useState<UserAccountInfoResponse | null>(); // 検索ユーザー情報
+  const [status, setStatus] = useState<string | null>(); // 友達ステータス
+  const [requestId, setRequestId] = useState<string | null>(); // 友達リクエストID
 
-  const [isLoading, setLoading] = useState(false);
-  const [isDisabled, setDisabled] = useState(true);
+  const [isLoading, setLoading] = useState(false); // ローディングフラグ
+  const [isStatusLoading, setStatusLoading] = useState(false); // ステータスローディングフラグ
+  const [isDisabled, setDisabled] = useState(true); // 検索ボタン活性非活性
 
+  // ボタン活性非活性
   useEffect(() => {
     if (validateEmail(email)) {
       setDisabled(false);
@@ -38,6 +44,7 @@ export default function FriendAddScreen({ onClose }: Props) {
     }
   }, [email]);
 
+  // ユーザー検索
   const search = async () => {
     setLoading(true);
     setUser(null);
@@ -48,6 +55,8 @@ export default function FriendAddScreen({ onClose }: Props) {
       if (res?.ok) {
         const data: UserAccountInfoResponse = await res.json();
         setUser(data);
+        setStatus(data.status);
+        setRequestId(data.requestId);
       } else {
         setResultText("見つかりませんでした");
         const data = await res?.json();
@@ -59,6 +68,68 @@ export default function FriendAddScreen({ onClose }: Props) {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 友達申請
+  const addFriend = async () => {
+    setStatusLoading(true);
+
+    if (!user) return;
+
+    try {
+      const res = await apiRequestWithRefresh(
+        `/friends/${user.userId}`,
+        "POST"
+      );
+
+      if (res?.ok) {
+        const requestId = await res.text();
+        setStatus("pending");
+        setRequestId(requestId);
+      } else {
+        Alert.alert("友達申請に失敗しました");
+        console.error(res);
+      }
+    } catch (error) {
+      Alert.alert("友達申請に失敗しました。");
+      console.error(error);
+    }
+
+    setStatusLoading(false);
+  };
+
+  // 申請取り消し
+  const cancelApplication = async () => {
+    Alert.alert("申請を取り消しますか？", "", [
+      {
+        text: "キャンセル",
+        style: "cancel",
+      },
+      {
+        text: "取り消す",
+        style: "destructive",
+        onPress: () => setStatus(null),
+      },
+    ]);
+  };
+
+  // 友達削除
+  const removeFriend = async () => {
+    Alert.alert(
+      "友達から削除",
+      `${user?.nickname}さんを本当に友達から削除しますか？`,
+      [
+        {
+          text: "キャンセル",
+          style: "cancel",
+        },
+        {
+          text: "友達から削除",
+          style: "destructive",
+          onPress: () => setStatus(null),
+        },
+      ]
+    );
   };
 
   return (
@@ -94,22 +165,39 @@ export default function FriendAddScreen({ onClose }: Props) {
           {user ? (
             <View style={styles.resultUserContainer}>
               <Text style={styles.userName}>{user.nickname}</Text>
-              <TouchableOpacity>
-                <Text
+              {isStatusLoading ? (
+                <View
                   style={[
-                    styles.addFriendButtonText,
-                    user.status !== null && styles.already,
+                    styles.activityContainer,
+                    status !== null && styles.alreadyFriend,
                   ]}
                 >
-                  {user.status === null && "+ 友達に追加"}
-                  {user.status === "accepted" && (
-                    <Text>
-                      <FontAwesome name="check" color="white" size={16} /> 友達
-                    </Text>
+                  <ActivityIndicator />
+                </View>
+              ) : (
+                <>
+                  {status === null && (
+                    <TouchableOpacity onPress={addFriend}>
+                      <Text style={styles.addFriend}>+ 友達に追加</Text>
+                    </TouchableOpacity>
                   )}
-                  {user.status === "pennding" && "申請中"}
-                </Text>
-              </TouchableOpacity>
+                  {status === "pending" && (
+                    <TouchableOpacity onPress={cancelApplication}>
+                      <Text style={[styles.addFriend, styles.alreadyFriend]}>
+                        申請中
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {status === "accepted" && (
+                    <TouchableOpacity onPress={removeFriend}>
+                      <Text style={[styles.addFriend, styles.alreadyFriend]}>
+                        <FontAwesome name="check" color="white" size={16} />{" "}
+                        友達
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
             </View>
           ) : (
             <View style={styles.resultTextContainer}>
@@ -187,7 +275,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.large,
     marginVertical: theme.spacing[4],
   },
-  addFriendButtonText: {
+  addFriend: {
     fontWeight: "700",
     width: 150,
     textAlign: "center",
@@ -196,8 +284,16 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 4,
   },
-  already: {
+  alreadyFriend: {
     color: theme.colors.white,
     backgroundColor: theme.colors.black,
+  },
+  activityContainer: {
+    width: 150,
+    alignItems: "center",
+    paddingVertical: theme.spacing[2],
+    borderColor: theme.colors.font.gray,
+    borderWidth: 0.5,
+    borderRadius: 4,
   },
 });

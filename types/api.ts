@@ -38,6 +38,7 @@ export type UserAccountInfoResponse = {
   email: string;
   nickname: string;
   status: string;
+  requestId: string;
 };
 
 export type ErrorType = {
