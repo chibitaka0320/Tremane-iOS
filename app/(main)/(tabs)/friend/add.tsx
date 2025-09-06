@@ -6,7 +6,6 @@ import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { UserAccountInfoResponse } from "@/types/api";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
-import { User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -74,7 +73,10 @@ export default function FriendAddScreen({ onClose }: Props) {
   const addFriend = async () => {
     setStatusLoading(true);
 
-    if (!user) return;
+    if (!user) {
+      setStatusLoading(false);
+      return;
+    }
 
     try {
       const res = await apiRequestWithRefresh(
@@ -110,7 +112,10 @@ export default function FriendAddScreen({ onClose }: Props) {
         style: "destructive",
         onPress: async () => {
           setStatusLoading(true);
-          if (!requestId) return;
+          if (!requestId) {
+            setStatusLoading(false);
+            return;
+          }
 
           try {
             const res = await apiRequestWithRefresh(
@@ -150,6 +155,82 @@ export default function FriendAddScreen({ onClose }: Props) {
           text: "友達から削除",
           style: "destructive",
           onPress: () => setStatus(null),
+        },
+      ]
+    );
+  };
+
+  // 友達申請許可
+  const receiveFriend = async () => {
+    setStatusLoading(true);
+
+    if (!requestId) {
+      setStatusLoading(false);
+      return;
+    }
+
+    try {
+      const res = await apiRequestWithRefresh(
+        `/friends/${requestId}/accept`,
+        "PUT"
+      );
+
+      if (res?.ok) {
+        const requestId = await res.text();
+        setStatus("accepted");
+        setRequestId(requestId);
+      } else {
+        Alert.alert("申請許可に失敗しました");
+        console.error(res);
+      }
+    } catch (error) {
+      Alert.alert("申請許可に失敗しました。");
+      console.error(error);
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // 友達申請拒否
+  const rejectFriend = async () => {
+    Alert.alert(
+      "申請の拒否",
+      `${user?.nickname}さんからの申請を拒否しますか？`,
+      [
+        {
+          text: "キャンセル",
+          style: "cancel",
+        },
+        {
+          text: "申請を拒否",
+          style: "destructive",
+          onPress: async () => {
+            setStatusLoading(true);
+            if (!requestId) {
+              setStatusLoading(false);
+              return;
+            }
+
+            try {
+              const res = await apiRequestWithRefresh(
+                `/friends/${requestId}`,
+                "DELETE"
+              );
+
+              if (res?.ok) {
+                setStatus(null);
+                setRequestId(null);
+              } else {
+                Alert.alert("申請の拒否に失敗しました。");
+                console.error(res);
+              }
+            } catch (error) {
+              Alert.alert("申請の拒否に失敗しました。");
+              console.error(error);
+            } finally {
+              setStatusLoading(false);
+            }
+          },
         },
       ]
     );
@@ -218,6 +299,20 @@ export default function FriendAddScreen({ onClose }: Props) {
                         友達
                       </Text>
                     </TouchableOpacity>
+                  )}
+                  {status === "receive" && (
+                    <View style={styles.receiveContainer}>
+                      <TouchableOpacity onPress={rejectFriend}>
+                        <Text style={styles.receiveFriend}>拒否</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={receiveFriend}>
+                        <Text
+                          style={[styles.receiveFriend, styles.alreadyFriend]}
+                        >
+                          許可
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
                 </>
               )}
@@ -315,6 +410,20 @@ const styles = StyleSheet.create({
     width: 150,
     alignItems: "center",
     paddingVertical: theme.spacing[2],
+    borderColor: theme.colors.font.gray,
+    borderWidth: 0.5,
+    borderRadius: 4,
+  },
+
+  receiveContainer: {
+    flexDirection: "row",
+  },
+  receiveFriend: {
+    fontWeight: "700",
+    width: 100,
+    textAlign: "center",
+    paddingVertical: theme.spacing[2],
+    marginHorizontal: theme.spacing[2],
     borderColor: theme.colors.font.gray,
     borderWidth: 0.5,
     borderRadius: 4,
