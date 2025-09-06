@@ -93,9 +93,9 @@ export default function FriendAddScreen({ onClose }: Props) {
     } catch (error) {
       Alert.alert("友達申請に失敗しました。");
       console.error(error);
+    } finally {
+      setStatusLoading(false);
     }
-
-    setStatusLoading(false);
   };
 
   // 申請取り消し
@@ -108,7 +108,30 @@ export default function FriendAddScreen({ onClose }: Props) {
       {
         text: "取り消す",
         style: "destructive",
-        onPress: () => setStatus(null),
+        onPress: async () => {
+          setStatusLoading(true);
+          if (!requestId) return;
+
+          try {
+            const res = await apiRequestWithRefresh(
+              `/friends/${requestId}`,
+              "DELETE"
+            );
+
+            if (res?.ok) {
+              setStatus(null);
+              setRequestId(null);
+            } else {
+              Alert.alert("申請の取り消しに失敗しました。");
+              console.error(res);
+            }
+          } catch (error) {
+            Alert.alert("申請の取り消しに失敗しました。");
+            console.error(error);
+          } finally {
+            setStatusLoading(false);
+          }
+        },
       },
     ]);
   };
