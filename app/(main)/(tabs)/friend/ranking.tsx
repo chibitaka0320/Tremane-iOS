@@ -1,44 +1,70 @@
+import Indicator from "@/components/common/Indicator";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
+import { TrainingRankingResponse } from "@/types/api";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 
 export default function RankingScreen() {
+  const [rankingList, setRankingList] = useState<TrainingRankingResponse[]>();
+
+  const [isLoading, setLoading] = useState(false);
+
+  const getRanking = async () => {
+    setLoading(true);
+    try {
+      const res = await apiRequestWithRefresh(`/friends/ranking`);
+
+      if (res?.ok) {
+        const data: TrainingRankingResponse[] = await res.json();
+        setRankingList(data);
+      } else {
+        console.log(res);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     getRanking();
+  //   }, [])
+  // );
+
+  useEffect(() => {
+    getRanking();
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>今月のトレーニング日数</Text>
       </View>
-      <ScrollView>
-        <View style={styles.listItem}>
-          <View style={styles.itemLeft}>
-            <Text style={styles.rank}>1</Text>
-            <Text style={styles.name}>ちびたか</Text>
-          </View>
-          <View style={styles.itemRight}>
-            <Text style={styles.count}>3</Text>
-            <Text style={styles.unit}>days</Text>
-          </View>
+
+      {isLoading ? (
+        <View style={{ flex: 1 }}>
+          <Indicator />
         </View>
-        <View style={styles.listItem}>
-          <View style={styles.itemLeft}>
-            <Text style={styles.rank}>2</Text>
-            <Text style={styles.name}>ちびたか</Text>
-          </View>
-          <View style={styles.itemRight}>
-            <Text style={styles.count}>3</Text>
-            <Text style={styles.unit}>days</Text>
-          </View>
-        </View>
-        <View style={styles.listItem}>
-          <View style={styles.itemLeft}>
-            <Text style={styles.rank}>3</Text>
-            <Text style={styles.name}>ちびたか</Text>
-          </View>
-          <View style={styles.itemRight}>
-            <Text style={styles.count}>3</Text>
-            <Text style={styles.unit}>days</Text>
-          </View>
-        </View>
-      </ScrollView>
+      ) : (
+        <ScrollView>
+          {rankingList?.map((ranking, index) => (
+            <View style={styles.listItem} key={index}>
+              <View style={styles.itemLeft}>
+                <Text style={styles.rank}>{index + 1}</Text>
+                <Text style={styles.name}>{ranking.nickname}</Text>
+              </View>
+              <View style={styles.itemRight}>
+                <Text style={styles.count}>{ranking.trainingCounts}</Text>
+                <Text style={styles.unit}>days</Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }

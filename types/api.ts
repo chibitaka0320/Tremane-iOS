@@ -41,6 +41,13 @@ export type UserAccountInfoResponse = {
   requestId: string;
 };
 
+// トレーニングランキングAPI
+export type TrainingRankingResponse = {
+  userId: string;
+  nickname: string;
+  trainingCounts: number;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;
