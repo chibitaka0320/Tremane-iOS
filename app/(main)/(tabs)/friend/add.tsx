@@ -88,6 +88,22 @@ export default function FriendAddScreen({ onClose }: Props) {
         const requestId = await res.text();
         setStatus("pending");
         setRequestId(requestId);
+      } else if (res?.status === 409) {
+        const requestId = await res.text();
+        setStatus("pending");
+        setRequestId(requestId);
+      } else if (res?.status === 418) {
+        Alert.alert("すでに友達申請を受けています。", "", [
+          {
+            text: "OK",
+            style: "cancel",
+            onPress: async () => {
+              const requestId = await res.text();
+              setStatus("receive");
+              setRequestId(requestId);
+            },
+          },
+        ]);
       } else {
         Alert.alert("友達申請に失敗しました");
         console.error(res);
@@ -154,7 +170,33 @@ export default function FriendAddScreen({ onClose }: Props) {
         {
           text: "友達から削除",
           style: "destructive",
-          onPress: () => setStatus(null),
+          onPress: async () => {
+            setStatusLoading(true);
+            if (!requestId) {
+              setStatusLoading(false);
+              return;
+            }
+
+            try {
+              const res = await apiRequestWithRefresh(
+                `/friends/${requestId}`,
+                "DELETE"
+              );
+
+              if (res?.ok) {
+                setStatus(null);
+                setRequestId(null);
+              } else {
+                Alert.alert("友達から削除処理に失敗しました。");
+                console.error(res);
+              }
+            } catch (error) {
+              Alert.alert("友達から削除処理に失敗しました。");
+              console.error(error);
+            } finally {
+              setStatusLoading(false);
+            }
+          },
         },
       ]
     );
@@ -179,6 +221,16 @@ export default function FriendAddScreen({ onClose }: Props) {
         const requestId = await res.text();
         setStatus("accepted");
         setRequestId(requestId);
+      } else if (res?.status === 404) {
+        Alert.alert("すでに申請が取り消されています。", "", [
+          {
+            text: "OK",
+            style: "cancel",
+            onPress: () => {
+              setStatus(null);
+            },
+          },
+        ]);
       } else {
         Alert.alert("申請許可に失敗しました");
         console.error(res);
