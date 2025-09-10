@@ -48,6 +48,18 @@ export type TrainingRankingResponse = {
   trainingCounts: number;
 };
 
+// タイムラインAPI
+export type TimelineTrainingResponse = {
+  userId: string;
+  date: Date;
+  bodyParts: bodyParts[];
+};
+
+type bodyParts = {
+  partsId: number;
+  bodyPartsName: string;
+};
+
 export type ErrorType = {
   error: string;
   code?: number;
