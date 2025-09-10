@@ -22,6 +22,7 @@ import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { initUser } from "@/localDb/initUser";
 import Indicator from "@/components/common/Indicator";
+import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
 
 /** ログイン画面 */
 export default function SignInScreen() {
@@ -58,6 +59,10 @@ export default function SignInScreen() {
       if (userCredentical.user.emailVerified) {
         // メールアドレス認証済みの場合、サーバーからユーザー情報を取得しローカルDBに同期。終了後トレーニング画面に遷移。
         await initUser();
+
+        // TODO: 通知機能はpennding
+        await registerPushTokenIfNeeded();
+
         router.replace("/training");
       } else {
         // メールアドレス未認証の場合、Alertを表示し処理を行う。
