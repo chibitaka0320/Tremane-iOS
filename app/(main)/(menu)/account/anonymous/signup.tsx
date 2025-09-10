@@ -20,6 +20,8 @@ import {
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import CustomTextInput from "@/components/common/CustomTextInput";
+import { updateNicknameDao } from "@/localDb/dao/userDao";
+import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
 
 export default function AnonymousSignupScreen() {
   const [nickname, setNickname] = useState("");
@@ -50,9 +52,20 @@ export default function AnonymousSignupScreen() {
         displayName: nickname,
       });
       await linkWithCredential(user, credential);
+      const now = new Date().toISOString();
+      await updateNicknameDao(nickname, now);
 
       router.dismissAll();
       router.replace("/training");
+
+      try {
+        const res = await apiRequestWithRefresh("/users", "PUT", {
+          nickname,
+          updatedAt: now,
+        });
+      } catch (error) {
+        console.error(error);
+      }
     } catch (error: any) {
       console.log(error);
       if (error.code === "auth/email-already-in-use") {

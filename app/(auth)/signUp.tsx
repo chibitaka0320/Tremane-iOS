@@ -26,6 +26,7 @@ import {
 import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
+import { updateNicknameDao } from "@/localDb/dao/userDao";
 
 export default function SignUpScreen() {
   const [nickname, setNickname] = useState("");
@@ -57,6 +58,7 @@ export default function SignUpScreen() {
 
       const res = await apiRequest("/auth/signUp", "POST", {
         userId: user.uid,
+        nickname,
       });
 
       if (!res.ok) {
@@ -92,9 +94,13 @@ export default function SignUpScreen() {
 
       const res = await apiRequest("/auth/signUp", "POST", {
         userId: user.uid,
+        nickname,
       });
 
       if (res.ok) {
+        const now = new Date().toISOString();
+        await updateNicknameDao(nickname, now);
+
         router.replace("/(main)/(tabs)/(home)/training");
       } else {
         Alert.alert("登録に失敗しました");

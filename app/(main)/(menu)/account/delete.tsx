@@ -1,14 +1,17 @@
+import Indicator from "@/components/common/Indicator";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
 import theme from "@/styles/theme";
 import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { deleteUser } from "firebase/auth";
-import React from "react";
+import { deleteUser, signInWithCustomToken } from "firebase/auth";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 
 export default function DeleteAccountScreen() {
+  const [isLoading, setLoading] = useState(false);
+
   const handleDelete = () => {
     const user = auth.currentUser;
     const URL = "/users";
@@ -24,11 +27,26 @@ export default function DeleteAccountScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await apiRequestWithRefresh(URL, "DELETE");
-              await deleteUser(user);
-              await clearLocalDb();
-              router.dismissAll();
-              router.replace("/(auth)/signIn");
+              const res = await apiRequestWithRefresh(
+                "/auth/reauth_token",
+                "POST"
+              );
+
+              if (res?.ok) {
+                const data = await res.json();
+                const customToken = data.customToken;
+                await signInWithCustomToken(auth, customToken);
+
+                await apiRequestWithRefresh(URL, "DELETE");
+                if (auth.currentUser) {
+                  await deleteUser(auth.currentUser);
+                  await clearLocalDb();
+                  router.dismissAll();
+                  router.replace("/(auth)/signIn");
+                }
+              } else {
+                Alert.alert("アカウントの削除に失敗しました。");
+              }
             } catch (error) {
               console.log(error);
               Alert.alert("アカウントの削除に失敗しました。");
@@ -38,6 +56,10 @@ export default function DeleteAccountScreen() {
       ]
     );
   };
+
+  if (isLoading) {
+    return <Indicator />;
+  }
 
   return (
     <View style={styles.container}>

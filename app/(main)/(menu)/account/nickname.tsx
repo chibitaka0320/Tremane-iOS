@@ -1,7 +1,9 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { validateNickname } from "@/lib/validators";
+import { updateNicknameDao } from "@/localDb/dao/userDao";
 import theme from "@/styles/theme";
 import { router } from "expo-router";
 import { updateProfile } from "firebase/auth";
@@ -37,14 +39,21 @@ export default function NicknameEditScreen() {
     if (user == null) return;
 
     try {
+      const now = new Date().toISOString();
       await updateProfile(user, {
         displayName: newNickname,
       });
       await auth.currentUser?.reload();
+      await updateNicknameDao(newNickname, now);
 
       Alert.alert("更新に成功しました");
 
       router.back();
+
+      const res = await apiRequestWithRefresh("/users", "PUT", {
+        nickname: newNickname,
+        updatedAt: now,
+      });
     } catch (e) {
       console.error(e);
       Alert.alert("ニックネームの更新に失敗しました");
