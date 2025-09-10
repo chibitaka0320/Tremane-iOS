@@ -21,13 +21,19 @@ import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { initUser } from "@/localDb/initUser";
+import Indicator from "@/components/common/Indicator";
 
+/** ログイン画面 */
 export default function SignInScreen() {
+  // 表示項目
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // フラグ
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
 
+  // ボタンの活性非活性判定処理（メールアドレスとパスワードのバリデーションチェック）
   useEffect(() => {
     if (validateEmail(email) && validatePassword(password)) {
       setDisabled(false);
@@ -36,10 +42,13 @@ export default function SignInScreen() {
     }
   }, [email, password]);
 
-  const onLogin = async () => {
+  // ログインボタン押下
+  const onLoginButton = async () => {
+    // ローディング開始
     setIsLoading(true);
 
     try {
+      // firebase メールアドレスパスワード認証
       const userCredentical = await signInWithEmailAndPassword(
         auth,
         email,
@@ -47,9 +56,11 @@ export default function SignInScreen() {
       );
 
       if (userCredentical.user.emailVerified) {
+        // メールアドレス認証済みの場合、サーバーからユーザー情報を取得しローカルDBに同期。終了後トレーニング画面に遷移。
         await initUser();
         router.replace("/training");
       } else {
+        // メールアドレス未認証の場合、Alertを表示し処理を行う。
         Alert.alert(
           "メールアドレスが未認証です。",
           "メールアドレスの認証を完了させてください。",
@@ -58,14 +69,16 @@ export default function SignInScreen() {
               text: "OK",
               style: "default",
               onPress: async () => {
-                setIsLoading(true);
                 try {
+                  // 認証メールを送信し、メール認証画面へ遷移する。
                   await sendEmailVerification(userCredentical.user);
-                  router.replace("/(auth)/authMail");
+                  router.replace("/authMail");
                 } catch (e) {
                   console.error(e);
-                } finally {
-                  setIsLoading(false);
+                  Alert.alert(
+                    "メール送信に失敗しました",
+                    "メール送信に失敗しました。時間をおいて再送してください。"
+                  );
                 }
               },
             },
@@ -85,11 +98,7 @@ export default function SignInScreen() {
   };
 
   if (isLoading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator color={theme.colors.primary} />
-      </View>
-    );
+    return <Indicator />;
   }
 
   return (
@@ -126,7 +135,7 @@ export default function SignInScreen() {
             </View>
             <TouchableOpacity
               style={[styles.button, isDisabled && styles.buttonDisabled]}
-              onPress={onLogin}
+              onPress={onLoginButton}
               disabled={isDisabled}
             >
               <Text style={styles.buttonText}>ログイン</Text>

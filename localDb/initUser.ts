@@ -22,8 +22,6 @@ export const initUser = async () => {
   // ユーザーテーブル初期化
   const userRes = await apiRequestWithRefresh("/users", "GET", null);
 
-  console.log("hello ");
-
   if (userRes?.ok) {
     const userInfo: User = await userRes.json();
     await insertUserDao(userInfo);
