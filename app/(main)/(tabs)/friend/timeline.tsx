@@ -4,20 +4,19 @@ import { partsColors } from "@/styles/partsColor";
 import theme from "@/styles/theme";
 import { TimelineTrainingResponse } from "@/types/api";
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 
 export default function FriendScreen() {
-  const [timelineList, setTimelineList] =
-    useState<TimelineTrainingResponse[]>();
-
+  const [timelineList, setTimelineList] = useState<TimelineTrainingResponse[]>(
+    []
+  );
   const [isLoading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const getTimeline = async () => {
     setLoading(true);
-
     try {
       const res = await apiRequestWithRefresh(`/friends/timeline`);
-
       if (res?.ok) {
         const data: TimelineTrainingResponse[] = await res.json();
         setTimelineList(data);
@@ -31,36 +30,48 @@ export default function FriendScreen() {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getTimeline(); // 最新データ再取得
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     getTimeline();
   }, []);
 
-  if (isLoading) {
+  if (isLoading && timelineList.length === 0) {
     return <Indicator />;
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {timelineList?.map((training, index) => (
-        <View style={styles.recordContainer} key={index}>
-          <Text style={styles.userName}>{training.userId}</Text>
-          <Text style={styles.recordDatetime}>{training.date.toString()}</Text>
+    <FlatList
+      style={styles.container}
+      data={timelineList}
+      keyExtractor={(_, index) => index.toString()}
+      renderItem={({ item }) => (
+        <View style={styles.recordContainer}>
+          <Text style={styles.userName}>{item.userId}</Text>
+          <Text style={styles.recordDatetime}>{item.date.toString()}</Text>
           <View style={styles.bodyPartsItem}>
-            {training.bodyParts.map((parts, index) => (
+            {item.bodyParts.map((parts, idx) => (
               <Text
                 style={[
                   styles.item,
                   { backgroundColor: partsColors[Number(parts.partsId)] },
                 ]}
-                key={index}
+                key={idx}
               >
                 {parts.bodyPartsName}
               </Text>
             ))}
           </View>
         </View>
-      ))}
-    </ScrollView>
+      )}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    />
   );
 }
 
@@ -85,12 +96,12 @@ const styles = StyleSheet.create({
   bodyPartsItem: {
     marginTop: theme.spacing[2],
     flexDirection: "row",
+    flexWrap: "wrap",
   },
   item: {
     color: theme.colors.white,
     fontWeight: "bold",
     width: 50,
-    backgroundColor: theme.colors.primary,
     borderRadius: 4,
     textAlign: "center",
     marginHorizontal: theme.spacing[2],
