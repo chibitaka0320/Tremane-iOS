@@ -51,6 +51,7 @@ export type TrainingRankingResponse = {
 // タイムラインAPI
 export type TimelineTrainingResponse = {
   userId: string;
+  nickname: string;
   date: Date;
   bodyParts: bodyParts[];
 };

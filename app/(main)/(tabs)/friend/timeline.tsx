@@ -51,7 +51,7 @@ export default function FriendScreen() {
       keyExtractor={(_, index) => index.toString()}
       renderItem={({ item }) => (
         <View style={styles.recordContainer}>
-          <Text style={styles.userName}>{item.userId}</Text>
+          <Text style={styles.userName}>{item.nickname}</Text>
           <Text style={styles.recordDatetime}>{item.date.toString()}</Text>
           <View style={styles.bodyPartsItem}>
             {item.bodyParts.map((parts, idx) => (
