@@ -32,7 +32,7 @@ export default function Exercise({ partsId, exercise }: Props) {
         <Text style={styles.exerciseName}>{name}</Text>
         <TouchableOpacity>
           <AntDesign
-            name="pluscircleo"
+            name="plus-circle"
             color="black"
             style={styles.addButton}
             onPress={onPlus}
