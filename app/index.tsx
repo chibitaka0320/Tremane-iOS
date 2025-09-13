@@ -6,6 +6,17 @@ import { initUser } from "@/localDb/initUser";
 import { syncLocalDb } from "@/localDb/syncLocalDb";
 import { initMaster } from "@/localDb/initMaster";
 import Indicator from "@/components/common/Indicator";
+import * as Notifications from "expo-notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true, // バナー表示
+    shouldPlaySound: true, // サウンド鳴らす
+    shouldSetBadge: true, // バッジ更新
+    shouldShowBanner: true, // バナー表示 (iOS 15+)
+    shouldShowList: true, // 通知リスト表示 (iOS 15+)
+  }),
+});
 
 export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

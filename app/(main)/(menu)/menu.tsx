@@ -6,6 +6,8 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
 import { syncLocalDb } from "@/localDb/syncLocalDb";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
@@ -37,10 +39,20 @@ export default function MenuScreen() {
   const onSignOut = async () => {
     try {
       await syncLocalDb();
-      await signOut(auth);
-      await clearLocalDb();
-      router.dismissAll();
-      router.replace("/(auth)/signIn");
+      const response = await apiRequestWithRefresh(
+        "/push/unregister",
+        "DELETE"
+      );
+      if (response?.ok) {
+        await signOut(auth);
+        await clearLocalDb();
+        AsyncStorage.removeItem("push_token_registered");
+        router.dismissAll();
+        router.replace("/(auth)/signIn");
+      } else {
+        console.error("APIレスポンスエラー：" + response?.status);
+        Alert.alert("ログアウトに失敗しました");
+      }
     } catch (e) {
       Alert.alert("ログアウトに失敗しました");
     }

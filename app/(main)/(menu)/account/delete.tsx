@@ -4,6 +4,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
 import theme from "@/styles/theme";
 import { Entypo } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { deleteUser, signInWithCustomToken } from "firebase/auth";
 import React, { useState } from "react";
@@ -41,6 +42,7 @@ export default function DeleteAccountScreen() {
                 if (auth.currentUser) {
                   await deleteUser(auth.currentUser);
                   await clearLocalDb();
+                  AsyncStorage.removeItem("push_token_registered");
                   router.dismissAll();
                   router.replace("/(auth)/signIn");
                 }

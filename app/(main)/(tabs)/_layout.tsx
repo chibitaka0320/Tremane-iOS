@@ -9,11 +9,12 @@ import {
 import theme from "@/styles/theme";
 
 import AnalysisScreen from "./analysis";
-import { router, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect, useNavigation } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import MainScreen from "./(home)/main";
 import FriendTabs from "./friend";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
+import { useForegroundNotificationHandler } from "@/hooks/useForegroundNotificationHandler";
 
 const BottomTab = createBottomTabNavigator();
 
@@ -57,9 +58,15 @@ export default function TabsLayout() {
   };
 
   // 未読件数取得（初期表示時）
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
+      getNonNotificationCount();
+    }, [])
+  );
+
+  useForegroundNotificationHandler(() => {
     getNonNotificationCount();
-  }, []);
+  });
 
   const onMenu = () => {
     router.push("/(main)/(menu)/menu");
