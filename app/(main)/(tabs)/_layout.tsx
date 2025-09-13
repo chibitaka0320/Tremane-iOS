@@ -1,6 +1,11 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Feather, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
+import {
+  Feather,
+  FontAwesome6,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import theme from "@/styles/theme";
 
 import AnalysisScreen from "./analysis";
@@ -18,6 +23,11 @@ export default function TabsLayout() {
     router.push("/(main)/(menu)/menu");
   };
 
+  // 通知画面遷移
+  const onNotification = () => {
+    router.push("/notification");
+  };
+
   return (
     <BottomTab.Navigator
       screenOptions={{
@@ -33,9 +43,21 @@ export default function TabsLayout() {
         headerTitle: "",
         headerRight: () => {
           return (
-            <TouchableOpacity onPress={onMenu} style={{ marginRight: 16 }}>
-              <Feather name="menu" size={25} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={onNotification}
+                style={{ marginRight: 24 }}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={25}
+                  color="black"
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onMenu} style={{ marginRight: 16 }}>
+                <Feather name="menu" size={25} />
+              </TouchableOpacity>
+            </View>
           );
         },
       }}

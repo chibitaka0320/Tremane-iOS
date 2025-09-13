@@ -1,3 +1,5 @@
+import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
+
 // 部位・種目取得API
 export type BodyPartExerciseResponse = {
   partsId: number;
@@ -59,6 +61,17 @@ export type TimelineTrainingResponse = {
 type bodyParts = {
   partsId: number;
   bodyPartsName: string;
+};
+
+export type NotificationResponse = {
+  notificationId: string;
+  userId: string;
+  notificationSource: string;
+  type: string;
+  message: string;
+  relatedId: string;
+  createdAt: Timestamp;
+  status: string | null;
 };
 
 export type ErrorType = {

@@ -12,7 +12,6 @@ export default function RankingScreen() {
   const [isLoading, setLoading] = useState(false);
 
   const getRanking = async () => {
-    setLoading(true);
     try {
       const res = await apiRequestWithRefresh(`/friends/ranking`);
 
@@ -24,19 +23,19 @@ export default function RankingScreen() {
       }
     } catch (e) {
       console.log(e);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     getRanking();
-  //   }, [])
-  // );
+  useFocusEffect(
+    useCallback(() => {
+      getRanking();
+    }, [])
+  );
 
   useEffect(() => {
+    setLoading(true);
     getRanking();
+    setLoading(false);
   }, []);
 
   return (

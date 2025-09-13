@@ -71,6 +71,13 @@ export default function FriendScreen() {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>まだ記録がありません</Text>
+        </View>
+      }
+      contentContainerStyle={{ flexGrow: 1 }}
+      alwaysBounceVertical={true}
     />
   );
 }
@@ -107,5 +114,16 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[2],
     marginVertical: theme.spacing[2],
     paddingVertical: theme.spacing[2],
+  },
+
+  // リストが空の時
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
   },
 });
