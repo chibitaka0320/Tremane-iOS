@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing[3],
   },
   activityContainer: {
-    width: 150,
+    width: 70,
     alignItems: "center",
     paddingVertical: theme.spacing[2],
     borderColor: theme.colors.font.gray,
