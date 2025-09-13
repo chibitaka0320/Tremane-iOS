@@ -1,11 +1,14 @@
 import { AlertProvider } from "@/context/AlertContext";
+import { useNotificationHandler } from "@/hooks/useNotificationHandler";
 import { initLocalDb } from "@/localDb/initLocalDb";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 export default function RootLayout() {
   const [isDbReady, setisDbReady] = useState(false);
+  useNotificationHandler();
 
   useEffect(() => {
     const init = async () => {
