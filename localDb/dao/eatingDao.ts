@@ -73,8 +73,8 @@ export const getEatingDao = async (eatingId: string) => {
       protein,
       fat,
       carbo,
-      created_at,
-      updated_at
+      created_at AS createdAt,
+      updated_at AS updatedAt
     FROM eatings
     WHERE eating_id = ?
     `,

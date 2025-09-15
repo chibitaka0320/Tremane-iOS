@@ -8,7 +8,6 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";

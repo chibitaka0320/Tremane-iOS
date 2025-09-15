@@ -4,13 +4,7 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
 import { NotificationResponse } from "@/types/api";
 import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
 /** 通知一覧画面 */
 export default function NotificationScreen() {

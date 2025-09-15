@@ -8,14 +8,7 @@ import theme from "@/styles/theme";
 import { EatingByDate } from "@/types/eating";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Text,
-  FlatList,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 
 type Props = {
   selectedDate: string;
@@ -38,8 +31,6 @@ export default function EatingScreen({ selectedDate }: Props) {
     } else {
       setFetching(true);
     }
-
-    const URL = "/eating?date=" + selectedDate;
 
     try {
       const data = await getEatingByDate(selectedDate);

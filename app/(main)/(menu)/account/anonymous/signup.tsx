@@ -21,7 +21,7 @@ import {
 import { auth } from "@/lib/firebaseConfig";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { updateNicknameDao } from "@/localDb/dao/userDao";
-import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
+import { apiRequestWithRefresh } from "@/lib/apiClient";
 
 export default function AnonymousSignupScreen() {
   const [nickname, setNickname] = useState("");

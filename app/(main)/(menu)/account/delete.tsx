@@ -29,13 +29,12 @@ export default function DeleteAccountScreen() {
           onPress: async () => {
             try {
               const res = await apiRequestWithRefresh(
-                "/auth/reauth_token",
+                "/auth/reauth-token",
                 "POST"
               );
 
               if (res?.ok) {
-                const data = await res.json();
-                const customToken = data.customToken;
+                const customToken = await res.text();
                 await signInWithCustomToken(auth, customToken);
 
                 await apiRequestWithRefresh(URL, "DELETE");

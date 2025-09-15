@@ -3,7 +3,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Alert,
   TouchableOpacity,
 } from "react-native";
 import TrainingItem from "@/components/training/TrainingItem";

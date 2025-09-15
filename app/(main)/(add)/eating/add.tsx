@@ -13,7 +13,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
@@ -24,8 +24,6 @@ import { calcKcal } from "@/lib/calc";
 import { upsertEatingDao } from "@/localDb/dao/eatingDao";
 
 export default function EatingAddScreen() {
-  const navigation = useNavigation();
-
   const [date, setDate] = useState(new Date());
   const [name, setName] = useState("");
   const [protein, setProtein] = useState("0");

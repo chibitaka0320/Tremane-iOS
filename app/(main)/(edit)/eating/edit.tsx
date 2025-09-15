@@ -131,11 +131,7 @@ export default function EatingEditScreen() {
     }
 
     try {
-      const res = await apiRequestWithRefresh(
-        API_ENDPOINTS.eating(eatingId),
-        "PUT",
-        eatings
-      );
+      const res = await apiRequestWithRefresh("/eating", "POST", eatings);
       if (res?.ok) {
         await upsertEatingDao(eatings, 1, 0);
       }

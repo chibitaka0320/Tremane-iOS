@@ -61,7 +61,7 @@ export const initUser = async () => {
   const latestTraining = await getLatestTraining();
 
   const trainingRes = await apiRequestWithRefresh(
-    "/training/sync?updatedAt=" +
+    "/training?updatedAt=" +
       format(latestTraining, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
     "GET",
     null
@@ -76,8 +76,7 @@ export const initUser = async () => {
   const latestEating = await getLatestEating();
 
   const eatingRes = await apiRequestWithRefresh(
-    "/eating/sync?updatedAt=" +
-      format(latestEating, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+    "/eating?updatedAt=" + format(latestEating, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
     "GET",
     null
   );

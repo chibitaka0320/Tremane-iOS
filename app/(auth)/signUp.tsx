@@ -56,7 +56,7 @@ export default function SignUpScreen() {
         displayName: nickname,
       });
 
-      const res = await apiRequest("/auth/signUp", "POST", {
+      const res = await apiRequest("/auth/signup", "POST", {
         userId: user.uid,
         nickname,
       });
@@ -92,7 +92,7 @@ export default function SignUpScreen() {
 
       const user = userCredential.user;
 
-      const res = await apiRequest("/auth/signUp", "POST", {
+      const res = await apiRequest("/auth/signup", "POST", {
         userId: user.uid,
         nickname,
       });

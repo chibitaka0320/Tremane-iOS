@@ -1,6 +1,6 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import ExerciseScreen from ".";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import { BodypartWithExercise } from "@/types/bodyPart";
 import { ActivityIndicator, StyleSheet, View } from "react-native";

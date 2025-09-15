@@ -7,7 +7,6 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   Keyboard,
-  TextInput,
   TouchableWithoutFeedback,
   View,
   Text,
