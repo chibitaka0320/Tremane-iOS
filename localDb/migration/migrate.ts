@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db } from "@/lib/localDbConfig";
 import { bodyPartsSchema } from "../schema/bodyPartsSchema";
 import { eatingsSchema } from "../schema/eatingsSchema";
 import { exercisesSchema } from "../schema/exercisesSchema";
