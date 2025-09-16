@@ -1,5 +1,3 @@
 import { openDatabaseSync } from "expo-sqlite";
 
-export function getDb() {
-  return openDatabaseSync("tremane.db");
-}
+export const db = openDatabaseSync("tremane.db");

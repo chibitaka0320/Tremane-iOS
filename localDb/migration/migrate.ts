@@ -1,4 +1,4 @@
-import { getDb } from "../db";
+import { db } from "../db";
 import { bodyPartsSchema } from "../schema/bodyPartsSchema";
 import { eatingsSchema } from "../schema/eatingsSchema";
 import { exercisesSchema } from "../schema/exercisesSchema";
@@ -11,8 +11,6 @@ import { usersSchema } from "../schema/usersSchema";
 // DBにスキーマを適用
 export async function migrate() {
   try {
-    const db = getDb();
-
     // 外部キー制約を有効化
     await db.execAsync("PRAGMA foreign_keys = ON;");
 
