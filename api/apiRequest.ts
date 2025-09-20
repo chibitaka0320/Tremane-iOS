@@ -30,6 +30,11 @@ export async function apiRequest<T>(
       message = data.message ?? res.statusText;
     } catch {}
 
+    // ステータス404：ステータスのみ返す
+    if (res.status === 404) {
+      return { status: res.status, data: null };
+    }
+
     throw new ApiError(res.status, message);
   }
 
@@ -87,6 +92,11 @@ export async function apiRequestAuth<T>(
         await handleUnauthorized();
         throw new ApiError(401, "Unauthorized");
       }
+    }
+
+    // ステータス404：ステータスのみ返す
+    if (res.status === 404) {
+      return { status: res.status, data: null };
     }
 
     throw new ApiError(res.status, message);
