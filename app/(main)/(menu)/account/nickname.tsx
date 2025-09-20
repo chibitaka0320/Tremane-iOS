@@ -1,12 +1,9 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { validateNickname } from "@/lib/validators";
-import { updateNicknameDao } from "@/localDb/dao/userDao";
 import theme from "@/styles/theme";
 import { router } from "expo-router";
-import { updateProfile } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   Keyboard,
@@ -17,6 +14,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import * as userService from "@/service/userService";
 
 export default function NicknameEditScreen() {
   const currentNickname = auth.currentUser?.displayName;
@@ -33,30 +31,22 @@ export default function NicknameEditScreen() {
     }
   }, [newNickname]);
 
+  // ユーザー情報の更新
   const handlePress = async () => {
     setLoading(true);
     const user = auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      const now = new Date().toISOString();
-      await updateProfile(user, {
-        displayName: newNickname,
-      });
-      await auth.currentUser?.reload();
-      await updateNicknameDao(newNickname, now);
-
+      await userService.updateUser(user, newNickname);
       Alert.alert("更新に成功しました");
-
       router.back();
-
-      const res = await apiRequestWithRefresh("/users", "PUT", {
-        nickname: newNickname,
-        updatedAt: now,
-      });
-    } catch (e) {
-      console.error(e);
-      Alert.alert("ニックネームの更新に失敗しました");
+    } catch (error) {
+      console.error("ユーザー情報更新失敗：" + error);
+      Alert.alert("更新に失敗しました");
     } finally {
       setLoading(false);
     }

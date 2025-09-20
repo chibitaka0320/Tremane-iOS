@@ -1,5 +1,13 @@
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
+// ユーザー情報取得API
+export type UserResponse = {
+  userId: string;
+  nickname: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // 部位・種目取得API
 export type BodyPartExerciseResponse = {
   partsId: number;

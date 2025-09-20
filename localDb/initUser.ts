@@ -3,7 +3,6 @@ import {
   Eating,
   Exercise,
   Training,
-  User,
   UserGoal,
   UserProfile,
 } from "@/types/localDb";
@@ -11,21 +10,16 @@ import {
   getLatestUserProfile,
   insertUserProfileDao,
 } from "./dao/userProfileDao";
-import { insertUserDao } from "./dao/userDao";
 import { format } from "date-fns";
 import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
 import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
 import { getLatestUserGoal, insertUserGoalDao } from "./dao/userGoalDao";
 import { getLatestMyExercise, updateMyExerciseDao } from "./dao/myExerciseDao";
+import * as userRepository from "@/localDb/repository/userRepository";
 
 export const initUser = async () => {
   // ユーザーテーブル初期化
-  const userRes = await apiRequestWithRefresh("/users", "GET", null);
-
-  if (userRes?.ok) {
-    const userInfo: User = await userRes.json();
-    await insertUserDao(userInfo);
-  }
+  userRepository.syncUsersFromRemote();
 
   // ユーザープロフィールテーブル初期化
   const latestUserProfile = await getLatestUserProfile();

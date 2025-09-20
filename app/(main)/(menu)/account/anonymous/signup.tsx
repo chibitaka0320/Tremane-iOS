@@ -13,15 +13,9 @@ import {
 import { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
-import {
-  EmailAuthProvider,
-  linkWithCredential,
-  updateProfile,
-} from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import CustomTextInput from "@/components/common/CustomTextInput";
-import { updateNicknameDao } from "@/localDb/dao/userDao";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import * as userService from "@/service/userService";
 
 export default function AnonymousSignupScreen() {
   const [nickname, setNickname] = useState("");
@@ -38,40 +32,27 @@ export default function AnonymousSignupScreen() {
     }
   }, [nickname, email, password]);
 
+  // 匿名ユーザーの認証方法変更
   const handleSignUp = async () => {
     setIsLoading(true);
+    const user = auth.currentUser;
+    if (user === null) return;
 
     try {
-      const credential = EmailAuthProvider.credential(email, password);
-
-      const user = auth.currentUser;
-
-      if (user === null) return;
-
-      await updateProfile(user, {
-        displayName: nickname,
-      });
-      await linkWithCredential(user, credential);
-      const now = new Date().toISOString();
-      await updateNicknameDao(nickname, now);
-
+      await userService.registerAnonymousToUser(
+        user,
+        email,
+        password,
+        nickname
+      );
       router.dismissAll();
       router.replace("/training");
-
-      try {
-        const res = await apiRequestWithRefresh("/users", "PUT", {
-          nickname,
-          updatedAt: now,
-        });
-      } catch (error) {
-        console.error(error);
-      }
     } catch (error: any) {
-      console.log(error);
+      console.error("ユーザー登録失敗：" + error);
       if (error.code === "auth/email-already-in-use") {
-        Alert.alert("すでに登録されているメールアドレスです");
+        Alert.alert("すでに登録されているメールアドレスです。");
       } else {
-        Alert.alert("登録に失敗しました");
+        Alert.alert("登録処理に失敗しました。");
       }
     } finally {
       setIsLoading(false);

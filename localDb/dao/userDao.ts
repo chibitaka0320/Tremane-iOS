@@ -1,26 +1,23 @@
 import { db } from "@/lib/localDbConfig";
-import { User } from "@/types/localDb";
+import { UserEntity } from "@/types/db";
 
-// 追加
-export const insertUserDao = async (user: User) => {
+// ユーザー追加
+export async function insertUser(user: UserEntity) {
   await db.runAsync(
     `INSERT OR REPLACE INTO users (user_id, nickname, created_at, updated_at) VALUES (?, ?, ?, ?);`,
-    [user.userId, user.nickname, user.createdAt, user.updatedAt]
+    [user.user_id, user.nickname, user.created_at, user.updated_at]
   );
-};
+}
 
-// ニックネーム更新
-export const updateNicknameDao = async (
-  nickname: string,
-  updatedAt: string
-) => {
+// ユーザー更新
+export async function updateUser(nickname: string, updatedAt: string) {
   await db.runAsync(`UPDATE users SET nickname = ?, updated_at = ?;`, [
     nickname,
     updatedAt,
   ]);
-};
+}
 
-// 削除
-export const deleteUserDao = async () => {
+// ユーザー削除
+export async function deleteUser() {
   await db.runAsync(`DELETE FROM users`);
-};
+}

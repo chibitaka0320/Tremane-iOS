@@ -12,21 +12,11 @@ import {
   ScrollView,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { apiRequest, apiRequestWithRefresh } from "@/lib/apiClient";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import Indicator from "@/components/common/Indicator";
-import {
-  createUserWithEmailAndPassword,
-  deleteUser,
-  sendEmailVerification,
-  signInAnonymously,
-  updateProfile,
-  UserCredential,
-} from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
-import { updateNicknameDao } from "@/localDb/dao/userDao";
+import * as userService from "@/service/userService";
 
 export default function SignUpScreen() {
   const [nickname, setNickname] = useState("");
@@ -43,71 +33,33 @@ export default function SignUpScreen() {
     }
   }, [nickname, email, password]);
 
+  // ユーザー新規登録処理
   const handleSignUp = async () => {
     setIsLoading(true);
-
     try {
-      const userCredential: UserCredential =
-        await createUserWithEmailAndPassword(auth, email, password);
-
-      const user = userCredential.user;
-
-      await updateProfile(user, {
-        displayName: nickname,
-      });
-
-      const res = await apiRequest("/auth/signup", "POST", {
-        userId: user.uid,
-        nickname,
-      });
-
-      if (!res.ok) {
-        await deleteUser(user);
-        Alert.alert("登録処理に失敗しました");
-      }
-
-      try {
-        await sendEmailVerification(user);
-        router.replace("/(auth)/authMail");
-      } catch (e) {
-        await apiRequestWithRefresh("/users", "DELETE");
-        await deleteUser(user);
-        Alert.alert("登録処理に失敗しました");
-      }
+      await userService.registerUser(email, password, nickname);
+      router.replace("/(auth)/authMail");
     } catch (error: any) {
+      console.error("ユーザー登録失敗：" + error);
       if (error.code === "auth/email-already-in-use") {
-        Alert.alert("すでに登録されているメールアドレスです");
+        Alert.alert("すでに登録されているメールアドレスです。");
       } else {
-        Alert.alert("登録処理に失敗しました");
+        Alert.alert("登録処理に失敗しました。");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 匿名ユーザー登録処理
   const anonymous = async () => {
     setIsLoading(true);
     try {
-      const userCredential: UserCredential = await signInAnonymously(auth);
-
-      const user = userCredential.user;
-
-      const res = await apiRequest("/auth/signup", "POST", {
-        userId: user.uid,
-        nickname,
-      });
-
-      if (res.ok) {
-        const now = new Date().toISOString();
-        await updateNicknameDao(nickname, now);
-
-        router.replace("/(main)/(tabs)/(home)/training");
-      } else {
-        Alert.alert("登録に失敗しました");
-        await deleteUser(user);
-      }
+      await userService.registerAnonymous();
+      router.replace("/(main)/(tabs)/(home)/training");
     } catch (error) {
-      Alert.alert("認証に失敗しました");
+      console.error("匿名ユーザー登録失敗：" + error);
+      Alert.alert("登録処理に失敗しました。");
     } finally {
       setIsLoading(false);
     }
