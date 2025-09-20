@@ -7,6 +7,7 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
@@ -15,17 +16,12 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { getActiveLevelExplanation } from "@/constants/activeLevelExplain";
 import { genderOptions } from "@/constants/genderOptions";
 import { activeOptions } from "@/constants/activeOptions";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { router } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateHeight, validateWeight } from "@/lib/validators";
 import { getUserProfile } from "@/localDb/service/userProfileService";
 import { auth } from "@/lib/firebaseConfig";
-import { UserProfile } from "@/types/localDb";
-import {
-  insertUserProfileDao,
-  setUserProfileSynced,
-} from "@/localDb/dao/userProfileDao";
+import * as userProfileService from "@/service/userProfileService";
 
 export default function ProfileEditScreen() {
   const [height, setHeight] = useState("");
@@ -66,40 +62,23 @@ export default function ProfileEditScreen() {
   // 更新ボタン押下
   const onUpdate = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const userProfile: UserProfile = {
-      userId: auth.currentUser.uid,
-      height: parseFloat(height),
-      weight: parseFloat(weight),
-      birthday: format(birthday, "yyyy-MM-dd"),
-      gender: parseInt(gender),
-      activeLevel: parseInt(activeLevel),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     try {
-      await insertUserProfileDao(userProfile, 0);
+      await userProfileService.upsertUserProfile(
+        auth.currentUser.uid,
+        parseFloat(height),
+        parseFloat(weight),
+        birthday,
+        parseInt(gender),
+        parseInt(activeLevel)
+      );
+      router.back();
     } catch (error) {
-      console.error(error);
+      console.error("プロフィール更新失敗：" + error);
+      Alert.alert("プロフィールの更新に失敗しました");
     } finally {
       setLoading(false);
-      router.back();
-    }
-
-    try {
-      const res = await apiRequestWithRefresh(
-        "/users/profile",
-        "POST",
-        userProfile
-      );
-      if (res?.ok) {
-        await setUserProfileSynced();
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 

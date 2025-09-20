@@ -1,39 +1,30 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import {
-  Eating,
-  Exercise,
-  Training,
-  UserGoal,
-  UserProfile,
-} from "@/types/localDb";
-import {
-  getLatestUserProfile,
-  insertUserProfileDao,
-} from "./dao/userProfileDao";
+import { Eating, Exercise, Training, UserGoal } from "@/types/localDb";
 import { format } from "date-fns";
 import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
 import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
 import { getLatestUserGoal, insertUserGoalDao } from "./dao/userGoalDao";
 import { getLatestMyExercise, updateMyExerciseDao } from "./dao/myExerciseDao";
 import * as userRepository from "@/localDb/repository/userRepository";
+import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
+import { ApiError } from "@/lib/error";
 
 export const initUser = async () => {
-  // ユーザーテーブル初期化
-  userRepository.syncUsersFromRemote();
+  try {
+    // ユーザーテーブル初期化
+    await userRepository.syncUsersFromRemote();
 
-  // ユーザープロフィールテーブル初期化
-  const latestUserProfile = await getLatestUserProfile();
-
-  const userProfileRes = await apiRequestWithRefresh(
-    "/users/profile?updatedAt=" +
-      format(latestUserProfile, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
-    "GET",
-    null
-  );
-
-  if (userProfileRes?.ok) {
-    const userProfileInfo: UserProfile = await userProfileRes.json();
-    await insertUserProfileDao(userProfileInfo, 1);
+    // ユーザープロフィールテーブル初期化
+    await userProfileRepository.syncUserProfilesFromRemote();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error("APIエラー：(" + error.status + ")" + error.message);
+    } else {
+      console.error(
+        "ユーザー情報同期エラー（リモート → ローカル）：" +
+          (error as Error).message
+      );
+    }
   }
 
   // ユーザー目標テーブル初期化

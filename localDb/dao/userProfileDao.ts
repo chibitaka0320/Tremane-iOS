@@ -1,13 +1,14 @@
 import { db } from "@/lib/localDbConfig";
+import { UserProfileEntity } from "@/types/db";
 import { UserProfile } from "@/types/localDb";
 
 // 最新更新日を取得
-export const getLatestUserProfile = async (): Promise<string> => {
+export async function getLastUpdatedAt(): Promise<string> {
   const row = await db.getFirstAsync<{ last_updated: string }>(
     "SELECT MAX(updated_at) as last_updated FROM users_profile;"
   );
   return row?.last_updated ?? "1970-01-01T00:00:00";
-};
+}
 
 // 非同期データを取得
 export const getUnsyncedUserProfile = async (): Promise<UserProfile | null> => {
@@ -59,21 +60,18 @@ export const getUserProfileDao = async (): Promise<UserProfile | null> => {
   return data;
 };
 
-// 追加
-export const insertUserProfileDao = async (
-  userProfile: UserProfile,
-  syncFlg: number
-) => {
+// 追加 or 更新
+export const upsertUserProfile = async (userProfile: UserProfileEntity) => {
   await db.runAsync(
     `INSERT OR REPLACE INTO users_profile (user_id, height, weight, birthday, gender, active_level, is_synced, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
-      userProfile.userId,
+      userProfile.user_id,
       userProfile.height,
       userProfile.weight,
       userProfile.birthday,
       userProfile.gender,
-      userProfile.activeLevel,
-      syncFlg,
+      userProfile.active_level,
+      userProfile.is_synced,
       userProfile.createdAt,
       userProfile.updatedAt,
     ]

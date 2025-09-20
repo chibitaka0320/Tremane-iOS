@@ -1,9 +1,35 @@
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
+// ==== リクエスト ====
 // ユーザー情報取得API
 export type UserResponse = {
   userId: string;
   nickname: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// ユーザープロフィール情報取得API
+export type UserProfileResponse = {
+  userId: string;
+  height: number;
+  weight: number;
+  birthday: string;
+  gender: number;
+  activeLevel: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// ==== レスポンス ====
+// ユーザープロフィール情報追加更新API
+export type UserProfileRequest = {
+  userId: string;
+  height: number;
+  weight: number;
+  birthday: string;
+  gender: number;
+  activeLevel: number;
   createdAt: string;
   updatedAt: string;
 };
