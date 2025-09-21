@@ -72,8 +72,8 @@ export const upsertUserProfile = async (userProfile: UserProfileEntity) => {
       userProfile.gender,
       userProfile.active_level,
       userProfile.is_synced,
-      userProfile.createdAt,
-      userProfile.updatedAt,
+      userProfile.created_at,
+      userProfile.updated_at,
     ]
   );
 };

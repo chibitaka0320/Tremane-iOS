@@ -15,12 +15,10 @@ export async function syncUserProfilesFromRemote() {
 
   // 取得した情報をローカルDBに同期
   if (userProfileResponse) {
-    const UserProfileEntity = toEntity(userProfileResponse);
-    await userProfileDao.upsertUserProfile(UserProfileEntity);
+    const userProfileEntity = toEntity(userProfileResponse);
+    await userProfileDao.upsertUserProfile(userProfileEntity);
   } else {
-    console.log(
-      "同期対象のユーザープロフィールデータが存在しませんでした。(userProfileRepository.syncUserProfilesFromRemote)"
-    );
+    console.log("同期対象のユーザープロフィールデータが存在しませんでした。");
   }
 }
 
@@ -44,7 +42,7 @@ function toEntity(userProfileResponse: UserProfileResponse): UserProfileEntity {
     gender: userProfileResponse.gender,
     active_level: userProfileResponse.activeLevel,
     is_synced: 1,
-    createdAt: userProfileResponse.createdAt,
-    updatedAt: userProfileResponse.updatedAt,
+    created_at: userProfileResponse.createdAt,
+    updated_at: userProfileResponse.updatedAt,
   };
 }

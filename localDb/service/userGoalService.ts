@@ -1,4 +1,4 @@
-import { UserGoalResponse } from "@/types/api";
+import { UserGoalDto } from "@/types/api";
 import { getUserGoalDao } from "../dao/userGoalDao";
 import { getUserProfileDao } from "../dao/userProfileDao";
 import { calcGoalKcal } from "@/lib/calc";
@@ -14,7 +14,7 @@ export const getUserGoal = async () => {
   }
 
   if (goal) {
-    const userGoal: UserGoalResponse = {
+    const userGoal: UserGoalDto = {
       weight: goal.weight,
       goalWeight: goal.goalWeight,
       goalCalorie,

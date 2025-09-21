@@ -1,12 +1,12 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { Eating, Exercise, Training, UserGoal } from "@/types/localDb";
+import { Eating, Exercise, Training } from "@/types/localDb";
 import { format } from "date-fns";
 import { getLatestTraining, upsertTrainingDao } from "./dao/trainingDao";
 import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
-import { getLatestUserGoal, insertUserGoalDao } from "./dao/userGoalDao";
 import { getLatestMyExercise, updateMyExerciseDao } from "./dao/myExerciseDao";
 import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
+import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import { ApiError } from "@/lib/error";
 
 export const initUser = async () => {
@@ -16,6 +16,9 @@ export const initUser = async () => {
 
     // ユーザープロフィールテーブル初期化
     await userProfileRepository.syncUserProfilesFromRemote();
+
+    // ユーザー目標テーブル初期化
+    await userGoalRepository.syncUserGoalsFromRemote();
   } catch (error) {
     if (error instanceof ApiError) {
       console.error("APIエラー：(" + error.status + ")" + error.message);
@@ -25,21 +28,6 @@ export const initUser = async () => {
           (error as Error).message
       );
     }
-  }
-
-  // ユーザー目標テーブル初期化
-  const latestUserGoal = await getLatestUserGoal();
-
-  const userGoalRes = await apiRequestWithRefresh(
-    "/users/goal?updatedAt=" +
-      format(latestUserGoal, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
-    "GET",
-    null
-  );
-
-  if (userGoalRes?.ok) {
-    const userGoalInfo: UserGoal = await userGoalRes.json();
-    await insertUserGoalDao(userGoalInfo, 1);
   }
 
   // トレーニングテーブル初期化

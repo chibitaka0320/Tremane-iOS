@@ -1,8 +1,9 @@
 import { db } from "@/lib/localDbConfig";
+import { UserGoalEntity } from "@/types/db";
 import { UserGoal } from "@/types/localDb";
 
 // 最新更新日を取得
-export const getLatestUserGoal = async (): Promise<string> => {
+export const getLastUpdatedAt = async (): Promise<string> => {
   const row = await db.getFirstAsync<{ last_updated: string }>(
     "SELECT MAX(updated_at) as last_updated FROM users_goal;"
   );
@@ -57,23 +58,20 @@ export const getUserGoalDao = async (): Promise<UserGoal | null> => {
   return data;
 };
 
-// 追加
-export const insertUserGoalDao = async (
-  userGoal: UserGoal,
-  syncFlg: number
-) => {
+// 追加 or 更新
+export const upsertUserGoalDao = async (userGoal: UserGoalEntity) => {
   await db.runAsync(
     `INSERT OR REPLACE INTO users_goal (user_id, weight, goal_weight, start, finish, pfc, is_synced, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
-      userGoal.userId,
+      userGoal.user_id,
       userGoal.weight,
-      userGoal.goalWeight,
+      userGoal.goal_weight,
       userGoal.start,
       userGoal.finish,
       userGoal.pfc,
-      syncFlg,
-      userGoal.createdAt,
-      userGoal.updatedAt,
+      userGoal.is_synced,
+      userGoal.created_at,
+      userGoal.updated_at,
     ]
   );
 };

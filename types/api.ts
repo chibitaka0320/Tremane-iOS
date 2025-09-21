@@ -1,6 +1,6 @@
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
-// ==== リクエスト ====
+// ==== レスポンス ====
 // ユーザー情報取得API
 export type UserResponse = {
   userId: string;
@@ -21,7 +21,19 @@ export type UserProfileResponse = {
   updatedAt: string;
 };
 
-// ==== レスポンス ====
+// ユーザー目標情報取得API
+export type UserGoalResponse = {
+  userId: string;
+  weight: number;
+  goalWeight: number;
+  start: string;
+  finish: string;
+  pfc: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
   userId: string;
@@ -59,7 +71,7 @@ export type UserInfoResponse = {
 };
 
 // ユーザー目標API
-export type UserGoalResponse = {
+export type UserGoalDto = {
   weight: number;
   goalWeight: number;
   goalCalorie: number;
