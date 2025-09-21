@@ -46,6 +46,18 @@ export type UserProfileRequest = {
   updatedAt: string;
 };
 
+// ユーザー目標情報追加更新API
+export type UserGoalRequest = {
+  userId: string;
+  weight: number;
+  goalWeight: number;
+  start: string;
+  finish: string;
+  pfc: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // 部位・種目取得API
 export type BodyPartExerciseResponse = {
   partsId: number;

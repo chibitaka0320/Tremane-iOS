@@ -8,6 +8,7 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
@@ -22,10 +23,11 @@ import { validateWeight } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";
 import { UserGoal } from "@/types/localDb";
 import {
-  insertUserGoalDao,
+  upsertUserGoalDao,
   setUserGoalSynced,
 } from "@/localDb/dao/userGoalDao";
 import { getUserGoal } from "@/localDb/service/userGoalService";
+import * as userGoalService from "@/service/userGoalService";
 
 export default function GoalEditScreen() {
   const [weight, setWeight] = useState("");
@@ -82,36 +84,23 @@ export default function GoalEditScreen() {
   //更新ボタン押下
   const onUpdate = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const userGoal: UserGoal = {
-      userId: auth.currentUser.uid,
-      weight: parseFloat(weight),
-      goalWeight: parseFloat(goalWeight),
-      start: format(start, "yyyy-MM-dd"),
-      finish: format(finish, "yyyy-MM-dd"),
-      pfc: parseInt(pfc),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     try {
-      await insertUserGoalDao(userGoal, 0);
-    } catch (e) {
-      console.error(e);
+      await userGoalService.upsertUserGoal(
+        auth.currentUser.uid,
+        parseFloat(weight),
+        parseFloat(goalWeight),
+        start,
+        finish,
+        parseInt(pfc)
+      );
+      router.back();
+    } catch (error) {
+      console.error("目標更新失敗：" + error);
+      Alert.alert("目標の更新に失敗しました");
     } finally {
       setLoading(false);
-      router.back();
-    }
-
-    try {
-      const res = await apiRequestWithRefresh("/users/goal", "POST", userGoal);
-      if (res?.ok) {
-        await setUserGoalSynced();
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 

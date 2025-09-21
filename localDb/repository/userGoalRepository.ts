@@ -22,6 +22,16 @@ export async function syncUserGoalsFromRemote() {
   }
 }
 
+// ユーザープロフィール情報追加更新
+export async function upsertUserGoal(userGoalEntity: UserGoalEntity) {
+  await userGoalDao.upsertUserGoalDao(userGoalEntity);
+}
+
+// 同期済みフラグを立てる
+export async function setUserGoalSynced() {
+  await userGoalDao.setUserGoalSynced();
+}
+
 // レスポンスをエンティティに変換
 function toEntity(userGoalResponse: UserGoalResponse): UserGoalEntity {
   return {

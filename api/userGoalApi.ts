@@ -1,4 +1,4 @@
-import { UserGoalResponse } from "@/types/api";
+import { UserGoalRequest, UserGoalResponse } from "@/types/api";
 import { apiRequestAuth } from "./apiRequest";
 
 // GET /users/goal
@@ -11,4 +11,9 @@ export async function getUserGoal(
     null
   );
   return res.data;
+}
+
+// POST /users/goal
+export async function upsertUserGoal(userGoal: UserGoalRequest) {
+  await apiRequestAuth<void>("/users/goal", "POST", userGoal);
 }

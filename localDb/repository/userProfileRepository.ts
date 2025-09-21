@@ -23,8 +23,8 @@ export async function syncUserProfilesFromRemote() {
 }
 
 // ユーザープロフィール情報追加更新
-export async function upsertUserProfile(UserProfileEntity: UserProfileEntity) {
-  await userProfileDao.upsertUserProfile(UserProfileEntity);
+export async function upsertUserProfile(userProfileEntity: UserProfileEntity) {
+  await userProfileDao.upsertUserProfile(userProfileEntity);
 }
 
 // 同期済みフラグを立てる

@@ -14,7 +14,7 @@ export async function upsertUserProfile(
   activeLevel: number
 ) {
   const now = new Date().toISOString();
-  const UserProfileEntity: UserProfileEntity = {
+  const userProfileEntity: UserProfileEntity = {
     user_id: userId,
     height,
     weight,
@@ -22,12 +22,12 @@ export async function upsertUserProfile(
     gender,
     active_level: activeLevel,
     is_synced: 0,
-    createdAt: now,
-    updatedAt: now,
+    created_at: now,
+    updated_at: now,
   };
 
   // ローカルDB追加更新
-  await userProfileRepository.upsertUserProfile(UserProfileEntity);
+  await userProfileRepository.upsertUserProfile(userProfileEntity);
 
   // リモートDB更新（非同期）
   const userProfileRequest: UserProfileRequest = {
