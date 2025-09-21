@@ -31,3 +31,17 @@ export type UserGoalEntity = {
   created_at: string;
   updated_at: string;
 };
+
+// トレーニングテーブル
+export type TrainingEntity = {
+  training_id: string;
+  date: string;
+  user_id: string;
+  exercise_id: string;
+  weight: number;
+  reps: number;
+  is_synced: number;
+  is_deleted: number;
+  created_at: string;
+  updated_at: string;
+};

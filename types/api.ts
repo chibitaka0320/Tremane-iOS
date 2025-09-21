@@ -33,6 +33,18 @@ export type UserGoalResponse = {
   updatedAt: string;
 };
 
+// トレーニング情報取得API
+export type TrainingResponse = {
+  trainingId: string;
+  date: string;
+  userId: string;
+  exerciseId: string;
+  weight: number;
+  reps: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
@@ -54,6 +66,17 @@ export type UserGoalRequest = {
   start: string;
   finish: string;
   pfc: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// トレーニング情報追加更新API
+export type TrainingRequest = {
+  trainingId: string;
+  date: string;
+  exerciseId: string;
+  weight: number;
+  reps: number;
   createdAt: string;
   updatedAt: string;
 };

@@ -10,6 +10,7 @@ import { usersSchema } from "../schema/usersSchema";
 
 // DBにスキーマを適用
 export async function migrate() {
+  console.log("========== テーブル作成開始 ==========");
   try {
     // 外部キー制約を有効化
     await db.execAsync("PRAGMA foreign_keys = ON;");
@@ -26,8 +27,10 @@ export async function migrate() {
     ${eatingsSchema}
   `);
 
-    console.log("✅ データベース作成成功");
+    console.log("✅ テーブル作成成功");
   } catch (error) {
-    console.error("❌ データベース作成失敗: ", error);
+    console.error("❌ テーブル作成失敗: ", error);
+  } finally {
+    console.log("========== テーブル作成終了 ==========");
   }
 }

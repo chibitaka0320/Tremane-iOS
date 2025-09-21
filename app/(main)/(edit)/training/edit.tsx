@@ -23,12 +23,11 @@ import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import {
   deleteTrainingDao,
   getTrainingDao,
-  setTrainingSynced,
-  upsertTrainingDao,
+  setTrainingsSynced,
 } from "@/localDb/dao/trainingDao";
-import { Training } from "@/types/localDb";
 import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
+import * as trainingService from "@/service/trainingService";
 
 export default function TrainingEditScreen() {
   // パスパラメーター
@@ -154,39 +153,24 @@ export default function TrainingEditScreen() {
   // トレーニング更新処理
   const onUpdateTraining = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const training: Training[] = [
-      {
-        trainingId: trainingId,
-        date: format(date, "yyyy-MM-dd"),
-        userId: auth.currentUser.uid,
-        exerciseId: exercise,
-        weight: parseFloat(weight),
-        reps: parseInt(reps),
-        createdAt: createdAt,
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
     try {
-      await upsertTrainingDao(training, 0, 0);
-    } catch (error) {
-      console.error(error);
-    } finally {
+      await trainingService.upsertTraining(
+        trainingId,
+        date,
+        auth.currentUser.uid,
+        exercise,
+        parseFloat(weight),
+        parseFloat(reps)
+      );
       router.dismissAll();
       router.replace("/(main)/(tabs)/(home)/training");
+    } catch (error) {
+      console.error("トレーニング更新失敗：" + error);
+      Alert.alert("トレーニングの更新に失敗しました。");
+    } finally {
       setLoading(false);
-    }
-
-    try {
-      const res = await apiRequestWithRefresh("/training", "POST", training);
-      if (res?.ok) {
-        await upsertTrainingDao(training, 1, 0);
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -215,7 +199,7 @@ export default function TrainingEditScreen() {
               null
             );
             if (res?.ok) {
-              await setTrainingSynced(trainingId);
+              await setTrainingsSynced([trainingId]);
             }
           } catch (e) {
             console.error(e);

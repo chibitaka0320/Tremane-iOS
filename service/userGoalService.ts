@@ -45,6 +45,6 @@ export async function upsertUserGoal(
     .upsertUserGoal(userGoalRequest)
     .then(async () => await userGoalRepository.setUserGoalSynced())
     .catch((error) => {
-      console.error("APIエラー(ユーザー目標情報追加更新：)" + error);
+      console.error("APIエラー(ユーザー目標情報追加更新)：" + error);
     });
 }

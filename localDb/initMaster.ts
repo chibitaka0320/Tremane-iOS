@@ -6,6 +6,7 @@ import { getLatestExercise, insertExerciseDao } from "./dao/exerciseDao";
 
 // マスタテーブル初期化
 export const initMaster = async () => {
+  console.log("========== マスタデータダウンロード開始 ==========");
   try {
     // 部位テーブル初期化
     const latestBodyPart = await getLatestBodyPart();
@@ -40,5 +41,7 @@ export const initMaster = async () => {
     console.log("マスタデータダウンロード完了");
   } catch (error) {
     console.error(error);
+  } finally {
+    console.log("========== マスタデータダウンロード終了 ==========");
   }
 };

@@ -7,11 +7,11 @@ import {
   Keyboard,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router } from "expo-router";
 import { selectLabel } from "@/types/common";
@@ -19,11 +19,10 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import { BodypartWithExercise } from "@/types/bodyPart";
 import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
-import { Training } from "@/types/localDb";
 import uuid from "react-native-uuid";
 import { auth } from "@/lib/firebaseConfig";
-import { upsertTrainingDao } from "@/localDb/dao/trainingDao";
 import { Picker } from "@react-native-picker/picker";
+import * as trainingService from "@/service/trainingService";
 
 export default function TrainingAddScreen() {
   // 表示データ
@@ -112,39 +111,24 @@ export default function TrainingAddScreen() {
   // トレーニング記録
   const onRecordTraining = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const training: Training[] = [
-      {
-        trainingId: uuid.v4(),
-        date: format(date, "yyyy-MM-dd"),
-        userId: auth.currentUser.uid,
-        exerciseId: exercise,
-        weight: parseFloat(weight),
-        reps: parseInt(reps),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
     try {
-      await upsertTrainingDao(training, 0, 0);
-    } catch (error) {
-      console.error(error);
-    } finally {
+      await trainingService.upsertTraining(
+        uuid.v4(),
+        date,
+        auth.currentUser.uid,
+        exercise,
+        parseFloat(weight),
+        parseInt(reps)
+      );
       router.dismissAll();
       router.replace("/(main)/(tabs)/(home)/training");
+    } catch (error) {
+      console.error("トレーニング追加失敗：" + error);
+      Alert.alert("トレーニングの追加に失敗しました。");
+    } finally {
       setLoading(false);
-    }
-
-    try {
-      const res = await apiRequestWithRefresh("/training", "POST", training);
-      if (res?.ok) {
-        await upsertTrainingDao(training, 1, 0);
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 

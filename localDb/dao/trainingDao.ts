@@ -1,30 +1,31 @@
 import { db } from "@/lib/localDbConfig";
+import { TrainingEntity } from "@/types/db";
 import { Training } from "@/types/localDb";
 import { TrainingWithExercise } from "@/types/training";
 
 // 最新更新日を取得
-export const getLatestTraining = async (): Promise<string> => {
+export async function getLastUpdatedAt(): Promise<string> {
   const row = await db.getFirstAsync<{ last_updated: string }>(
     `SELECT MAX(updated_at) as last_updated FROM trainings;`
   );
   return row?.last_updated ?? "1970-01-01T00:00:00";
-};
+}
 
 // 非同期データの取得
-export const getUnsyncedTraining = async (
+export async function getUnsyncedTrainings(
   deleteFlg: number
-): Promise<Training[]> => {
-  const unsynced = await db.getAllAsync<Training>(
+): Promise<TrainingEntity[]> {
+  const unsynced = await db.getAllAsync<TrainingEntity>(
     `
     SELECT
-      training_id AS trainingId,
+      training_id,
       date,
-      user_id AS userId,
-      exercise_id AS exerciseId,
+      user_id,
+      exercise_id,
       weight,
       reps,
-      created_at AS createdAt,
-      updated_at AS updatedAt
+      created_at,
+      updated_at
     FROM trainings
     WHERE is_synced = 0
     AND is_deleted = ?
@@ -33,7 +34,7 @@ export const getUnsyncedTraining = async (
     [deleteFlg]
   );
   return unsynced;
-};
+}
 
 // 日別部位別トレーニング集計
 export const getTrainingPartsDao = async () => {
@@ -239,12 +240,8 @@ export const getTrainingDao = async (trainingId: string) => {
   return training;
 };
 
-// 追加
-export const upsertTrainingDao = async (
-  trainings: Training[],
-  syncFlg: number,
-  deleteFlg: number
-) => {
+// 追加 or 更新
+export async function upsertTrainings(trainings: TrainingEntity[]) {
   await db.withTransactionAsync(async () => {
     for (const training of trainings) {
       await db.runAsync(
@@ -253,21 +250,21 @@ export const upsertTrainingDao = async (
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `,
         [
-          training.trainingId,
+          training.training_id,
           training.date,
-          training.userId,
-          training.exerciseId,
+          training.user_id,
+          training.exercise_id,
           training.weight,
           training.reps,
-          syncFlg,
-          deleteFlg,
-          training.createdAt,
-          training.updatedAt,
+          training.is_synced,
+          training.is_deleted,
+          training.created_at,
+          training.updated_at,
         ]
       );
     }
   });
-};
+}
 
 // 削除
 export const deleteTrainingDao = async (trainingId: string) => {
@@ -282,9 +279,13 @@ export const deleteTrainings = async () => {
 };
 
 // フラグを同期済みにする
-export const setTrainingSynced = async (trainingId: string) => {
-  await db.runAsync(
-    `UPDATE trainings SET is_synced = 1 WHERE training_id = ?;`,
-    [trainingId]
-  );
+export const setTrainingsSynced = async (trainingIds: string[]) => {
+  await db.withTransactionAsync(async () => {
+    for (const trainingId of trainingIds) {
+      await db.runAsync(
+        `UPDATE trainings SET is_synced = 1 WHERE training_id = ?;`,
+        [trainingId]
+      );
+    }
+  });
 };

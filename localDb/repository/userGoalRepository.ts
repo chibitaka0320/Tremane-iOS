@@ -15,8 +15,8 @@ export async function syncUserGoalsFromRemote() {
 
   // 取得した情報をローカルDBに同期
   if (userGoalResponse) {
-    const UserGoalEntity = toEntity(userGoalResponse);
-    await userGoalDao.upsertUserGoalDao(UserGoalEntity);
+    const userGoalEntity = toEntity(userGoalResponse);
+    await userGoalDao.upsertUserGoalDao(userGoalEntity);
   } else {
     console.log("同期対象のユーザー目標データが存在しませんでした。");
   }
