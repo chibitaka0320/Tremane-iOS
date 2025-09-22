@@ -19,7 +19,7 @@ import {
 import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
-import { initUser } from "@/localDb/initUser";
+import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import Indicator from "@/components/common/Indicator";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
 
@@ -57,7 +57,7 @@ export default function SignInScreen() {
 
       if (userCredentical.user.emailVerified) {
         // メールアドレス認証済みの場合、サーバーからユーザー情報を取得しローカルDBに同期。終了後トレーニング画面に遷移。
-        await initUser();
+        await userSyncFromRemote();
 
         // TODO: 通知機能はpennding
         await registerPushTokenIfNeeded();

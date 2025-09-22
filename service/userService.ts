@@ -28,7 +28,7 @@ export async function registerUser(
   const user = userCredential.user;
   await updateProfile(user, { displayName: nickname });
 
-  // TODO: ローカルDBにユーザー追加が必要か？（現状はinitUserで初期化を行なっている。）
+  // TODO: ローカルDBにユーザー追加が必要か？（現状はuserSyncFromRemoteで初期化を行なっている。）
 
   // リモートDB追加
   try {

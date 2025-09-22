@@ -7,7 +7,7 @@ import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 import { ApiError } from "@/lib/error";
 
 // リモートDBからローカルDBにユーザーデータを同期する。
-export const initUser = async () => {
+export async function userSyncFromRemote() {
   console.log("========== データ同期開始（Remote → Local） ==========");
   try {
     // ユーザーテーブル初期化
@@ -45,4 +45,4 @@ export const initUser = async () => {
   } finally {
     console.log("========== データ同期終了（Remote → Local） ==========");
   }
-};
+}

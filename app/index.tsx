@@ -2,7 +2,7 @@ import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { initUser } from "@/localDb/initUser";
+import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import { syncLocalDb } from "@/localDb/syncLocalDb";
 import { initMaster } from "@/localDb/initMaster";
 import Indicator from "@/components/common/Indicator";
@@ -28,7 +28,7 @@ export default function Index() {
         try {
           await initMaster();
           await syncLocalDb();
-          await initUser();
+          await userSyncFromRemote();
         } catch (error) {
           console.error(error);
         }
