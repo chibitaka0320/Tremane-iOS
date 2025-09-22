@@ -1,6 +1,6 @@
 import { AlertProvider } from "@/context/AlertContext";
 import { useNotificationHandler } from "@/hooks/useNotificationHandler";
-import { initLocalDb } from "@/localDb/initLocalDb";
+import { initLocalDb } from "@/localDb/migration/initLocalDb";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";

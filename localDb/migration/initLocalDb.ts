@@ -1,4 +1,4 @@
-import { migrate } from "./migration/migrate";
+import { migrate } from "./migrate";
 
 // ローカルDBのテーブル初期化
 export async function initLocalDb() {
