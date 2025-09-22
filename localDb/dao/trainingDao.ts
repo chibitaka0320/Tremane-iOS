@@ -1,6 +1,5 @@
 import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
-import { Training } from "@/types/localDb";
 import { TrainingWithExercise } from "@/types/training";
 
 // 最新更新日を取得
