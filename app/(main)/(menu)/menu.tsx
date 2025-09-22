@@ -5,7 +5,7 @@ import theme from "@/styles/theme";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
-import { syncLocalDb } from "@/localDb/syncLocalDb";
+import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 

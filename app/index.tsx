@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
-import { syncLocalDb } from "@/localDb/syncLocalDb";
+import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
 import { initMaster } from "@/localDb/initMaster";
 import Indicator from "@/components/common/Indicator";
 import * as Notifications from "expo-notifications";

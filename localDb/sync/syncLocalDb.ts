@@ -2,14 +2,14 @@ import { Eating, Exercise, UserGoal, UserProfile } from "@/types/localDb";
 import {
   getUnsyncedUserProfile,
   setUserProfileSynced,
-} from "./dao/userProfileDao";
+} from "../dao/userProfileDao";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { getUnsyncedUserGoal, setUserGoalSynced } from "./dao/userGoalDao";
+import { getUnsyncedUserGoal, setUserGoalSynced } from "../dao/userGoalDao";
 import {
   getUnsyncedMyExercise,
   setMyExercisesSynced,
   updateMyExerciseDao,
-} from "./dao/myExerciseDao";
+} from "../dao/myExerciseDao";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { ApiError } from "@/lib/error";

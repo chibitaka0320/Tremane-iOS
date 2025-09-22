@@ -23,7 +23,7 @@ import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEmail, validatePassword } from "@/lib/validators";
 import { clearLocalDb } from "@/localDb/clearLocalDb";
-import { syncLocalDb } from "@/localDb/syncLocalDb";
+import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
 
 export default function EmailEditScreen() {
   const currentEmail = auth.currentUser?.email;
