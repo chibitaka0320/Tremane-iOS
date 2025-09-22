@@ -11,27 +11,28 @@ export async function getLastUpdatedAt(): Promise<string> {
 }
 
 // 非同期データを取得
-export const getUnsyncedUserProfile = async (): Promise<UserProfile | null> => {
-  const unsynced = await db.getFirstAsync<UserProfile | null>(
-    `
+export const getUnsyncedUserProfile =
+  async (): Promise<UserProfileEntity | null> => {
+    const unsynced = await db.getFirstAsync<UserProfileEntity>(
+      `
     SELECT
-      user_id AS userId,
+      user_id,
       height,
       weight,
       birthday,
       gender,
-      active_level AS activeLevel,
-      created_at AS createdAt,
-      updated_at AS updatedAt
+      active_level,
+      created_at,
+      updated_at
     FROM
       users_profile
     WHERE
       is_synced = 0
     ;
     `
-  );
-  return unsynced;
-};
+    );
+    return unsynced;
+  };
 
 // フラグを同期済みにする
 export const setUserProfileSynced = async () => {

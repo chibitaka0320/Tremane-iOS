@@ -1,8 +1,4 @@
-import { Eating, Exercise, UserGoal, UserProfile } from "@/types/localDb";
-import {
-  getUnsyncedUserProfile,
-  setUserProfileSynced,
-} from "../dao/userProfileDao";
+import { Exercise, UserGoal } from "@/types/localDb";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { getUnsyncedUserGoal, setUserGoalSynced } from "../dao/userGoalDao";
 import {
@@ -10,30 +6,20 @@ import {
   setMyExercisesSynced,
   updateMyExerciseDao,
 } from "../dao/myExerciseDao";
+import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { ApiError } from "@/lib/error";
 
+// ローカルDBのデータをリモートDBに同期する。
 export const syncLocalDb = async () => {
   console.log("========== データ同期開始（Local → Remote） ==========");
   try {
-    // ユーザープロフィールの非同期データ送信
-    const userProfile: UserProfile | null = await getUnsyncedUserProfile();
+    // ユーザーテーブルの非同期データ送信
+    // TODO: ユーザーテーブルの同期を作成
 
-    if (userProfile) {
-      try {
-        const res = await apiRequestWithRefresh(
-          "/users/profile",
-          "POST",
-          userProfile
-        );
-        if (res?.ok) {
-          await setUserProfileSynced();
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    // ユーザープロフィールの非同期データ送信
+    await userProfileRepository.syncUserProfilesFromLocal();
 
     // ユーザー目標の非同期データ送信
     const userGoal: UserGoal | null = await getUnsyncedUserGoal();
