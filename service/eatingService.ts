@@ -15,7 +15,7 @@ export async function upsertEating(
   fat: number,
   carbo: number
 ) {
-  const now = new Date().toString();
+  const now = new Date().toISOString();
   const eatingEntities: EatingEntity[] = [
     {
       eating_id: eatingId,
