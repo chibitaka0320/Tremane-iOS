@@ -31,11 +31,15 @@ export async function syncTrainingsFromLocal() {
   const trainings = await trainingDao.getUnsyncedTrainings(0);
   if (trainings.length > 0) {
     const requests: TrainingRequest[] = [];
+    const trainingIds: string[] = [];
     for (const training of trainings) {
       const trainingRequest = toRequest(training);
       requests.push(trainingRequest);
+      trainingIds.push(training.training_id);
     }
-    trainingApi.upsertTrainings(requests);
+    trainingApi
+      .upsertTrainings(requests)
+      .then(async () => await setTrainingsSynced(trainingIds));
   } else {
     console.log(
       "同期対象のトレーニングデータ（未削除）が存在しませんでした。（ローカル → リモート）"
@@ -46,7 +50,9 @@ export async function syncTrainingsFromLocal() {
   const deletedTrainings = await trainingDao.getUnsyncedTrainings(1);
   if (deletedTrainings.length > 0) {
     for (const training of deletedTrainings) {
-      trainingApi.deleteTraining(training.training_id);
+      trainingApi
+        .deleteTraining(training.training_id)
+        .then(async () => await setTrainingsSynced([training.training_id]));
     }
   } else {
     console.log(
