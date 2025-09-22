@@ -1,7 +1,7 @@
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
 import * as userGoalApi from "@/api/userGoalApi";
 import { format } from "date-fns";
-import { UserGoalResponse } from "@/types/api";
+import { UserGoalRequest, UserGoalResponse } from "@/types/api";
 import { UserGoalEntity } from "@/types/db";
 
 // リモートDBからユーザー目標データの最新情報を同期
@@ -19,6 +19,22 @@ export async function syncUserGoalsFromRemote() {
     await userGoalDao.upsertUserGoalDao(userGoalEntity);
   } else {
     console.log("同期対象のユーザー目標データが存在しませんでした。");
+  }
+}
+
+// ローカルDBからユーザー目標データの情報を同期
+export async function syncUserGoalsFromLocal() {
+  // 非同期データの取得
+  const userGoal = await userGoalDao.getUnsyncedUserGoal();
+  if (userGoal) {
+    const userGoalRequest = toRequest(userGoal);
+    userGoalApi
+      .upsertUserGoal(userGoalRequest)
+      .then(async () => await setUserGoalSynced());
+  } else {
+    console.log(
+      "同期対象のユーザー目標が存在しませんでした。（ローカル → リモート）"
+    );
   }
 }
 
@@ -44,5 +60,19 @@ function toEntity(userGoalResponse: UserGoalResponse): UserGoalEntity {
     is_synced: 1,
     created_at: userGoalResponse.createdAt,
     updated_at: userGoalResponse.updatedAt,
+  };
+}
+
+// エンティティをリクエストに変換
+function toRequest(userGoalEntity: UserGoalEntity): UserGoalRequest {
+  return {
+    userId: userGoalEntity.user_id,
+    weight: userGoalEntity.weight,
+    goalWeight: userGoalEntity.goal_weight,
+    start: userGoalEntity.start,
+    finish: userGoalEntity.finish,
+    pfc: userGoalEntity.pfc,
+    createdAt: userGoalEntity.created_at,
+    updatedAt: userGoalEntity.updated_at,
   };
 }

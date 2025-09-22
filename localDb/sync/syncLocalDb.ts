@@ -7,6 +7,7 @@ import {
   updateMyExerciseDao,
 } from "../dao/myExerciseDao";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
+import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { ApiError } from "@/lib/error";
@@ -22,30 +23,15 @@ export const syncLocalDb = async () => {
     await userProfileRepository.syncUserProfilesFromLocal();
 
     // ユーザー目標の非同期データ送信
-    const userGoal: UserGoal | null = await getUnsyncedUserGoal();
+    await userGoalRepository.syncUserGoalsFromLocal();
 
-    if (userGoal) {
-      try {
-        const res = await apiRequestWithRefresh(
-          "/users/goal",
-          "POST",
-          userGoal
-        );
-        if (res?.ok) {
-          await setUserGoalSynced();
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // トレーニングデータの非同期データ送信
+    // トレーニングの非同期データ送信
     await trainingRepository.syncTrainingsFromLocal();
 
-    // 食事データの非同期データ送信
+    // 食事の非同期データ送信
     await eatingRepository.syncEatingsFromLocal();
 
-    // マイ種別データ（追加）
+    // マイトレーニング種目の非同期データ送信
     const myExerciseAdd: Exercise[] = await getUnsyncedMyExercise(0);
     if (myExerciseAdd.length > 0) {
       try {

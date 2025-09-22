@@ -3,26 +3,26 @@ import { UserGoalEntity } from "@/types/db";
 import { UserGoal } from "@/types/localDb";
 
 // 最新更新日を取得
-export const getLastUpdatedAt = async (): Promise<string> => {
+export async function getLastUpdatedAt(): Promise<string> {
   const row = await db.getFirstAsync<{ last_updated: string }>(
     "SELECT MAX(updated_at) as last_updated FROM users_goal;"
   );
   return row?.last_updated ?? "1970-01-01T00:00:00";
-};
+}
 
 // 非同期データを取得
-export const getUnsyncedUserGoal = async (): Promise<UserGoal | null> => {
-  const unsynced = await db.getFirstAsync<UserGoal | null>(
+export async function getUnsyncedUserGoal(): Promise<UserGoalEntity | null> {
+  const unsynced = await db.getFirstAsync<UserGoalEntity>(
     `
     SELECT
-      user_id AS userId,
+      user_id,
       weight,
-      goal_weight AS goalWeight,
+      goal_weight,
       start,
       finish,
       pfc,
-      created_at AS createdAt,
-      updated_at AS updatedAt
+      created_at,
+      updated_at
     FROM
       users_goal
     WHERE
@@ -31,7 +31,7 @@ export const getUnsyncedUserGoal = async (): Promise<UserGoal | null> => {
     `
   );
   return unsynced;
-};
+}
 
 // フラグを同期済みにする
 export const setUserGoalSynced = async () => {
