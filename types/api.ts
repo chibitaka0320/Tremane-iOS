@@ -59,6 +59,16 @@ export type EatingResponse = {
   updatedAt: string;
 };
 
+// トレーニング種目取得API
+export type ExerciseResponse = {
+  exerciseId: string;
+  ownerUserId: string;
+  partsId: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
@@ -109,16 +119,13 @@ export type EatingRequest = {
   updatedAt: string;
 };
 
-// 部位・種目取得API
-export type BodyPartExerciseResponse = {
+// トレーニング種目追加更新API
+export type ExerciseRequest = {
+  exerciseId: string;
   partsId: number;
   name: string;
-  exercises: ExerciseResponse[];
-};
-
-type ExerciseResponse = {
-  exerciseId: string;
-  name: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 // ユーザー情報API

@@ -1,13 +1,14 @@
 import { db } from "@/lib/localDbConfig";
+import { ExerciseEntity } from "@/types/db";
 import { Exercise } from "@/types/localDb";
 
 // 最新更新日を取得
-export const getLatestMyExercise = async (): Promise<string> => {
+export async function getLastUpdatedAt(): Promise<string> {
   const row = await db.getFirstAsync<{ last_updated: string }>(
     `SELECT MAX(updated_at) as last_updated FROM exercises WHERE owner_user_id IS NOT null;`
   );
   return row?.last_updated ?? "1970-01-01T00:00:00";
-};
+}
 
 // 詳細取得
 export const getMyExercise = async (
@@ -111,6 +112,32 @@ export const updateMyExerciseDao = async (
     }
   });
 };
+
+// 追加 or 更新
+export async function upsertMyExercises(exercises: ExerciseEntity[]) {
+  await db.withTransactionAsync(async () => {
+    for (const exercise of exercises) {
+      if (exercise.owner_user_id) {
+        const result = await db.runAsync(
+          `
+        INSERT OR REPLACE INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+          [
+            exercise.exercise_id,
+            exercise.owner_user_id,
+            exercise.parts_id,
+            exercise.name,
+            exercise.is_synced,
+            exercise.is_deleted,
+            exercise.created_at,
+            exercise.updated_at,
+          ]
+        );
+      }
+    }
+  });
+}
 
 // 削除
 export const deleteMyExerciseDao = async (exerciseId: string) => {

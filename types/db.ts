@@ -61,3 +61,15 @@ export type EatingEntity = {
   created_at: string;
   updated_at: string;
 };
+
+// トレーニング種目テーブル
+export type ExerciseEntity = {
+  exercise_id: string;
+  owner_user_id: string;
+  parts_id: number;
+  name: string;
+  is_synced: number;
+  is_deleted: number;
+  created_at: string;
+  updated_at: string;
+};
