@@ -32,17 +32,18 @@ export const getMyExercise = async (
 };
 
 // 非同期データの取得
-export const getUnsyncedMyExercise = async (
+export async function getUnsyncedMyExercises(
   deleteFlg: number
-): Promise<Exercise[]> => {
-  const unsynced = await db.getAllAsync<Exercise>(
+): Promise<ExerciseEntity[]> {
+  const unsynced = await db.getAllAsync<ExerciseEntity>(
     `
     SELECT
-        exercise_id AS exerciseId,
-        parts_id AS partsId,
+        exercise_id,
+        owner_user_id,
+        parts_id,
         name,
-        created_at AS createdAt,
-        updated_at AS updatedAt
+        created_at,
+        updated_at
     FROM exercises
     WHERE owner_user_id IS NOT NULL
     AND is_synced = 0
@@ -51,7 +52,7 @@ export const getUnsyncedMyExercise = async (
     [deleteFlg]
   );
   return unsynced;
-};
+}
 
 // 追加
 export const insertMyExerciseDao = async (
@@ -152,9 +153,13 @@ export const deleteMyExercises = async () => {
 };
 
 // フラグを同期済みにする
-export const setMyExercisesSynced = async (exerciseId: string) => {
-  await db.runAsync(
-    `UPDATE exercises SET is_synced = 1 WHERE exercise_id = ?;`,
-    [exerciseId]
-  );
-};
+export async function setMyExercisesSynced(exerciseIds: string[]) {
+  await db.withTransactionAsync(async () => {
+    for (const exerciseId of exerciseIds) {
+      await db.runAsync(
+        `UPDATE exercises SET is_synced = 1 WHERE exercise_id = ?;`,
+        [exerciseId]
+      );
+    }
+  });
+}

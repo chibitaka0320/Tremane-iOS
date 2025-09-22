@@ -1,15 +1,8 @@
-import { Exercise, UserGoal } from "@/types/localDb";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { getUnsyncedUserGoal, setUserGoalSynced } from "../dao/userGoalDao";
-import {
-  getUnsyncedMyExercise,
-  setMyExercisesSynced,
-  updateMyExerciseDao,
-} from "../dao/myExerciseDao";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
+import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 import { ApiError } from "@/lib/error";
 
 // ローカルDBのデータをリモートDBに同期する。
@@ -21,53 +14,23 @@ export const syncLocalDb = async () => {
 
     // ユーザープロフィールの非同期データ送信
     await userProfileRepository.syncUserProfilesFromLocal();
+    console.log("ユーザープロフィールデータ同期完了");
 
     // ユーザー目標の非同期データ送信
     await userGoalRepository.syncUserGoalsFromLocal();
+    console.log("ユーザー目標データ同期完了");
 
     // トレーニングの非同期データ送信
     await trainingRepository.syncTrainingsFromLocal();
+    console.log("トレーニングデータ同期完了");
 
     // 食事の非同期データ送信
     await eatingRepository.syncEatingsFromLocal();
+    console.log("食事データ同期完了");
 
     // マイトレーニング種目の非同期データ送信
-    const myExerciseAdd: Exercise[] = await getUnsyncedMyExercise(0);
-    if (myExerciseAdd.length > 0) {
-      try {
-        const res = await apiRequestWithRefresh(
-          `/exercise/myself`,
-          "POST",
-          myExerciseAdd
-        );
-        if (res?.ok) {
-          await updateMyExerciseDao(myExerciseAdd, 1, 0);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // マイ種別データ（削除）
-    const myExerciseDelete: Exercise[] = await getUnsyncedMyExercise(1);
-    if (myExerciseDelete.length > 0) {
-      for (const exercise of myExerciseDelete) {
-        try {
-          const res = await apiRequestWithRefresh(
-            `/exercise/myself/` + exercise.exerciseId,
-            "DELETE",
-            null
-          );
-          if (res?.ok) {
-            await setMyExercisesSynced(exercise.exerciseId);
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-
-    console.log("データアップロード完了");
+    await exerciseRepository.syncMyExercisesFromLocal();
+    console.log("マイトレーニング種目データ同期完了");
   } catch (error) {
     if (error instanceof ApiError) {
       console.error("APIエラー：(" + error.status + ")" + error.message);

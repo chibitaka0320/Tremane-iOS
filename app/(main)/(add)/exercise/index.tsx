@@ -52,7 +52,7 @@ export default function ExerciseScreen({ data }: Props) {
               null
             );
             if (res?.ok) {
-              await setMyExercisesSynced(exerciseId);
+              await setMyExercisesSynced([exerciseId]);
             }
           } catch (e) {
             console.error(e);
