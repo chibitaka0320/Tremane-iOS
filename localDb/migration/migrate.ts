@@ -2,7 +2,6 @@ import { db } from "@/lib/localDbConfig";
 import { bodyPartsSchema } from "../schema/bodyPartsSchema";
 import { eatingsSchema } from "../schema/eatingsSchema";
 import { exercisesSchema } from "../schema/exercisesSchema";
-import { myExercisesScheam } from "../schema/myExercisesSchema";
 import { trainingsSchema } from "../schema/trainingsSchema";
 import { userGoalsSchema } from "../schema/userGoalsSchema";
 import { userProfilesShema } from "../schema/userProfilesShema";
@@ -19,7 +18,6 @@ export async function migrate() {
     await db.execAsync(`
     ${bodyPartsSchema}
     ${exercisesSchema}
-    ${myExercisesScheam}
     ${usersSchema}
     ${userProfilesShema}
     ${userGoalsSchema}

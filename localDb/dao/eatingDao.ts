@@ -84,7 +84,7 @@ export const getEatingDao = async (eatingId: string) => {
   return eating;
 };
 
-// 追加
+// 追加 or 更新
 export async function upsertEatings(eatings: EatingEntity[]) {
   await db.withTransactionAsync(async () => {
     for (const eating of eatings) {

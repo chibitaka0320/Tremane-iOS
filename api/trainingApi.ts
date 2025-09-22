@@ -21,9 +21,5 @@ export async function upsertTrainings(trainings: TrainingRequest[]) {
 // DELETE /training/{trainingId}
 // TODO: 複数削除を可能とするか検討
 export async function deleteTraining(trainingId: string) {
-  await apiRequestAuth<void>(
-    "/training?trainingId=" + trainingId,
-    "DELETE",
-    null
-  );
+  await apiRequestAuth<void>("/training/" + trainingId, "DELETE", null);
 }

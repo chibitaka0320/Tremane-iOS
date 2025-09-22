@@ -21,5 +21,5 @@ export async function upsertEatings(eatings: EatingRequest[]) {
 // DELETE /eating/{eatingId}
 // TODO: 複数削除を可能とするか検討
 export async function deleteEating(eatingId: string) {
-  await apiRequestAuth<void>("/eating?eatingId=" + eatingId, "DELETE", null);
+  await apiRequestAuth<void>("/eating/" + eatingId, "DELETE", null);
 }
