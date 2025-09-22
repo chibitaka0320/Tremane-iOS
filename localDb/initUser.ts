@@ -1,12 +1,12 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import { Eating, Exercise, Training } from "@/types/localDb";
+import { Exercise } from "@/types/localDb";
 import { format } from "date-fns";
-import { getLatestEating, upsertEatingDao } from "./dao/eatingDao";
 import { getLatestMyExercise, updateMyExerciseDao } from "./dao/myExerciseDao";
 import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { ApiError } from "@/lib/error";
 
 export const initUser = async () => {
@@ -25,18 +25,7 @@ export const initUser = async () => {
     await trainingRepository.syncTrainingsFromRemote();
 
     // 食事テーブル初期化
-    const latestEating = await getLatestEating();
-
-    const eatingRes = await apiRequestWithRefresh(
-      "/eating?updatedAt=" + format(latestEating, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
-      "GET",
-      null
-    );
-
-    if (eatingRes?.ok) {
-      const eating: Eating[] = await eatingRes.json();
-      await upsertEatingDao(eating, 1, 0);
-    }
+    await eatingRepository.syncEatingsFromRemote();
 
     // マイ種目テーブル初期化
     const latestExercise = await getLatestMyExercise();

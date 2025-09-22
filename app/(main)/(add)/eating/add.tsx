@@ -8,20 +8,18 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router } from "expo-router";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";
-import { Eating } from "@/types/localDb";
 import uuid from "react-native-uuid";
-import { calcKcal } from "@/lib/calc";
-import { upsertEatingDao } from "@/localDb/dao/eatingDao";
+import * as eatingService from "@/service/eatingService";
 
 export default function EatingAddScreen() {
   const [date, setDate] = useState(new Date());
@@ -62,40 +60,24 @@ export default function EatingAddScreen() {
   // 食事記録ボタン押下
   const onRecordEating = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const eatings: Eating[] = [
-      {
-        eatingId: uuid.v4(),
-        date: format(date, "yyyy-MM-dd"),
-        userId: auth.currentUser.uid,
+    try {
+      await eatingService.upsertEating(
+        uuid.v4(),
+        date,
+        auth.currentUser.uid,
         name,
-        calories: calcKcal(protein, fat, carbo),
-        protein: parseFloat(protein),
-        fat: parseFloat(fat),
-        carbo: parseFloat(carbo),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
-    try {
-      await upsertEatingDao(eatings, 0, 0);
-    } catch (e) {
-      console.error(e);
-    } finally {
+        parseFloat(protein),
+        parseFloat(fat),
+        parseFloat(carbo)
+      );
       router.back();
+    } catch (error) {
+      console.error("食事追加失敗：" + error);
+      Alert.alert("食事の追加に失敗しました。");
+    } finally {
       setLoading(false);
-    }
-
-    try {
-      const res = await apiRequestWithRefresh("/eating", "POST", eatings);
-      if (res?.ok) {
-        await upsertEatingDao(eatings, 1, 0);
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 

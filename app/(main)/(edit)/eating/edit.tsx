@@ -15,18 +15,11 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
-import {
-  deleteEatingDao,
-  getEatingDao,
-  setEatingSynced,
-  upsertEatingDao,
-} from "@/localDb/dao/eatingDao";
+import { getEatingDao } from "@/localDb/dao/eatingDao";
 import { auth } from "@/lib/firebaseConfig";
-import { Eating } from "@/types/localDb";
-import { calcKcal } from "@/lib/calc";
+import * as eatingService from "@/service/eatingService";
 
 export default function EatingEditScreen() {
   // パスパラメーター
@@ -106,37 +99,22 @@ export default function EatingEditScreen() {
 
     if (auth.currentUser === null) return;
 
-    const eatings: Eating[] = [
-      {
+    try {
+      await eatingService.upsertEating(
         eatingId,
-        date: format(date, "yyyy-MM-dd"),
-        userId: auth.currentUser.uid,
+        date,
+        auth.currentUser.uid,
         name,
-        calories: calcKcal(protein, fat, carbo),
-        protein: parseFloat(protein),
-        fat: parseFloat(fat),
-        carbo: parseFloat(carbo),
-        createdAt: createdAt,
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
-    try {
-      await upsertEatingDao(eatings, 0, 0);
-    } catch (e) {
-      console.error(e);
-    } finally {
+        parseFloat(protein),
+        parseFloat(fat),
+        parseFloat(carbo)
+      );
       router.back();
+    } catch (error) {
+      console.error("トレーニング更新失敗：" + error);
+      Alert.alert("トレーニングの更新に失敗しました。");
+    } finally {
       setLoading(false);
-    }
-
-    try {
-      const res = await apiRequestWithRefresh("/eating", "POST", eatings);
-      if (res?.ok) {
-        await upsertEatingDao(eatings, 1, 0);
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -150,24 +128,13 @@ export default function EatingEditScreen() {
         onPress: async () => {
           setLoading(true);
           try {
-            await deleteEatingDao(eatingId);
-          } catch (e) {
-            console.error(e);
-          } finally {
+            await eatingService.deleteEating(eatingId);
             router.back();
-          }
-
-          try {
-            const res = await apiRequestWithRefresh(
-              API_ENDPOINTS.eating(eatingId),
-              "DELETE",
-              null
-            );
-            if (res?.ok) {
-              await setEatingSynced(eatingId);
-            }
-          } catch (e) {
-            console.error(e);
+          } catch (error) {
+            console.error("トレーニング削除失敗：" + error);
+            Alert.alert("トレーニングの削除に失敗しました。");
+          } finally {
+            setLoading(false);
           }
         },
       },

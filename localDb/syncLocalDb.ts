@@ -4,11 +4,6 @@ import {
   setUserProfileSynced,
 } from "./dao/userProfileDao";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
-import {
-  getUnsyncedEating,
-  setEatingSynced,
-  upsertEatingDao,
-} from "./dao/eatingDao";
 import { getUnsyncedUserGoal, setUserGoalSynced } from "./dao/userGoalDao";
 import {
   getUnsyncedMyExercise,
@@ -16,6 +11,7 @@ import {
   updateMyExerciseDao,
 } from "./dao/myExerciseDao";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { ApiError } from "@/lib/error";
 
 export const syncLocalDb = async () => {
@@ -60,37 +56,8 @@ export const syncLocalDb = async () => {
     // トレーニングデータの非同期データ送信
     await trainingRepository.syncTrainingsFromLocal();
 
-    // 食事データの非同期データ送信（追加）
-    const eatingAdd: Eating[] = await getUnsyncedEating(0);
-    if (eatingAdd.length > 0) {
-      try {
-        const res = await apiRequestWithRefresh(`/eating`, "POST", eatingAdd);
-        if (res?.ok) {
-          await upsertEatingDao(eatingAdd, 1, 0);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // 食事データの非同期データ送信（削除）
-    const eatingDelete: Eating[] = await getUnsyncedEating(1);
-    if (eatingDelete.length > 0) {
-      for (const eating of eatingDelete) {
-        try {
-          const res = await apiRequestWithRefresh(
-            `/eating/` + eating.eatingId,
-            "DELETE",
-            null
-          );
-          if (res?.ok) {
-            await setEatingSynced(eating.eatingId);
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    }
+    // 食事データの非同期データ送信
+    await eatingRepository.syncEatingsFromLocal();
 
     // マイ種別データ（追加）
     const myExerciseAdd: Exercise[] = await getUnsyncedMyExercise(0);

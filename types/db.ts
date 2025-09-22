@@ -45,3 +45,19 @@ export type TrainingEntity = {
   created_at: string;
   updated_at: string;
 };
+
+// 食事テーブル
+export type EatingEntity = {
+  eating_id: string;
+  date: string;
+  user_id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbo: number;
+  is_synced: number;
+  is_deleted: number;
+  created_at: string;
+  updated_at: string;
+};

@@ -45,6 +45,20 @@ export type TrainingResponse = {
   updatedAt: string;
 };
 
+// 食事情報取得API
+export type EatingResponse = {
+  eatingId: string;
+  date: string;
+  userId: string;
+  name: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbo: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
@@ -77,6 +91,20 @@ export type TrainingRequest = {
   exerciseId: string;
   weight: number;
   reps: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// 食事情報追加更新API
+export type EatingRequest = {
+  eatingId: string;
+  date: string;
+  userId: string;
+  name: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbo: number;
   createdAt: string;
   updatedAt: string;
 };
