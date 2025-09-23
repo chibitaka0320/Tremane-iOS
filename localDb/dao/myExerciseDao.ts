@@ -148,6 +148,7 @@ export const deleteMyExerciseDao = async (exerciseId: string) => {
   );
 };
 
+// マイトレーニング種目データ物理削除
 export const deleteMyExercises = async () => {
   await db.runAsync("DELETE FROM exercises WHERE owner_user_id != null;");
 };

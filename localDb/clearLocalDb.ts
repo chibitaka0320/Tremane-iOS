@@ -3,12 +3,12 @@ import * as userProfileRepository from "@/localDb/repository/userProfileReposito
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
-import { deleteMyExercises } from "./dao/myExerciseDao";
+import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 
 // ローカルDB（ユーザーに紐づく情報）の削除
 export const clearLocalDb = async () => {
   console.log(
-    "========== ローカルDBデータクリア開始（マスタは除く） =========="
+    "========== ローカルDBデータクリア処理開始（マスタは除く） =========="
   );
   try {
     // ユーザー情報削除
@@ -30,6 +30,13 @@ export const clearLocalDb = async () => {
     // 食事情報削除
     await eatingRepository.deleteEatings();
     console.log("食事データクリア完了");
-  } catch (error) {}
-  await deleteMyExercises();
+
+    // マイトレーニング種目削除
+    await exerciseRepository.deleteMyExercises();
+    console.log("マイトレーニング種目クリア完了");
+  } catch (error) {
+    console.error("ローカルDBデータクリアエラー：" + error);
+  } finally {
+    ("========== ローカルDBデータクリア処理終了（マスタは除く） ==========");
+  }
 };
