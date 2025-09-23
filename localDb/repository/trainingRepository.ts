@@ -71,6 +71,11 @@ export async function setTrainingsSynced(trainingIds: string[]) {
   await trainingDao.setTrainingsSynced(trainingIds);
 }
 
+// トレーニング情報物理削除
+export async function deleteTrainings() {
+  await trainingDao.deleteTrainings();
+}
+
 // レスポンスをエンティティに変換
 function toEntity(trainingResponse: TrainingResponse): TrainingEntity {
   return {

@@ -273,6 +273,7 @@ export const deleteTrainingDao = async (trainingId: string) => {
   );
 };
 
+// トレーニングデータ物理削除
 export const deleteTrainings = async () => {
   await db.runAsync("DELETE FROM trainings;");
 };
