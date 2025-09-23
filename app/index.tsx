@@ -4,7 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
-import { initMaster } from "@/localDb/initMaster";
+import { masterSyncFromRemote } from "@/localDb/sync/masterSyncFromRemote";
 import Indicator from "@/components/common/Indicator";
 import * as Notifications from "expo-notifications";
 
@@ -26,7 +26,7 @@ export default function Index() {
       if (user?.emailVerified || user?.isAnonymous) {
         setIsAuthenticated(true);
         try {
-          await initMaster();
+          await masterSyncFromRemote();
           await syncLocalDb();
           await userSyncFromRemote();
         } catch (error) {
@@ -34,7 +34,7 @@ export default function Index() {
         }
       } else {
         try {
-          await initMaster();
+          await masterSyncFromRemote();
         } catch (e) {
           console.error(e);
         } finally {

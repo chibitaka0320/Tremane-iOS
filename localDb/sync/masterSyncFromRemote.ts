@@ -3,7 +3,7 @@ import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 import { ApiError } from "@/lib/error";
 
 // リモードDBからマスタデータを同期する
-export const initMaster = async () => {
+export const masterSyncFromRemote = async () => {
   console.log("========== マスタデータ同期開始 ==========");
   try {
     // 部位テーブル初期化
