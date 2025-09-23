@@ -21,3 +21,11 @@ export async function updateUser(nickname: string, updatedAt: string) {
 export async function deleteUser() {
   await db.runAsync(`DELETE FROM users`);
 }
+
+// ユーザー情報取得
+export async function getUser(): Promise<UserEntity | null> {
+  const user = await db.getFirstAsync<UserEntity>(
+    `SELECT user_id, nickname, created_at, updated_at FROM users`
+  );
+  return user;
+}

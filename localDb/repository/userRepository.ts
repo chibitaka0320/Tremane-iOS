@@ -16,6 +16,17 @@ export async function syncUsersFromRemote() {
   }
 }
 
+// ローカルDBからユーザーデータを同期
+export async function syncUsersFromLocal() {
+  const user = await userDao.getUser();
+  if (user) {
+    await userApi.updateUser(user.nickname, user.updated_at);
+  } else {
+    console.log("ユーザー情報が存在しませんでした。（ローカル → リモート）");
+    throw new Error("ローカルDBにユーザー情報が存在しません");
+  }
+}
+
 // ユーザー更新
 export async function updateUser(nickname: string, updatedAt: string) {
   await userDao.updateUser(nickname, updatedAt);

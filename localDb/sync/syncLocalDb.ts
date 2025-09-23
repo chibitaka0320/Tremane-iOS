@@ -1,3 +1,4 @@
+import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
@@ -10,7 +11,8 @@ export const syncLocalDb = async () => {
   console.log("========== データ同期開始（Local → Remote） ==========");
   try {
     // ユーザーテーブルの非同期データ送信
-    // TODO: ユーザーテーブルの同期を作成
+    await userRepository.syncUsersFromLocal();
+    console.log("ユーザーデータ同期完了");
 
     // ユーザープロフィールの非同期データ送信
     await userProfileRepository.syncUserProfilesFromLocal();
