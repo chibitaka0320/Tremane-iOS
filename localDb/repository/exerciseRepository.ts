@@ -1,4 +1,5 @@
 import * as myExerciseDao from "@/localDb/dao/myExerciseDao";
+import * as exerciseDao from "@/localDb/dao/exerciseDao";
 import * as exerciseApi from "@/api/exerciseApi";
 import { format } from "date-fns";
 import { ExerciseRequest, ExerciseResponse } from "@/types/api";
@@ -22,6 +23,27 @@ export async function syncMyExercisesFromRemote() {
     await myExerciseDao.upsertMyExercises(exerciseEntities);
   } else {
     console.log("同期対象のマイトレーニング種目が存在しませんでした。");
+  }
+}
+
+// リモートDBからトレーニング種目（システム管理）の最新情報を同期
+export async function syncExercisesFromRemote() {
+  // ローカルDBの最新更新日を取得
+  const lastUpdated = await exerciseDao.getLastUpdatedAt();
+
+  // リモートDBから情報を取得
+  const formatDate = format(lastUpdated, "yyyy-MM-dd'T'HH:mm:ss.SSS");
+  const exercises = await exerciseApi.getExercises(formatDate);
+
+  if (exercises) {
+    const exerciseEntities: ExerciseEntity[] = [];
+    for (const exercise of exercises) {
+      const exerciseEntity = toEntity(exercise);
+      exerciseEntities.push(exerciseEntity);
+    }
+    await exerciseDao.upsertExercises(exerciseEntities);
+  } else {
+    console.log("同期対象のトレーニング種目が存在しませんでした。");
   }
 }
 

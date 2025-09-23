@@ -1,5 +1,17 @@
 import { ExerciseRequest, ExerciseResponse } from "@/types/api";
-import { apiRequestAuth } from "./apiRequest";
+import { apiRequest, apiRequestAuth } from "./apiRequest";
+
+// GET /exercise
+export async function getExercises(
+  lastUpdated: string
+): Promise<ExerciseResponse[] | null> {
+  const res = await apiRequest<ExerciseResponse[]>(
+    "/exercise?updatedAt=" + lastUpdated,
+    "GET",
+    null
+  );
+  return res.data;
+}
 
 // GET /exercise/myself
 export async function getMyExercises(

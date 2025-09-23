@@ -1,8 +1,6 @@
-import { apiRequest } from "@/lib/apiClient";
-import { Exercise } from "@/types/localDb";
-import { format } from "date-fns";
-import { getLatestExercise, insertExerciseDao } from "./dao/exerciseDao";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
+import { ApiError } from "@/lib/error";
 
 // リモードDBからマスタデータを同期する
 export const initMaster = async () => {
@@ -13,24 +11,15 @@ export const initMaster = async () => {
     console.log("部位データ同期完了");
 
     // 種目テーブル初期化
-    const latestExercise = await getLatestExercise();
-
-    const exerciseRes = await apiRequest(
-      "/exercise?updatedAt=" +
-        format(latestExercise, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
-      "GET",
-      null
-    );
-
-    if (exerciseRes?.ok) {
-      const exercise: Exercise[] = await exerciseRes.json();
-      await insertExerciseDao(exercise);
-    }
-
-    console.log("マスタデータダウンロード完了");
+    await exerciseRepository.syncExercisesFromRemote();
+    console.log("トレーニング種目データ同期完了");
   } catch (error) {
-    console.error(error);
+    if (error instanceof ApiError) {
+      console.error("APIエラー：(" + error.status + ")" + error.message);
+    } else {
+      console.error("マスタデータ同期エラー：" + (error as Error).message);
+    }
   } finally {
-    console.log("========== マスタデータダウンロード終了 ==========");
+    console.log("========== マスタデータ同期終了 ==========");
   }
 };
