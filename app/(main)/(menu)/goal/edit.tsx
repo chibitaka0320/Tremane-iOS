@@ -14,18 +14,12 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import { format } from "date-fns";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { router } from "expo-router";
 import { pfcOptions } from "@/constants/pfcOptions";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { validateWeight } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";
-import { UserGoal } from "@/types/localDb";
-import {
-  upsertUserGoalDao,
-  setUserGoalSynced,
-} from "@/localDb/dao/userGoalDao";
 import { getUserGoal } from "@/localDb/service/userGoalService";
 import * as userGoalService from "@/service/userGoalService";
 

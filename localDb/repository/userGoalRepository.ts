@@ -38,6 +38,11 @@ export async function syncUserGoalsFromLocal() {
   }
 }
 
+// ユーザープロフィール情報取得
+export async function getUserGoal(): Promise<UserGoalEntity | null> {
+  return await userGoalDao.getUserGoal();
+}
+
 // ユーザープロフィール情報追加更新
 export async function upsertUserGoal(userGoalEntity: UserGoalEntity) {
   await userGoalDao.upsertUserGoalDao(userGoalEntity);

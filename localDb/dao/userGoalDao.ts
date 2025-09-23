@@ -1,6 +1,5 @@
 import { db } from "@/lib/localDbConfig";
 import { UserGoalEntity } from "@/types/db";
-import { UserGoal } from "@/types/localDb";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -34,13 +33,13 @@ export async function getUnsyncedUserGoal(): Promise<UserGoalEntity | null> {
 }
 
 // フラグを同期済みにする
-export const setUserGoalSynced = async () => {
+export async function setUserGoalSynced() {
   await db.runAsync(`UPDATE users_goal SET is_synced = 1`);
-};
+}
 
 // 取得
-export const getUserGoalDao = async (): Promise<UserGoal | null> => {
-  const data = await db.getFirstAsync<UserGoal | null>(
+export async function getUserGoal(): Promise<UserGoalEntity | null> {
+  const data = await db.getFirstAsync<UserGoalEntity>(
     `
     SELECT
       user_id AS userId,
@@ -56,10 +55,10 @@ export const getUserGoalDao = async (): Promise<UserGoal | null> => {
   );
 
   return data;
-};
+}
 
 // 追加 or 更新
-export const upsertUserGoalDao = async (userGoal: UserGoalEntity) => {
+export async function upsertUserGoalDao(userGoal: UserGoalEntity) {
   await db.runAsync(
     `INSERT OR REPLACE INTO users_goal (user_id, weight, goal_weight, start, finish, pfc, is_synced, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
@@ -74,7 +73,7 @@ export const upsertUserGoalDao = async (userGoal: UserGoalEntity) => {
       userGoal.updated_at,
     ]
   );
-};
+}
 
 // 削除
 export async function deleteUserGoal() {
