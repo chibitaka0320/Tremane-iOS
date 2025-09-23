@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import theme from "@/styles/theme";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { clearLocalDb } from "@/localDb/clearLocalDb";
+import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
 import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiRequestWithRefresh } from "@/lib/apiClient";

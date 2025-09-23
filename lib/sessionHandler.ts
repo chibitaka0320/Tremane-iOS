@@ -1,7 +1,7 @@
 import { signOut } from "firebase/auth";
 import { Alert } from "react-native";
 import { auth } from "./firebaseConfig";
-import { clearLocalDb } from "@/localDb/clearLocalDb";
+import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
 import { router } from "expo-router";
 
 let isHandling = false;

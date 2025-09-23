@@ -22,7 +22,7 @@ import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEmail, validatePassword } from "@/lib/validators";
-import { clearLocalDb } from "@/localDb/clearLocalDb";
+import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
 import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
 
 export default function EmailEditScreen() {

@@ -1,7 +1,7 @@
 import Indicator from "@/components/common/Indicator";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
-import { clearLocalDb } from "@/localDb/clearLocalDb";
+import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
 import theme from "@/styles/theme";
 import { Entypo } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
