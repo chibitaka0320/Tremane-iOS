@@ -1,9 +1,9 @@
 import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
+import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import { deleteEatings } from "./dao/eatingDao";
 import { deleteMyExercises } from "./dao/myExerciseDao";
 import { deleteTrainings } from "./dao/trainingDao";
-import { deleteUserGoalDao } from "./dao/userGoalDao";
 
 // ローカルDB（ユーザーに紐づく情報）の削除
 export const clearLocalDb = async () => {
@@ -18,8 +18,11 @@ export const clearLocalDb = async () => {
     // ユーザープロフィール情報削除
     await userProfileRepository.deleteUserProfile();
     console.log("ユーザープロフィールデータクリア完了");
+
+    // ユーザー目標情報削除
+    await userGoalRepository.deleteUserGoal();
+    console.log("ユーザー目標データクリア完了");
   } catch (error) {}
-  await deleteUserGoalDao();
   await deleteEatings();
   await deleteTrainings();
   await deleteMyExercises();

@@ -48,6 +48,11 @@ export async function setUserGoalSynced() {
   await userGoalDao.setUserGoalSynced();
 }
 
+// ユーザープロフィール情報物理削除
+export async function deleteUserGoal() {
+  await userGoalDao.deleteUserGoal();
+}
+
 // レスポンスをエンティティに変換
 function toEntity(userGoalResponse: UserGoalResponse): UserGoalEntity {
   return {

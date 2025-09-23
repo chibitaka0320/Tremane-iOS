@@ -77,6 +77,6 @@ export const upsertUserGoalDao = async (userGoal: UserGoalEntity) => {
 };
 
 // 削除
-export const deleteUserGoalDao = async () => {
+export async function deleteUserGoal() {
   await db.runAsync(`DELETE FROM users_goal`);
-};
+}
