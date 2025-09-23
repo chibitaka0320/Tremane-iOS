@@ -120,12 +120,12 @@ export async function deleteEating(eatingId: string) {
 }
 
 // 食事データ物理削除（全削除）
-export const deleteEatings = async () => {
+export async function deleteEatings() {
   await db.runAsync(`DELETE FROM eatings;`);
-};
+}
 
 // フラグを同期済みにする
-export const setEatingsSynced = async (eatingIds: string[]) => {
+export async function setEatingsSynced(eatingIds: string[]) {
   await db.withTransactionAsync(async () => {
     for (const eatingId of eatingIds) {
       await db.runAsync(
@@ -134,4 +134,4 @@ export const setEatingsSynced = async (eatingIds: string[]) => {
       );
     }
   });
-};
+}
