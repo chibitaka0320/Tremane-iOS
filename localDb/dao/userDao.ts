@@ -17,7 +17,7 @@ export async function updateUser(nickname: string, updatedAt: string) {
   ]);
 }
 
-// ユーザー削除
+// ユーザー物理削除
 export async function deleteUser() {
   await db.runAsync(`DELETE FROM users`);
 }

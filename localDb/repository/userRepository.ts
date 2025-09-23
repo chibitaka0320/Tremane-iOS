@@ -32,6 +32,11 @@ export async function updateUser(nickname: string, updatedAt: string) {
   await userDao.updateUser(nickname, updatedAt);
 }
 
+// ユーザー物理削除
+export async function deleteUser() {
+  await userDao.deleteUser();
+}
+
 // レスポンスをエンティティに変換
 function toEntity(user: UserResponse): UserEntity {
   return {
