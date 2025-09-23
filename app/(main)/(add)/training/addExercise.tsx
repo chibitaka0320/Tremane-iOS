@@ -22,7 +22,7 @@ import uuid from "react-native-uuid";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import { BodyPartDto } from "@/types/dto";
+import { BodyPartDto } from "@/types/dto/bodyPartDto";
 
 export default function TrainingWithExerciseScreen() {
   //パスパラメータ

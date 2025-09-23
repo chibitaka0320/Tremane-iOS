@@ -1,6 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { BodyPartEntity } from "@/types/db";
-import { BodyPartWithExerciseDto } from "@/types/dto";
+import { BodyPartWithExerciseDto } from "@/types/dto/bodyPartDto";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {

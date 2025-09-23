@@ -3,7 +3,7 @@ import * as bodyPartApi from "@/api/bodyPartApi";
 import { format } from "date-fns";
 import { BodyPartEntity } from "@/types/db";
 import { BodyPartResponse } from "@/types/api";
-import { BodyPartDto } from "@/types/dto";
+import { BodyPartDto } from "@/types/dto/bodyPartDto";
 
 // リモートDBから部位データを同期
 export async function syncBodyPartsFromRemte() {

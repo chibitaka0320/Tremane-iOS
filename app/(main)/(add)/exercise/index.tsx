@@ -4,7 +4,7 @@ import {
   setMyExercisesSynced,
 } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
-import { BodyPartDto } from "@/types/dto";
+import { BodyPartDto } from "@/types/dto/bodyPartDto";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";

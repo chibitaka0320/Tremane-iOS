@@ -7,7 +7,7 @@ import { Entypo } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 import { router, useFocusEffect } from "expo-router";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import { BodyPartDto } from "@/types/dto";
+import { BodyPartDto } from "@/types/dto/bodyPartDto";
 
 const Tab = createMaterialTopTabNavigator();
 
