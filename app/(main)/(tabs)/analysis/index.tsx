@@ -10,7 +10,6 @@ import {
 import theme from "@/styles/theme";
 import { LineChart } from "react-native-chart-kit";
 import { selectLabel } from "@/types/common";
-import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import {
   getTrainingByMaxWeight,
   getWorkoutCount,
@@ -18,6 +17,7 @@ import {
 import { TrainingAnalysis } from "@/types/training";
 import { Octicons } from "@expo/vector-icons";
 import { partsColors } from "@/styles/partsColor";
+import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
 
 export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState("0");
@@ -30,12 +30,12 @@ export default function AnalysisScreen() {
   // 部位・種別情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await getBodyPartsWithExercises();
+      const res = await bodyPartRepository.getBodyPartsWithExercises();
       if (res) {
         setBodyPartOptions([
           { label: "全て", value: "0" },
           ...res.map((part) => ({
-            label: part.name,
+            label: part.partName,
             value: String(part.partsId),
           })),
         ]);

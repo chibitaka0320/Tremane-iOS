@@ -6,7 +6,6 @@ import {
   getMyExercise,
   updateMyExerciseDao,
 } from "@/localDb/dao/myExerciseDao";
-import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
 import { Exercise } from "@/types/localDb";
@@ -22,6 +21,7 @@ import {
   Modal,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
 
 export default function ExerciseEditScreen() {
   // パスパラメーター
@@ -63,11 +63,11 @@ export default function ExerciseEditScreen() {
   // 部位情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await getBodyPartsWithExercises();
+      const res = await bodyPartRepository.getBodyPartsWithExercises();
       if (res) {
         setBodyPartOptions(
           res.map((part) => ({
-            label: part.name,
+            label: part.partName,
             value: String(part.partsId),
           }))
         );

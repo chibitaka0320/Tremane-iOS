@@ -4,7 +4,7 @@ import {
   setMyExercisesSynced,
 } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
-import { BodypartWithExercise } from "@/types/bodyPart";
+import { BodyPartDto } from "@/types/dto";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,7 +18,7 @@ import {
 } from "react-native";
 
 type Props = {
-  data: BodypartWithExercise;
+  data: BodyPartDto;
 };
 
 export default function ExerciseScreen({ data }: Props) {
@@ -75,7 +75,7 @@ export default function ExerciseScreen({ data }: Props) {
       contentContainerStyle={styles.contentContainer}
     >
       {exercises.map((exercise, idx) =>
-        exercise.myFlg ? (
+        exercise.myExerciseFlg ? (
           <View style={styles.itemContainer} key={idx}>
             <TouchableOpacity
               style={styles.itemTextContainer}
@@ -83,7 +83,7 @@ export default function ExerciseScreen({ data }: Props) {
                 onEdit(exercise.exerciseId);
               }}
             >
-              <Text style={styles.itemText}>{exercise.name}</Text>
+              <Text style={styles.itemText}>{exercise.exerciseName}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -95,7 +95,7 @@ export default function ExerciseScreen({ data }: Props) {
           </View>
         ) : (
           <View style={styles.itemContainer} key={idx}>
-            <Text style={styles.itemText}>{exercise.name}</Text>
+            <Text style={styles.itemText}>{exercise.exerciseName}</Text>
           </View>
         )
       )}

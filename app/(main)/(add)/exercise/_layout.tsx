@@ -1,25 +1,25 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import ExerciseScreen from ".";
 import { useCallback, useState } from "react";
-import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
-import { BodypartWithExercise } from "@/types/bodyPart";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { CircleButton } from "@/components/common/CircleButton";
 import { Entypo } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 import { router, useFocusEffect } from "expo-router";
+import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import { BodyPartDto } from "@/types/dto";
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function ExerciseLayout() {
-  const [dataList, setDataList] = useState<BodypartWithExercise[] | null>(null);
+  const [dataList, setDataList] = useState<BodyPartDto[] | null>(null);
 
   const onPlusButton = () => {
     router.push("/(main)/(other)/exercise/add");
   };
 
   const fetchData = async () => {
-    const res = await getBodyPartsWithExercises();
+    const res = await bodyPartRepository.getBodyPartsWithExercises();
     setDataList(res ?? []);
   };
 
@@ -85,7 +85,7 @@ export default function ExerciseLayout() {
     <>
       <Tab.Navigator>
         {dataList.map((data) => (
-          <Tab.Screen key={data.name} name={data.name}>
+          <Tab.Screen key={data.partName} name={data.partName}>
             {() => <ExerciseScreen data={data} />}
           </Tab.Screen>
         ))}

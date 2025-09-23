@@ -1,5 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { BodyPartEntity } from "@/types/db";
+import { BodyPartWithExerciseDto } from "@/types/dto";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -30,24 +31,21 @@ export async function upsertBodyParts(bodyParts: BodyPartEntity[]) {
 }
 
 // 種目付き部位データ取得
-export const getBodyPartsWithExercisesDao = async () => {
-  const rows = await db.getAllAsync<{
-    parts_id: number;
-    part_name: string;
-    exercise_id: string;
-    owner_user_id: string;
-    exercise_name: string;
-  }>(`
+// TODO：部位付き種目一覧がよい？検討。
+export async function getBodyPartsWithExercises(): Promise<
+  BodyPartWithExerciseDto[]
+> {
+  const rows = await db.getAllAsync<BodyPartWithExerciseDto>(`
     SELECT
-      bp.parts_id,
-      bp.name AS part_name,
-      ex.exercise_id,
-      ex.owner_user_id,
-      ex.name AS exercise_name
+      bp.parts_id AS partsId,
+      bp.name AS partName,
+      ex.exercise_id AS exerciseId,
+      ex.owner_user_id AS ownerUserId,
+      ex.name AS exerciseName
     FROM body_parts bp
     JOIN exercises ex ON ex.parts_id = bp.parts_id
     WHERE ex.is_deleted = 0
     ORDER BY bp.parts_id ASC, ex.owner_user_id DESC, ex.created_at DESC
   `);
   return rows;
-};
+}

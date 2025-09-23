@@ -18,8 +18,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
-import { BodypartWithExercise } from "@/types/bodyPart";
-import { getBodyPartsWithExercises } from "@/localDb/service/bodyPartService";
 import {
   deleteTrainingDao,
   getTrainingDao,
@@ -28,6 +26,8 @@ import {
 import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
+import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import { BodyPartDto } from "@/types/dto";
 
 export default function TrainingEditScreen() {
   // パスパラメーター
@@ -47,7 +47,7 @@ export default function TrainingEditScreen() {
   const [createdAt, setCreatedAt] = useState("");
 
   // ピッカーデータ
-  const [bodyPartData, setBodyPartData] = useState<BodypartWithExercise[]>([]);
+  const [bodyPartData, setBodyPartData] = useState<BodyPartDto[]>([]);
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
   const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 
@@ -68,12 +68,12 @@ export default function TrainingEditScreen() {
 
   // 部位・種目情報取得
   const fetchBodyParts = async () => {
-    const res = await getBodyPartsWithExercises();
+    const res = await bodyPartRepository.getBodyPartsWithExercises();
     if (res) {
       setBodyPartData(res);
       setBodyPartOptions(
         res.map((part) => ({
-          label: part.name,
+          label: part.partName,
           value: String(part.partsId),
         }))
       );
@@ -119,7 +119,7 @@ export default function TrainingEditScreen() {
     if (selected) {
       setExerciseOptions(
         selected.exercises.map((ex) => ({
-          label: ex.name,
+          label: ex.exerciseName,
           value: String(ex.exerciseId),
         }))
       );

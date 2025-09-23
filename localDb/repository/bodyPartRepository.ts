@@ -3,6 +3,7 @@ import * as bodyPartApi from "@/api/bodyPartApi";
 import { format } from "date-fns";
 import { BodyPartEntity } from "@/types/db";
 import { BodyPartResponse } from "@/types/api";
+import { BodyPartDto } from "@/types/dto";
 
 // リモートDBから部位データを同期
 export async function syncBodyPartsFromRemte() {
@@ -23,6 +24,33 @@ export async function syncBodyPartsFromRemte() {
   } else {
     console.log("同期対象の部位データが存在しませんでした。");
   }
+}
+
+// 種目付き部位一覧取得
+export async function getBodyPartsWithExercises(): Promise<BodyPartDto[]> {
+  const rows = await bodyPartDao.getBodyPartsWithExercises();
+
+  const bodyPartsRecord: Record<number, BodyPartDto> = {};
+
+  for (const row of rows) {
+    // 対象部位IDがなければ新規追加
+    if (!bodyPartsRecord[row.partsId]) {
+      bodyPartsRecord[row.partsId] = {
+        partsId: row.partsId,
+        partName: row.partName,
+        exercises: [],
+      };
+    }
+
+    bodyPartsRecord[row.partsId].exercises.push({
+      exerciseId: row.exerciseId,
+      exerciseName: row.exerciseName,
+      ownerUserId: row.ownerUserId,
+      myExerciseFlg: !row.ownerUserId,
+    });
+  }
+
+  return Object.values(bodyPartsRecord);
 }
 
 // レスポンスをエンティティに変換
