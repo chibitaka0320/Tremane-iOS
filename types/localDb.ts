@@ -6,18 +6,6 @@ export type User = {
   updatedAt: string;
 };
 
-// ユーザープロフィールテーブル
-export type UserProfile = {
-  userId: string;
-  height: number;
-  weight: number;
-  birthday: string;
-  gender: number;
-  activeLevel: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
 // ユーザー目標テーブル
 export type UserGoal = {
   userId: string;

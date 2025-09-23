@@ -1,6 +1,5 @@
 import { db } from "@/lib/localDbConfig";
 import { UserProfileEntity } from "@/types/db";
-import { UserProfile } from "@/types/localDb";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -11,10 +10,9 @@ export async function getLastUpdatedAt(): Promise<string> {
 }
 
 // 非同期データを取得
-export const getUnsyncedUserProfile =
-  async (): Promise<UserProfileEntity | null> => {
-    const unsynced = await db.getFirstAsync<UserProfileEntity>(
-      `
+export async function getUnsyncedUserProfile(): Promise<UserProfileEntity | null> {
+  const unsynced = await db.getFirstAsync<UserProfileEntity>(
+    `
     SELECT
       user_id,
       height,
@@ -30,28 +28,28 @@ export const getUnsyncedUserProfile =
       is_synced = 0
     ;
     `
-    );
-    return unsynced;
-  };
+  );
+  return unsynced;
+}
 
 // フラグを同期済みにする
-export const setUserProfileSynced = async () => {
+export async function setUserProfileSynced() {
   await db.runAsync(`UPDATE users_profile SET is_synced = 1`);
-};
+}
 
 // 取得
-export const getUserProfileDao = async (): Promise<UserProfile | null> => {
-  const data = await db.getFirstAsync<UserProfile | null>(
+export async function getUserProfile(): Promise<UserProfileEntity | null> {
+  const data = await db.getFirstAsync<UserProfileEntity>(
     `
       SELECT
-          user_id AS userId,
+          user_id,
           height,
           weight,
           birthday,
           gender,
-          active_level AS activeLevel,
-          created_at AS createdAt,
-          updated_at AS updatedAt
+          active_level,
+          created_at,
+          updated_at
       FROM
           users_profile
       ;
@@ -59,10 +57,10 @@ export const getUserProfileDao = async (): Promise<UserProfile | null> => {
   );
 
   return data;
-};
+}
 
 // 追加 or 更新
-export const upsertUserProfile = async (userProfile: UserProfileEntity) => {
+export async function upsertUserProfile(userProfile: UserProfileEntity) {
   await db.runAsync(
     `INSERT OR REPLACE INTO users_profile (user_id, height, weight, birthday, gender, active_level, is_synced, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
@@ -77,7 +75,7 @@ export const upsertUserProfile = async (userProfile: UserProfileEntity) => {
       userProfile.updated_at,
     ]
   );
-};
+}
 
 // 削除
 export async function deleteUserProfile() {

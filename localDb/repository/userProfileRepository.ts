@@ -38,6 +38,11 @@ export async function syncUserProfilesFromLocal() {
   }
 }
 
+// ユーザープロフィール情報取得
+export async function getUserProfile(): Promise<UserProfileEntity | null> {
+  return await userProfileDao.getUserProfile();
+}
+
 // ユーザープロフィール情報追加更新
 export async function upsertUserProfile(userProfileEntity: UserProfileEntity) {
   await userProfileDao.upsertUserProfile(userProfileEntity);

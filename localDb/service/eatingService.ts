@@ -1,13 +1,14 @@
 import { EatingByDate, Goal, Meal, Rate, Total } from "@/types/eating";
 import { getEatingByDateDao } from "../dao/eatingDao";
-import { Eating, UserGoal, UserProfile } from "@/types/localDb";
-import { getUserProfileDao } from "../dao/userProfileDao";
+import { Eating, UserGoal } from "@/types/localDb";
 import { getUserGoalDao } from "../dao/userGoalDao";
 import { calcGoalKcal } from "@/lib/calc";
+import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
+import { UserProfileEntity } from "@/types/db";
 
 export const getEatingByDate = async (date: string): Promise<EatingByDate> => {
   const eatings: Eating[] = await getEatingByDateDao(date);
-  const userProfile: UserProfile | null = await getUserProfileDao();
+  const userProfile = await userProfileRepository.getUserProfile();
   const userGoal: UserGoal | null = await getUserGoalDao();
 
   const total = createTotal(eatings);
@@ -66,7 +67,10 @@ const createMeal = (eatings: Eating[]): Meal[] => {
   return meal;
 };
 
-const createGoal = (prof: UserProfile | null, goal: UserGoal | null): Goal => {
+const createGoal = (
+  prof: UserProfileEntity | null,
+  goal: UserGoal | null
+): Goal => {
   let calories = 0;
   let protein = 0;
   let fat = 0;

@@ -1,11 +1,11 @@
 import { UserGoalDto } from "@/types/api";
 import { getUserGoalDao } from "../dao/userGoalDao";
-import { getUserProfileDao } from "../dao/userProfileDao";
 import { calcGoalKcal } from "@/lib/calc";
+import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 
 export const getUserGoal = async () => {
   const goal = await getUserGoalDao();
-  const prof = await getUserProfileDao();
+  const prof = await userProfileRepository.getUserProfile();
 
   let goalCalorie = 0;
 
