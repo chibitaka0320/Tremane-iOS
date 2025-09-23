@@ -1,27 +1,16 @@
 import { apiRequest } from "@/lib/apiClient";
-import { BodyPart, Exercise } from "@/types/localDb";
+import { Exercise } from "@/types/localDb";
 import { format } from "date-fns";
-import { getLatestBodyPart, insertBodyPartDao } from "./dao/bodyPartDao";
 import { getLatestExercise, insertExerciseDao } from "./dao/exerciseDao";
+import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
 
-// マスタテーブル初期化
+// リモードDBからマスタデータを同期する
 export const initMaster = async () => {
-  console.log("========== マスタデータダウンロード開始 ==========");
+  console.log("========== マスタデータ同期開始 ==========");
   try {
     // 部位テーブル初期化
-    const latestBodyPart = await getLatestBodyPart();
-
-    const bodyPartRes = await apiRequest(
-      "/bodyparts?updatedAt=" +
-        format(latestBodyPart, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
-      "GET",
-      null
-    );
-
-    if (bodyPartRes?.ok) {
-      const bodyPart: BodyPart[] = await bodyPartRes.json();
-      await insertBodyPartDao(bodyPart);
-    }
+    await bodyPartRepository.syncBodyPartsFromRemte();
+    console.log("部位データ同期完了");
 
     // 種目テーブル初期化
     const latestExercise = await getLatestExercise();

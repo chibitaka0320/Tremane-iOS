@@ -69,6 +69,14 @@ export type ExerciseResponse = {
   updatedAt: string;
 };
 
+// 部位データ取得API
+export type BodyPartResponse = {
+  partsId: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
