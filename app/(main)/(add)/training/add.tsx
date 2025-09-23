@@ -22,7 +22,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import { BodyPartDto } from "@/types/dto/bodyPartDto";
+import { BodyPart } from "@/types/dto/bodyPartDto";
 
 export default function TrainingAddScreen() {
   // 表示データ
@@ -40,7 +40,7 @@ export default function TrainingAddScreen() {
   const [exerciseModal, setExerciseModal] = useState(false);
 
   // ピッカーデータ関連
-  const [bodyPartData, setBodyPartData] = useState<BodyPartDto[]>([]);
+  const [bodyPartData, setBodyPartData] = useState<BodyPart[]>([]);
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
   const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
 

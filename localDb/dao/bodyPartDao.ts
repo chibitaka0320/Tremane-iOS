@@ -1,6 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { BodyPartEntity } from "@/types/db";
-import { BodyPartWithExerciseDto } from "@/types/dto/bodyPartDto";
+import { BodyPartWithExercise } from "@/types/dto/bodyPartDto";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -33,9 +33,9 @@ export async function upsertBodyParts(bodyParts: BodyPartEntity[]) {
 // 種目付き部位データ取得
 // TODO：部位付き種目一覧がよい？検討。
 export async function getBodyPartsWithExercises(): Promise<
-  BodyPartWithExerciseDto[]
+  BodyPartWithExercise[]
 > {
-  const rows = await db.getAllAsync<BodyPartWithExerciseDto>(`
+  const rows = await db.getAllAsync<BodyPartWithExercise>(`
     SELECT
       bp.parts_id AS partsId,
       bp.name AS partName,

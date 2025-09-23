@@ -7,12 +7,12 @@ import { Entypo } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 import { router, useFocusEffect } from "expo-router";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import { BodyPartDto } from "@/types/dto/bodyPartDto";
+import { BodyPart } from "@/types/dto/bodyPartDto";
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function ExerciseLayout() {
-  const [dataList, setDataList] = useState<BodyPartDto[] | null>(null);
+  const [dataList, setDataList] = useState<BodyPart[] | null>(null);
 
   const onPlusButton = () => {
     router.push("/(main)/(other)/exercise/add");

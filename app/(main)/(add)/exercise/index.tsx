@@ -4,7 +4,7 @@ import {
   setMyExercisesSynced,
 } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
-import { BodyPartDto } from "@/types/dto/bodyPartDto";
+import { BodyPart } from "@/types/dto/bodyPartDto";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,7 +18,7 @@ import {
 } from "react-native";
 
 type Props = {
-  data: BodyPartDto;
+  data: BodyPart;
 };
 
 export default function ExerciseScreen({ data }: Props) {

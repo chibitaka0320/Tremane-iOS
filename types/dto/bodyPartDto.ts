@@ -1,5 +1,5 @@
 // 種目付き部位DTO
-export type BodyPartWithExerciseDto = {
+export type BodyPartWithExercise = {
   partsId: number;
   partName: string;
   exerciseId: string;
@@ -8,7 +8,7 @@ export type BodyPartWithExerciseDto = {
 };
 
 // ネスト後部位DTO
-export type BodyPartDto = {
+export type BodyPart = {
   partsId: number;
   partName: string;
   exercises: {

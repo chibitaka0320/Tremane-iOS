@@ -3,7 +3,7 @@ import * as bodyPartApi from "@/api/bodyPartApi";
 import { format } from "date-fns";
 import { BodyPartEntity } from "@/types/db";
 import { BodyPartResponse } from "@/types/api";
-import { BodyPartDto } from "@/types/dto/bodyPartDto";
+import { BodyPart } from "@/types/dto/bodyPartDto";
 
 // リモートDBから部位データを同期
 export async function syncBodyPartsFromRemte() {
@@ -27,10 +27,10 @@ export async function syncBodyPartsFromRemte() {
 }
 
 // 種目付き部位一覧取得
-export async function getBodyPartsWithExercises(): Promise<BodyPartDto[]> {
+export async function getBodyPartsWithExercises(): Promise<BodyPart[]> {
   const rows = await bodyPartDao.getBodyPartsWithExercises();
 
-  const bodyPartsRecord: Record<number, BodyPartDto> = {};
+  const bodyPartsRecord: Record<number, BodyPart> = {};
 
   for (const row of rows) {
     // 対象部位IDがなければ新規追加
