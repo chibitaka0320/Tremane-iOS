@@ -70,6 +70,11 @@ export async function deleteEating(eatingId: string) {
   await eatingDao.deleteEating(eatingId);
 }
 
+// 食事情報物理削除
+export async function deleteEatings() {
+  await eatingDao.deleteEatings();
+}
+
 // レスポンスをエンティティに交換
 function toEntity(eatingResponse: EatingResponse): EatingEntity {
   return {

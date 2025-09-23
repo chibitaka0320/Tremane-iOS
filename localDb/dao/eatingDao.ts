@@ -119,7 +119,7 @@ export async function deleteEating(eatingId: string) {
   ]);
 }
 
-// 全削除
+// 食事データ物理削除（全削除）
 export const deleteEatings = async () => {
   await db.runAsync(`DELETE FROM eatings;`);
 };
