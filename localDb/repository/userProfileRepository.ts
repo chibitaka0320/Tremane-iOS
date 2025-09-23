@@ -48,6 +48,11 @@ export async function setUserProfileSynced() {
   await userProfileDao.setUserProfileSynced();
 }
 
+// ユーザープロフィール情報物理削除
+export async function deleteUserProfile() {
+  await userProfileDao.deleteUserProfile();
+}
+
 // レスポンスをエンティティに変換
 function toEntity(userProfileResponse: UserProfileResponse): UserProfileEntity {
   return {

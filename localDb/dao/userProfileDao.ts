@@ -80,6 +80,6 @@ export const upsertUserProfile = async (userProfile: UserProfileEntity) => {
 };
 
 // 削除
-export const deleteUserProfileDao = async () => {
+export async function deleteUserProfile() {
   await db.runAsync(`DELETE FROM users_profile`);
-};
+}
