@@ -8,7 +8,6 @@ import {
 } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
-import { Exercise } from "@/types/localDb";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -23,6 +22,7 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import { Exercise } from "@/types/dto/exerciseDto";
 
 export default function ExerciseAddScreen() {
   const [bodyParts, setBodyParts] = useState("");

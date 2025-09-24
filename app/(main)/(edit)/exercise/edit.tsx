@@ -5,7 +5,6 @@ import { auth } from "@/lib/firebaseConfig";
 import { updateMyExerciseDao } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
-import { Exercise } from "@/types/localDb";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -20,6 +19,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
 import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
+import { Exercise } from "@/types/dto/exerciseDto";
 
 export default function ExerciseEditScreen() {
   // パスパラメーター
