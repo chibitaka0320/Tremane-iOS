@@ -5,7 +5,7 @@ import * as eatingApi from "@/api/eatingApi";
 import { format } from "date-fns";
 import { EatingRequest, EatingResponse } from "@/types/api";
 import { EatingEntity, UserGoalEntity, UserProfileEntity } from "@/types/db";
-import { DailyEating, Nutrition } from "@/types/dto/eatingDto";
+import { DailyEating, MealRecord, Nutrition } from "@/types/dto/eatingDto";
 import { calcGoalKcal } from "@/lib/calc";
 
 // リモートDBから食事データの最新情報を同期
@@ -79,6 +79,11 @@ export async function getEatingByDate(date: string): Promise<DailyEating> {
   const meals = await eatingDao.getEatingsByDate(date);
 
   return { date, total, goal, rate, meals };
+}
+
+// 食事詳細情報取得
+export async function getEating(eatingId: string): Promise<MealRecord | null> {
+  return await eatingDao.getEating(eatingId);
 }
 
 // 食事情報追加更新

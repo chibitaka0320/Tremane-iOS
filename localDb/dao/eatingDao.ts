@@ -1,7 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { EatingEntity } from "@/types/db";
 import { MealRecord, Nutrition } from "@/types/dto/eatingDto";
-import { Eating } from "@/types/localDb";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -71,27 +70,26 @@ export async function getNutritionTotalByDate(
 }
 
 // 食事詳細取得
-export const getEatingDao = async (eatingId: string) => {
-  const eating = await db.getFirstAsync<Eating>(
+export async function getEating(eatingId: string): Promise<MealRecord | null> {
+  const eating = await db.getFirstAsync<MealRecord>(
     `
     SELECT
-      eating_id AS eatingId,
+      eating_id as eatingId,
       date,
-      user_id AS userId,
       name,
       calories,
       protein,
       fat,
       carbo,
-      created_at AS createdAt,
-      updated_at AS updatedAt
+      created_at as createdAt,
+      updated_at as updatedAt
     FROM eatings
     WHERE eating_id = ?
     `,
     [eatingId]
   );
   return eating;
-};
+}
 
 // 追加 or 更新
 export async function upsertEatings(eatings: EatingEntity[]) {

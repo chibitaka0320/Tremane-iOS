@@ -11,6 +11,8 @@ export type MealRecord = Nutrition & {
   eatingId: string;
   date: string;
   name: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 // 1日分食事集計

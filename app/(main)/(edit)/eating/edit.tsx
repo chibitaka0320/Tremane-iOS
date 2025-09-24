@@ -17,9 +17,9 @@ import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
-import { getEatingDao } from "@/localDb/dao/eatingDao";
 import { auth } from "@/lib/firebaseConfig";
 import * as eatingService from "@/service/eatingService";
+import * as eatingRepository from "@/localDb/repository/eatingRepository";
 
 export default function EatingEditScreen() {
   // パスパラメーター
@@ -48,7 +48,7 @@ export default function EatingEditScreen() {
     const fetchEating = async () => {
       setLoading(true);
       try {
-        const res = await getEatingDao(eatingId);
+        const res = await eatingRepository.getEating(eatingId);
 
         if (res) {
           setDate(new Date(res.date));
