@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import Value from "./Value";
 import theme from "@/styles/theme";
-import { Goal, Rate, Total } from "@/types/eating";
 import { PFC_LABELS } from "@/constants/pfc";
 import CircleProgress from "../common/CircleProgress";
 import { Nutrition } from "@/types/dto/eatingDto";
@@ -37,8 +36,8 @@ export default function Summary({ total, goal, rate }: Props) {
           <View style={styles.pfcValue} key={key}>
             <Text>{label}</Text>
             <Value
-              intake={total?.[key as keyof Total]}
-              goal={goal?.[key as keyof Goal]}
+              intake={total?.[key as keyof Nutrition]}
+              goal={goal?.[key as keyof Nutrition]}
             />
             <Text>g</Text>
           </View>
