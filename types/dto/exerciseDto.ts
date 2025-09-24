@@ -1,4 +1,4 @@
-// 種目テーブル
+// トレーニング種目DTO
 export type Exercise = {
   exerciseId: string;
   ownerUserId?: string;

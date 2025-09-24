@@ -4,6 +4,7 @@ import * as exerciseApi from "@/api/exerciseApi";
 import { format } from "date-fns";
 import { ExerciseRequest, ExerciseResponse } from "@/types/api";
 import { ExerciseEntity } from "@/types/db";
+import { Exercise } from "@/types/dto/exerciseDto";
 
 // リモートDBからマイトレーニング種目の最新情報を同期
 export async function syncMyExercisesFromRemote() {
@@ -81,6 +82,13 @@ export async function syncMyExercisesFromLocal() {
       "同期対象のマイトレーニング種目（削除）が存在しませんでした。（ローカル → リモート）"
     );
   }
+}
+
+// マイトレーニング種目取得
+export async function getMyExercise(
+  exerciseId: string
+): Promise<Exercise | null> {
+  return await myExerciseDao.getMyExercise(exerciseId);
 }
 
 // マイトレーニング種目追加更新

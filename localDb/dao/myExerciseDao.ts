@@ -1,6 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { ExerciseEntity } from "@/types/db";
-import { Exercise } from "@/types/localDb";
+import { Exercise } from "@/types/dto/exerciseDto";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -10,11 +10,11 @@ export async function getLastUpdatedAt(): Promise<string> {
   return row?.last_updated ?? "1970-01-01T00:00:00";
 }
 
-// 詳細取得
-export const getMyExercise = async (
+// マイトレーニング種目詳細取得
+export async function getMyExercise(
   exerciseId: string
-): Promise<Exercise | null> => {
-  const row = await db.getFirstAsync<Exercise | null>(
+): Promise<Exercise | null> {
+  const row = await db.getFirstAsync<Exercise>(
     `
     SELECT
         exercise_id AS exerciseId,
@@ -24,12 +24,13 @@ export const getMyExercise = async (
         updated_at AS updatedAt
     FROM exercises
     WHERE exercise_id = ?
+    AND owner_user_id != null
     `,
     [exerciseId]
   );
 
   return row;
-};
+}
 
 // 非同期データの取得
 export async function getUnsyncedMyExercises(

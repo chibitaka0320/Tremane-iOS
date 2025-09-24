@@ -2,10 +2,7 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
-import {
-  getMyExercise,
-  updateMyExerciseDao,
-} from "@/localDb/dao/myExerciseDao";
+import { updateMyExerciseDao } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
 import { Exercise } from "@/types/localDb";
@@ -22,6 +19,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 
 export default function ExerciseEditScreen() {
   // パスパラメーター
@@ -52,7 +50,7 @@ export default function ExerciseEditScreen() {
 
   // 部位詳細取得
   const fetchExercise = async () => {
-    const res = await getMyExercise(exerciseId);
+    const res = await exerciseRepository.getMyExercise(exerciseId);
     if (res) {
       setBodyParts(res.partsId.toString());
       setExercise(res.name);
