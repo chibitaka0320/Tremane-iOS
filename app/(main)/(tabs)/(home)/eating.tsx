@@ -3,12 +3,12 @@ import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import { PFC_LABELS } from "@/constants/pfc";
 import { useAlert } from "@/context/AlertContext";
-import { getEatingByDate } from "@/localDb/service/eatingService";
 import theme from "@/styles/theme";
-import { EatingByDate } from "@/types/eating";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
+import * as eatingRepository from "@/localDb/repository/eatingRepository";
+import { DailyEating } from "@/types/dto/eatingDto";
 
 type Props = {
   selectedDate: string;
@@ -17,7 +17,7 @@ type Props = {
 export default function EatingScreen({ selectedDate }: Props) {
   const { setError } = useAlert();
 
-  const [data, setData] = useState<EatingByDate | null>();
+  const [dailyEating, setDailyEating] = useState<DailyEating>();
   const [isLoading, setLoading] = useState(false);
 
   const [isFetching, setFetching] = useState(false);
@@ -33,8 +33,8 @@ export default function EatingScreen({ selectedDate }: Props) {
     }
 
     try {
-      const data = await getEatingByDate(selectedDate);
-      setData(data);
+      const dailyEating = await eatingRepository.getEatingByDate(selectedDate);
+      setDailyEating(dailyEating);
     } catch (e) {
       setError("時間をおいて再度アプリを起動してください", () => {
         router.replace("/(auth)/signIn");
@@ -64,7 +64,11 @@ export default function EatingScreen({ selectedDate }: Props) {
 
   return (
     <ScrollView style={styles.container}>
-      <Summary total={data?.total} goal={data?.goal} rate={data?.rate} />
+      <Summary
+        total={dailyEating?.total}
+        goal={dailyEating?.goal}
+        rate={dailyEating?.rate}
+      />
       <View style={styles.eatingContainer}>
         <View style={styles.row}>
           <Text style={styles.eating}>食べ物</Text>
@@ -76,9 +80,9 @@ export default function EatingScreen({ selectedDate }: Props) {
           ))}
         </View>
         <View style={styles.border}></View>
-        {data?.meals && data.meals.length > 0 ? (
+        {dailyEating?.meals && dailyEating.meals.length > 0 ? (
           <FlatList
-            data={data.meals}
+            data={dailyEating.meals}
             renderItem={({ item }) => <EatingRow meal={item} />}
             scrollEnabled={false}
             refreshing={isRefreshing}

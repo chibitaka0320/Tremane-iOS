@@ -1,8 +1,12 @@
 import * as eatingDao from "@/localDb/dao/eatingDao";
+import * as userGoalDao from "@/localDb/dao/userGoalDao";
+import * as userProfileDao from "@/localDb/dao/userProfileDao";
 import * as eatingApi from "@/api/eatingApi";
 import { format } from "date-fns";
 import { EatingRequest, EatingResponse } from "@/types/api";
-import { EatingEntity } from "@/types/db";
+import { EatingEntity, UserGoalEntity, UserProfileEntity } from "@/types/db";
+import { DailyEating, Nutrition } from "@/types/dto/eatingDto";
+import { calcGoalKcal } from "@/lib/calc";
 
 // リモートDBから食事データの最新情報を同期
 export async function syncEatingsFromRemote() {
@@ -53,6 +57,28 @@ export async function syncEatingsFromLocal() {
       "同期対象の食事データ（削除）が存在しませんでした。（ローカル → リモート）"
     );
   }
+}
+
+// 日別食事情報取得
+export async function getEatingByDate(date: string): Promise<DailyEating> {
+  // 合計摂取栄養素
+  const userProfile = await userProfileDao.getUserProfile();
+  const userGoal = await userGoalDao.getUserGoal();
+  let total = await eatingDao.getNutritionTotalByDate(date);
+  if (!total) {
+    total = { calories: 0, protein: 0, fat: 0, carbo: 0 };
+  }
+
+  // 目標摂取栄養素
+  const goal = getGoalNutrition(userProfile, userGoal);
+
+  // 目標達成比率
+  const rate = getRateNutrition(total, goal);
+
+  // 食事内容
+  const meals = await eatingDao.getEatingsByDate(date);
+
+  return { date, total, goal, rate, meals };
 }
 
 // 食事情報追加更新
@@ -107,4 +133,70 @@ function toRequest(eatingEntity: EatingEntity): EatingResponse {
     createdAt: eatingEntity.created_at,
     updatedAt: eatingEntity.updated_at,
   };
+}
+
+// ユーザーの目標摂取栄養素を取得
+function getGoalNutrition(
+  userProfile: UserProfileEntity | null,
+  userGoal: UserGoalEntity | null
+): Nutrition {
+  // 栄養素初期化
+  let calories = 0;
+  let protein = 0;
+  let fat = 0;
+  let carbo = 0;
+
+  if (userProfile && userGoal) {
+    // 目標摂取カロリー算出
+    calories = calcGoalKcal(userProfile, userGoal);
+
+    // 目標PFC栄養素算出
+    // TODO: 比率の保持については改善
+    if (calories > 0) {
+      switch (userGoal.pfc) {
+        case 0:
+          protein = Math.round((calories * 0.4) / 4);
+          fat = Math.round((calories * 0.2) / 9);
+          carbo = Math.round((calories * 0.4) / 4);
+          break;
+        case 1:
+          protein = Math.round((calories * 0.3) / 4);
+          fat = Math.round((calories * 0.2) / 9);
+          carbo = Math.round((calories * 0.5) / 4);
+          break;
+        case 2:
+          protein = Math.round((calories * 0.55) / 4);
+          fat = Math.round((calories * 0.25) / 9);
+          carbo = Math.round((calories * 0.5) / 4);
+          break;
+      }
+    }
+  }
+  return { calories, protein, fat, carbo };
+}
+
+function getRateNutrition(total: Nutrition, goal: Nutrition): Nutrition {
+  // 比率初期化
+  let calories = 0;
+  let protein = 0;
+  let fat = 0;
+  let carbo = 0;
+
+  if (goal.calories > 0) {
+    protein = Math.min(total.calories / goal.calories, 1);
+  }
+
+  if (goal.protein > 0) {
+    protein = Math.min(total.protein / goal.protein, 1);
+  }
+
+  if (goal.fat > 0) {
+    fat = Math.min(total.fat / goal.fat, 1);
+  }
+
+  if (goal.carbo > 0) {
+    carbo = Math.min(total.carbo / goal.carbo, 1);
+  }
+
+  return { calories, protein, fat, carbo };
 }

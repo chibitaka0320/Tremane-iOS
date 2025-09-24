@@ -4,13 +4,14 @@ import theme from "@/styles/theme";
 import { Goal, Rate, Total } from "@/types/eating";
 import { PFC_LABELS } from "@/constants/pfc";
 import CircleProgress from "../common/CircleProgress";
+import { Nutrition } from "@/types/dto/eatingDto";
 
 const screenWidth = Dimensions.get("window").width / 2.4;
 
 type Props = {
-  total?: Total;
-  goal?: Goal;
-  rate?: Rate;
+  total?: Nutrition;
+  goal?: Nutrition;
+  rate?: Nutrition;
 };
 
 export default function Summary({ total, goal, rate }: Props) {

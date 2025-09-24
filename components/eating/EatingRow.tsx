@@ -1,11 +1,12 @@
 import { PFC_LABELS } from "@/constants/pfc";
 import theme from "@/styles/theme";
+import { MealRecord } from "@/types/dto/eatingDto";
 import { Meal } from "@/types/eating";
 import { router } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  meal: Meal;
+  meal: MealRecord;
 };
 
 export default function EatingRow({ meal }: Props) {

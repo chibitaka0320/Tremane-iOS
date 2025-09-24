@@ -18,10 +18,6 @@ export type DailyEating = {
   date: string;
   total: Nutrition;
   goal: Nutrition;
-  rate: {
-    protein: number;
-    fat: number;
-    carbo: number;
-  };
+  rate: Nutrition;
   meals: MealRecord[];
 };
