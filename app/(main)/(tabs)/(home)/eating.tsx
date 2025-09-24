@@ -36,6 +36,7 @@ export default function EatingScreen({ selectedDate }: Props) {
       const dailyEating = await eatingRepository.getEatingByDate(selectedDate);
       setDailyEating(dailyEating);
     } catch (e) {
+      console.error(e);
       setError("時間をおいて再度アプリを起動してください", () => {
         router.replace("/(auth)/signIn");
       });

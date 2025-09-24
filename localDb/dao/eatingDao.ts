@@ -61,7 +61,7 @@ export async function getNutritionTotalByDate(
     SELECT IFNULL(SUM(calories), 0) AS calories,
            IFNULL(SUM(protein), 0) AS protein,
            IFNULL(SUM(fat), 0) AS fat,
-           IFNULL(SUM(carbo), 0) AS carbo,
+           IFNULL(SUM(carbo), 0) AS carbo
     FROM eatings
     WHERE date = ? AND is_deleted = 0;
     `,
