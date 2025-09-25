@@ -101,6 +101,11 @@ export async function setExercisesSynced(exerciseIds: string[]) {
   await myExerciseDao.setMyExercisesSynced(exerciseIds);
 }
 
+// マイトレーニング種目削除（削除フラグを立てる）
+export async function setMyExercisesDeleted(exerciseId: string) {
+  await myExerciseDao.deleteMyExercise(exerciseId);
+}
+
 // マイトレーニング種目物理削除
 export async function deleteMyExercises() {
   await myExerciseDao.deleteMyExercises();

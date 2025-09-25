@@ -27,7 +27,7 @@ export async function upsertMyExercises(
   // ローカルDB追加更新
   await exerciseRepository.upsertMyExercises(exerciseEntities);
 
-  // リモートDB更新（同期）
+  // リモートDB更新（非同期）
   const exerciseRequests: ExerciseRequest[] = [
     {
       exerciseId,
@@ -42,5 +42,19 @@ export async function upsertMyExercises(
     .then(async () => await exerciseRepository.setExercisesSynced([exerciseId]))
     .catch((error) => {
       console.log("APIエラー(マイトレーニング種目追加更新)：" + error);
+    });
+}
+
+// マイトレーニング種目削除
+export async function deleteMyExercise(exerciseId: string) {
+  // ローカルDB削除
+  await exerciseRepository.setMyExercisesDeleted(exerciseId);
+
+  // リモートDB更新（非同期）
+  exerciseApi
+    .deleteMyExercise(exerciseId)
+    .then(async () => await exerciseRepository.setExercisesSynced([exerciseId]))
+    .catch((error) => {
+      console.log("APIエラー(マイトレーニング種目削除)：" + error);
     });
 }

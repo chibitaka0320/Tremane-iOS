@@ -1,8 +1,3 @@
-import { apiRequestWithRefresh } from "@/lib/apiClient";
-import {
-  deleteMyExerciseDao,
-  setMyExercisesSynced,
-} from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 import { AntDesign } from "@expo/vector-icons";
@@ -16,6 +11,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import * as exerciseService from "@/service/exerciseService";
 
 type Props = {
   data: BodyPart;
@@ -36,26 +32,14 @@ export default function ExerciseScreen({ data }: Props) {
         style: "destructive",
         onPress: async () => {
           try {
-            await deleteMyExerciseDao(exerciseId);
+            await exerciseService.deleteMyExercise(exerciseId);
 
             setExercises((prev) =>
               prev.filter((e) => e.exerciseId !== exerciseId)
             );
-          } catch (e) {
-            console.error(e);
-          }
-
-          try {
-            const res = await apiRequestWithRefresh(
-              "/exercise/myself/" + exerciseId,
-              "DELETE",
-              null
-            );
-            if (res?.ok) {
-              await setMyExercisesSynced([exerciseId]);
-            }
-          } catch (e) {
-            console.error(e);
+          } catch (error) {
+            console.error("食事追加失敗：" + error);
+            Alert.alert("食事の追加に失敗しました。");
           }
         },
       },

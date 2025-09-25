@@ -89,12 +89,13 @@ export async function upsertMyExercises(exercises: ExerciseEntity[]) {
 }
 
 // 削除
-export const deleteMyExerciseDao = async (exerciseId: string) => {
+// TODO: 複数にするか
+export async function deleteMyExercise(exerciseId: string) {
   await db.runAsync(
     `UPDATE exercises SET is_deleted = 1 WHERE exercise_id = ?;`,
     [exerciseId]
   );
-};
+}
 
 // マイトレーニング種目データ物理削除
 export async function deleteMyExercises() {
