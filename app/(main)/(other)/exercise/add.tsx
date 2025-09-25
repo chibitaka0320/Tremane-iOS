@@ -1,11 +1,6 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
-import {
-  insertMyExerciseDao,
-  updateMyExerciseDao,
-} from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
 import { Picker } from "@react-native-picker/picker";
@@ -19,10 +14,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import uuid from "react-native-uuid";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import { Exercise } from "@/types/dto/exerciseDto";
+import * as exerciseService from "@/service/exerciseService";
 
 export default function ExerciseAddScreen() {
   const [bodyParts, setBodyParts] = useState("");
@@ -66,40 +62,21 @@ export default function ExerciseAddScreen() {
   // 種目追加
   const addExercise = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const exercises: Exercise[] = [
-      {
-        exerciseId: uuid.v4(),
-        ownerUserId: auth.currentUser.uid,
-        partsId: Number(bodyParts),
-        name: exercise,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
     try {
-      const result = await insertMyExerciseDao(exercises, 0, 0);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      router.back();
-      setLoading(false);
-    }
-
-    try {
-      const res = await apiRequestWithRefresh(
-        "/exercise/myself",
-        "POST",
-        exercises
+      await exerciseService.upsertMyExercises(
+        uuid.v4(),
+        auth.currentUser.uid,
+        Number(bodyParts),
+        exercise
       );
-      if (res?.ok) {
-        await updateMyExerciseDao(exercises, 1, 0);
-      }
-    } catch (e) {
-      console.error(e);
+      router.back();
+    } catch (error) {
+      console.error("マイトレーニング種目追加失敗：" + error);
+      Alert.alert("マイトレーニング種目の追加に失敗しました。");
+    } finally {
+      setLoading(false);
     }
   };
 

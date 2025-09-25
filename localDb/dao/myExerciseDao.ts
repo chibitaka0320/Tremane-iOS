@@ -55,66 +55,6 @@ export async function getUnsyncedMyExercises(
   return unsynced;
 }
 
-// 追加
-export const insertMyExerciseDao = async (
-  exercises: Exercise[],
-  syncFlg: number,
-  deleteFlg: number
-) => {
-  await db.withTransactionAsync(async () => {
-    for (const e of exercises) {
-      if (e.ownerUserId) {
-        await db.runAsync(
-          `
-        INSERT INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-          [
-            e.exerciseId,
-            e.ownerUserId,
-            e.partsId,
-            e.name,
-            syncFlg,
-            deleteFlg,
-            e.createdAt,
-            e.updatedAt,
-          ]
-        );
-      }
-    }
-  });
-};
-
-// 更新
-export const updateMyExerciseDao = async (
-  exercises: Exercise[],
-  syncFlg: number,
-  deleteFlg: number
-) => {
-  await db.withTransactionAsync(async () => {
-    for (const e of exercises) {
-      if (e.ownerUserId) {
-        const result = await db.runAsync(
-          `
-        REPLACE INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-          [
-            e.exerciseId,
-            e.ownerUserId,
-            e.partsId,
-            e.name,
-            syncFlg,
-            deleteFlg,
-            e.createdAt,
-            e.updatedAt,
-          ]
-        );
-      }
-    }
-  });
-};
-
 // 追加 or 更新
 export async function upsertMyExercises(exercises: ExerciseEntity[]) {
   await db.withTransactionAsync(async () => {
@@ -122,8 +62,15 @@ export async function upsertMyExercises(exercises: ExerciseEntity[]) {
       if (exercise.owner_user_id) {
         const result = await db.runAsync(
           `
-        INSERT OR REPLACE INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
+        INSERT INTO exercises (exercise_id, owner_user_id, parts_id, name, is_synced, is_deleted, created_at, updated_at)
         VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(exercise_id) DO UPDATE SET
+        owner_user_id = excluded.owner_user_id,
+        parts_id = excluded.parts_id,
+        name = excluded.name,
+        is_synced = excluded.is_synced,
+        is_deleted = excluded.is_deleted,
+        updated_at = excluded.updated_at;
         `,
           [
             exercise.exercise_id,
@@ -150,9 +97,9 @@ export const deleteMyExerciseDao = async (exerciseId: string) => {
 };
 
 // マイトレーニング種目データ物理削除
-export const deleteMyExercises = async () => {
+export async function deleteMyExercises() {
   await db.runAsync("DELETE FROM exercises WHERE owner_user_id != null;");
-};
+}
 
 // フラグを同期済みにする
 export async function setMyExercisesSynced(exerciseIds: string[]) {

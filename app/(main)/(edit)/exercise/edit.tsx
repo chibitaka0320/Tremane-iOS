@@ -1,8 +1,6 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
-import { updateMyExerciseDao } from "@/localDb/dao/myExerciseDao";
 import theme from "@/styles/theme";
 import { selectLabel } from "@/types/common";
 import { router, useLocalSearchParams } from "expo-router";
@@ -15,11 +13,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
 import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
-import { Exercise } from "@/types/dto/exerciseDto";
+import * as exerciseService from "@/service/exerciseService";
 
 export default function ExerciseEditScreen() {
   // パスパラメーター
@@ -84,43 +83,24 @@ export default function ExerciseEditScreen() {
     }
   }, [bodyParts, exercise]);
 
-  // 種目追加
-  const addExercise = async () => {
+  // 種目更新
+  const updateExercise = async () => {
     setLoading(true);
-
     if (auth.currentUser === null) return;
 
-    const exercises: Exercise[] = [
-      {
+    try {
+      await exerciseService.upsertMyExercises(
         exerciseId,
-        ownerUserId: auth.currentUser.uid,
-        partsId: Number(bodyParts),
-        name: exercise,
-        createdAt: createdAt,
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
-    try {
-      const result = await updateMyExerciseDao(exercises, 0, 0);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      router.back();
-      setLoading(false);
-    }
-
-    try {
-      const res = await apiRequestWithRefresh(
-        "/exercise/myself",
-        "POST",
-        exercises
+        auth.currentUser.uid,
+        Number(bodyParts),
+        exercise
       );
-      if (res?.ok) {
-        await updateMyExerciseDao(exercises, 1, 0);
-      }
-    } catch (e) {
-      console.error(e);
+      router.back();
+    } catch (error) {
+      console.error("マイトレーニング種目更新失敗：" + error);
+      Alert.alert("マイトレーニング種目の更新に失敗しました。");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -176,7 +156,7 @@ export default function ExerciseEditScreen() {
 
         <TouchableOpacity
           style={[styles.button, isDisabled && styles.buttonDisabled]}
-          onPress={addExercise}
+          onPress={updateExercise}
           disabled={isDisabled}
         >
           <Text style={styles.buttonText}>種目を追加</Text>
