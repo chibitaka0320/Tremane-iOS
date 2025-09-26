@@ -260,13 +260,13 @@ export async function upsertTrainings(trainings: TrainingEntity[]) {
   });
 }
 
-// 削除
-export const deleteTrainingDao = async (trainingId: string) => {
+// トレーニングデータ論理削除
+export async function deleteTraining(trainingId: string) {
   await db.runAsync(
     `UPDATE trainings SET is_deleted = 1 WHERE training_id = ?;`,
     [trainingId]
   );
-};
+}
 
 // トレーニングデータ物理削除
 export const deleteTrainings = async () => {
@@ -274,7 +274,7 @@ export const deleteTrainings = async () => {
 };
 
 // フラグを同期済みにする
-export const setTrainingsSynced = async (trainingIds: string[]) => {
+export async function setTrainingsSynced(trainingIds: string[]) {
   await db.withTransactionAsync(async () => {
     for (const trainingId of trainingIds) {
       await db.runAsync(
@@ -283,4 +283,4 @@ export const setTrainingsSynced = async (trainingIds: string[]) => {
       );
     }
   });
-};
+}

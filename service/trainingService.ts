@@ -51,3 +51,17 @@ export async function upsertTraining(
       console.error("APIエラー(トレーニング情報追加更新)：" + error);
     });
 }
+
+// トレーニング情報削除
+export async function deleteTraining(trainingId: string) {
+  // ローカルDB削除
+  await trainingRepository.deleteTraining(trainingId);
+
+  // リモートDB削除（非同期）
+  trainingApi
+    .deleteTraining(trainingId)
+    .then(async () => await trainingRepository.setTrainingsSynced([trainingId]))
+    .catch((error) => {
+      console.error("APIエラー(トレーニング情報削除)：" + error);
+    });
+}

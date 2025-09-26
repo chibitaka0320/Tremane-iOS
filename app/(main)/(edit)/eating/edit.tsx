@@ -111,8 +111,8 @@ export default function EatingEditScreen() {
       );
       router.back();
     } catch (error) {
-      console.error("トレーニング更新失敗：" + error);
-      Alert.alert("トレーニングの更新に失敗しました。");
+      console.error("食事更新失敗：" + error);
+      Alert.alert("食事の更新に失敗しました。");
     } finally {
       setLoading(false);
     }
@@ -131,8 +131,8 @@ export default function EatingEditScreen() {
             await eatingService.deleteEating(eatingId);
             router.back();
           } catch (error) {
-            console.error("トレーニング削除失敗：" + error);
-            Alert.alert("トレーニングの削除に失敗しました。");
+            console.error("食事削除失敗：" + error);
+            Alert.alert("食事の削除に失敗しました。");
           } finally {
             setLoading(false);
           }

@@ -12,17 +12,12 @@ import {
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import theme from "@/styles/theme";
 import { format } from "date-fns";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import Indicator from "@/components/common/Indicator";
 import { router, useLocalSearchParams } from "expo-router";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
-import {
-  deleteTrainingDao,
-  getTrainingDao,
-  setTrainingsSynced,
-} from "@/localDb/dao/trainingDao";
+import { getTrainingDao } from "@/localDb/dao/trainingDao";
 import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
@@ -184,25 +179,13 @@ export default function TrainingEditScreen() {
         onPress: async () => {
           setLoading(true);
           try {
-            await deleteTrainingDao(trainingId);
-          } catch (e) {
-            console.error(e);
-          } finally {
+            await trainingService.deleteTraining(trainingId);
             router.back();
-          }
-
-          try {
-            // 削除処理
-            const res = await apiRequestWithRefresh(
-              API_ENDPOINTS.training(trainingId),
-              "DELETE",
-              null
-            );
-            if (res?.ok) {
-              await setTrainingsSynced([trainingId]);
-            }
-          } catch (e) {
-            console.error(e);
+          } catch (error) {
+            console.error("トレーニング削除失敗：" + error);
+            Alert.alert("トレーニングの削除に失敗しました。");
+          } finally {
+            setLoading(false);
           }
         },
       },

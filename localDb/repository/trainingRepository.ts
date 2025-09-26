@@ -119,6 +119,11 @@ export async function setTrainingsSynced(trainingIds: string[]) {
   await trainingDao.setTrainingsSynced(trainingIds);
 }
 
+// トレーニング情報論理削除
+export async function deleteTraining(trainingId: string) {
+  await trainingDao.deleteTraining(trainingId);
+}
+
 // トレーニング情報物理削除
 export async function deleteTrainings() {
   await trainingDao.deleteTrainings();
