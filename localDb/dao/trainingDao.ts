@@ -1,5 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
+import { DailyTrainingRow } from "@/types/dto/trainingDto";
 import { TrainingWithExercise } from "@/types/training";
 
 // 最新更新日を取得
@@ -56,23 +57,17 @@ export const getTrainingPartsDao = async () => {
 };
 
 // 日別トレーニング情報取得
-export const getTrainingByDateDao = async (date: string) => {
-  const rows = await db.getAllAsync<{
-    parts_id: number;
-    parts_name: string;
-    exercise_id: string;
-    exercise_name: string;
-    training_id: string;
-    weight: number;
-    reps: number;
-  }>(
+export async function getTrainingByDate(
+  date: string
+): Promise<DailyTrainingRow[]> {
+  const rows = await db.getAllAsync<DailyTrainingRow>(
     `
     SELECT
-      b.parts_id,
-      b.name AS parts_name,
-      e.exercise_id, 
-      e.name AS exercise_name,
-      t.training_id,
+      t.training_id AS trainingId,
+      b.parts_id AS partsId,
+      b.name AS partsName,
+      e.exercise_id AS exerciseId, 
+      e.name AS exerciseName,
       t.weight,
       t.reps
     FROM trainings t
@@ -85,7 +80,7 @@ export const getTrainingByDateDao = async (date: string) => {
     [date]
   );
   return rows;
-};
+}
 
 // トレーニング件数取得(全部位)
 export const getTrainingAllCount = async (started: string, ended: string) => {

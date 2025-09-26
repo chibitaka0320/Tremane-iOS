@@ -3,6 +3,7 @@ import * as trainingApi from "@/api/trainingApi";
 import { format } from "date-fns";
 import { TrainingRequest, TrainingResponse } from "@/types/api";
 import { TrainingEntity } from "@/types/db";
+import { BodyPart, DailyTraining } from "@/types/dto/trainingDto";
 
 // リモートDBからトレーニングデータの最新情報を同期
 export async function syncTrainingsFromRemote() {
@@ -59,6 +60,53 @@ export async function syncTrainingsFromLocal() {
       "同期対象のトレーニングデータ（削除）が存在しませんでした。（ローカル → リモート）"
     );
   }
+}
+
+// 日別トレーニング情報取得
+export async function getTrainingByDate(date: string): Promise<DailyTraining> {
+  // 日別トレーニングの行データ取得
+  const rows = await trainingDao.getTrainingByDate(date);
+
+  // データを構造化
+  const bodyPartMap: Record<number, BodyPart> = {};
+
+  // 1行ずつデータを作成
+  rows.forEach((row) => {
+    // 対象部位の箱がなければ作成
+    if (!bodyPartMap[row.partsId]) {
+      bodyPartMap[row.partsId] = {
+        bodyPartId: row.partsId,
+        name: row.partsName,
+        exercises: [],
+      };
+    }
+    const bodyPart = bodyPartMap[row.partsId];
+
+    // 対象部位の箱から対象種目の箱を取り出す
+    // 対象種目の箱がなければ作成し対象部位の箱に追加
+    let exercise = bodyPart.exercises.find(
+      (e) => e.exerciseId === row.exerciseId
+    );
+    if (!exercise) {
+      exercise = {
+        exerciseId: row.exerciseId,
+        name: row.exerciseName,
+        trainings: [],
+      };
+      bodyPart.exercises.push(exercise);
+    }
+
+    exercise.trainings.push({
+      trainingId: row.trainingId,
+      weight: row.weight,
+      reps: row.reps,
+    });
+  });
+
+  return {
+    date,
+    bodyParts: Object.values(bodyPartMap),
+  };
 }
 
 // トレーニング情報追加更新

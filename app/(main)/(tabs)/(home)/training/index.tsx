@@ -7,13 +7,13 @@ import {
 } from "react-native";
 import TrainingItem from "@/components/training/TrainingItem";
 import theme from "@/styles/theme";
-import { TrainingByDate } from "@/types/training";
 import { useCallback, useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import Indicator from "@/components/common/Indicator";
 import { useAlert } from "@/context/AlertContext";
-import { getTrainingByDate } from "@/localDb/service/trainingService";
+import { DailyTraining } from "@/types/dto/trainingDto";
+import * as trainingRepository from "@/localDb/repository/trainingRepository";
 
 type Props = {
   selectedDate: string;
@@ -22,7 +22,7 @@ type Props = {
 export default function TrainingScreen({ selectedDate }: Props) {
   const { setError } = useAlert();
 
-  const [trainingData, setData] = useState<TrainingByDate[]>([]);
+  const [trainingData, setData] = useState<DailyTraining>();
 
   const [isFetching, setFetching] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
@@ -37,11 +37,12 @@ export default function TrainingScreen({ selectedDate }: Props) {
     }
 
     try {
-      const data = await getTrainingByDate(selectedDate);
+      const data = await trainingRepository.getTrainingByDate(selectedDate);
       if (data != null) {
         setData(data);
       }
     } catch (e) {
+      console.error(e);
       setError("時間をおいて再度アプリを起動してください", () => {
         router.replace("/(auth)/signIn");
       });
@@ -70,7 +71,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
 
   return (
     <View style={styles.container}>
-      {trainingData.length == 0 ? (
+      {trainingData?.bodyParts.length == 0 ? (
         <TouchableOpacity style={styles.nonDataContainer}>
           <MaterialIcons name="note-add" size={60} color="#ccc" />
           <Text style={styles.text}>データがありません</Text>
@@ -78,7 +79,7 @@ export default function TrainingScreen({ selectedDate }: Props) {
         </TouchableOpacity>
       ) : (
         <FlatList
-          data={trainingData}
+          data={trainingData?.bodyParts}
           style={styles.trainingContainer}
           renderItem={({ item }) => <TrainingItem bodyPart={item} />}
           showsVerticalScrollIndicator={false}

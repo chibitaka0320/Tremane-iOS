@@ -8,6 +8,7 @@ export type BodyPartWithExercise = {
 };
 
 // ネスト後部位DTO
+// TODO：exerciseDtoのExerciseを使用するか検討
 export type BodyPart = {
   partsId: number;
   partName: string;

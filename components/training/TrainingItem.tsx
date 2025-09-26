@@ -1,28 +1,28 @@
 import { View, Text, StyleSheet } from "react-native";
 import theme from "@/styles/theme";
-import Exercise from "./Exercise";
-import { TrainingByDate } from "@/types/training";
+import ExerciseItem from "./ExerciseItem";
 import { partsColors } from "@/styles/partsColor";
+import { BodyPart } from "@/types/dto/trainingDto";
 
 type Props = {
-  bodyPart: TrainingByDate;
+  bodyPart: BodyPart;
 };
 
 export default function TrainingItem({ bodyPart }: Props) {
-  const { partsId, name, exercises } = bodyPart;
+  const { bodyPartId, name, exercises } = bodyPart;
 
   return (
     <View style={styles.container}>
       <View
         style={[
           styles.categoryContainer,
-          { backgroundColor: partsColors[partsId] },
+          { backgroundColor: partsColors[bodyPartId] },
         ]}
       >
         <Text style={styles.categoryTitle}>{name}</Text>
       </View>
       {exercises.map((exercise, index) => (
-        <Exercise exercise={exercise} key={index} partsId={partsId} />
+        <ExerciseItem exercise={exercise} key={index} partsId={bodyPartId} />
       ))}
     </View>
   );
