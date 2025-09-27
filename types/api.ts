@@ -86,6 +86,43 @@ export type UserSearchResponse = {
   requestId: string;
 };
 
+// トレーニング日数ランキング取得
+export type TrainingDateRankingResponse = {
+  userId: string;
+  nickname: string;
+  trainingCounts: number;
+};
+
+// トレーニングタイムライン取得
+export type TimelineTrainingResponse = {
+  userId: string;
+  nickname: string;
+  date: string;
+  bodyParts: {
+    partsId: number;
+    bodyPartsName: string;
+  };
+};
+
+// トレーニングランキング取得API
+export type TrainingRankingResponse = {
+  userId: string;
+  nickname: string;
+  trainingCounts: number;
+};
+
+// 通知一覧取得API
+export type NotificationResponse = {
+  notificationId: string;
+  userId: string;
+  notificationSource: string;
+  type: string;
+  message: string;
+  relatedId: string;
+  createdAt: Timestamp;
+  status: string | null;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
@@ -145,37 +182,8 @@ export type ExerciseRequest = {
   updatedAt: string;
 };
 
-// トレーニングランキングAPI
-export type TrainingRankingResponse = {
-  userId: string;
-  nickname: string;
-  trainingCounts: number;
-};
-
-// タイムラインAPI
-export type TimelineTrainingResponse = {
-  userId: string;
-  nickname: string;
-  date: Date;
-  bodyParts: bodyParts[];
-};
-
-type bodyParts = {
-  partsId: number;
-  bodyPartsName: string;
-};
-
-export type NotificationResponse = {
-  notificationId: string;
-  userId: string;
-  notificationSource: string;
-  type: string;
-  message: string;
-  relatedId: string;
-  createdAt: Timestamp;
-  status: string | null;
-};
-
+// ==== 共通系 ====
+// エラータイプ
 export type ErrorType = {
   error: string;
   code?: number;
