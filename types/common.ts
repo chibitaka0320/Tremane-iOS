@@ -1,6 +1,5 @@
-interface selectLabel {
+// ピッカーデータラベル
+export type SelectLabel = {
   label: string;
   value: string;
-}
-
-export type { selectLabel };
+};

@@ -2,7 +2,7 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
 import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
-import { selectLabel } from "@/types/common";
+import { SelectLabel } from "@/types/common";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ export default function ExerciseAddScreen() {
   const [exercise, setExercise] = useState("");
   const [bodyPartsModal, setBodyPartsModal] = useState(false);
 
-  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
+  const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
 
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);

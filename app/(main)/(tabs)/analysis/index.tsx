@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import theme from "@/styles/theme";
 import { LineChart } from "react-native-chart-kit";
-import { selectLabel } from "@/types/common";
+import { SelectLabel } from "@/types/common";
 import { Octicons } from "@expo/vector-icons";
 import { partsColors } from "@/styles/partsColor";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
@@ -18,7 +18,7 @@ import { TrainingAnalysisChart } from "@/types/dto/trainingDto";
 
 export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState("0");
-  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
+  const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
   const [datas, setDatas] = useState<TrainingAnalysisChart[]>([]);
   const [week, setWeek] = useState(0);
   const [month, setMonth] = useState(0);

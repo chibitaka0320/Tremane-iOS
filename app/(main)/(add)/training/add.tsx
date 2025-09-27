@@ -14,7 +14,7 @@ import theme from "@/styles/theme";
 import { format } from "date-fns";
 import Indicator from "@/components/common/Indicator";
 import { router } from "expo-router";
-import { selectLabel } from "@/types/common";
+import { SelectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
 import uuid from "react-native-uuid";
@@ -41,8 +41,8 @@ export default function TrainingAddScreen() {
 
   // ピッカーデータ関連
   const [bodyPartData, setBodyPartData] = useState<BodyPart[]>([]);
-  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
-  const [exerciseOptions, setExerciseOptions] = useState<selectLabel[]>([]);
+  const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
+  const [exerciseOptions, setExerciseOptions] = useState<SelectLabel[]>([]);
 
   const selectedBodyParts =
     bodyPartOptions.find((o) => o.value === bodyParts)?.label ||

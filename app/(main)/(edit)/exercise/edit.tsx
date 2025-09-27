@@ -2,7 +2,7 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
 import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
-import { selectLabel } from "@/types/common";
+import { SelectLabel } from "@/types/common";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -29,7 +29,7 @@ export default function ExerciseEditScreen() {
   const [bodyPartsModal, setBodyPartsModal] = useState(false);
   const [createdAt, setCreatedAt] = useState("");
 
-  const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
+  const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
 
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
