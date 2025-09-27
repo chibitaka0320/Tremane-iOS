@@ -1,7 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
 import { DailyTrainingRow, TrainingDetail } from "@/types/dto/trainingDto";
-import { TrainingWithExercise } from "@/types/training";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
