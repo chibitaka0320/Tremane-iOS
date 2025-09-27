@@ -36,3 +36,13 @@ export type DailyTraining = {
   date: string;
   bodyParts: BodyPart[];
 };
+
+// トレーニング詳細
+export type TrainingDetail = {
+  trainingId: string;
+  date: string;
+  bodyPartId: number;
+  exerciseId: string;
+  weight: number;
+  reps: number;
+};

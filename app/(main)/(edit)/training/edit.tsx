@@ -17,10 +17,10 @@ import { router, useLocalSearchParams } from "expo-router";
 import { selectLabel } from "@/types/common";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateReps, validateWeight } from "@/lib/validators";
-import { getTrainingDao } from "@/localDb/dao/trainingDao";
 import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
+import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 
@@ -39,7 +39,6 @@ export default function TrainingEditScreen() {
   const [exercise, setExercise] = useState("");
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
-  const [createdAt, setCreatedAt] = useState("");
 
   // ピッカーデータ
   const [bodyPartData, setBodyPartData] = useState<BodyPart[]>([]);
@@ -78,15 +77,14 @@ export default function TrainingEditScreen() {
   // トレーニング詳細取得
   const fetchTraining = async () => {
     if (!trainingId) return;
-    const res = await getTrainingDao(trainingId);
+    const res = await trainingRepository.getTrainingDetail(trainingId);
 
     if (res) {
       setDate(new Date(res.date));
-      setBodyParts(res.partsId.toString());
-      setExercise(res.exerciseId.toString());
+      setBodyParts(res.bodyPartId.toString());
+      setExercise(res.exerciseId);
       setWeight(res.weight.toString());
       setReps(res.reps.toString());
-      setCreatedAt(res.createdAt);
     }
   };
 

@@ -62,6 +62,11 @@ export async function syncTrainingsFromLocal() {
   }
 }
 
+// トレーニング情報詳細取得
+export async function getTrainingDetail(trainingId: string) {
+  return await trainingDao.getTrainingDetail(trainingId);
+}
+
 // 日別トレーニング情報取得
 export async function getTrainingByDate(date: string): Promise<DailyTraining> {
   // 日別トレーニングの行データ取得

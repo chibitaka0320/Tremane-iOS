@@ -1,6 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
-import { DailyTrainingRow } from "@/types/dto/trainingDto";
+import { DailyTrainingRow, TrainingDetail } from "@/types/dto/trainingDto";
 import { TrainingWithExercise } from "@/types/training";
 
 // 最新更新日を取得
@@ -214,17 +214,18 @@ export const getTrainingDataByMaxWeightDao = async (partsId: string) => {
 };
 
 // トレーニング詳細取得
-export const getTrainingDao = async (trainingId: string) => {
-  const training = await db.getFirstAsync<TrainingWithExercise>(
+export async function getTrainingDetail(
+  trainingId: string
+): Promise<TrainingDetail | null> {
+  const training = await db.getFirstAsync<TrainingDetail>(
     `
     SELECT
       t.training_id AS trainingId,
       t.date,
-      e.parts_id AS partsId,
+      e.parts_id AS bodyPartId,
       t.exercise_id AS exerciseId,
       t.weight,
-      t.reps,
-      t.created_at AS createdAt
+      t.reps
     FROM trainings t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     WHERE t.training_id = ?
@@ -232,7 +233,7 @@ export const getTrainingDao = async (trainingId: string) => {
     [trainingId]
   );
   return training;
-};
+}
 
 // 追加 or 更新
 export async function upsertTrainings(trainings: TrainingEntity[]) {
@@ -269,9 +270,9 @@ export async function deleteTraining(trainingId: string) {
 }
 
 // トレーニングデータ物理削除
-export const deleteTrainings = async () => {
+export async function deleteTrainings() {
   await db.runAsync("DELETE FROM trainings;");
-};
+}
 
 // フラグを同期済みにする
 export async function setTrainingsSynced(trainingIds: string[]) {
