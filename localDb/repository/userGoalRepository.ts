@@ -1,8 +1,11 @@
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
+import * as userProfileDao from "@/localDb/dao/userProfileDao";
 import * as userGoalApi from "@/api/userGoalApi";
 import { format } from "date-fns";
 import { UserGoalRequest, UserGoalResponse } from "@/types/api";
 import { UserGoalEntity } from "@/types/db";
+import { calcGoalKcal } from "@/lib/calc";
+import { UserGoal } from "@/types/dto/userDto";
 
 // リモートDBからユーザー目標データの最新情報を同期
 export async function syncUserGoalsFromRemote() {
@@ -38,12 +41,32 @@ export async function syncUserGoalsFromLocal() {
   }
 }
 
-// ユーザープロフィール情報取得
-export async function getUserGoal(): Promise<UserGoalEntity | null> {
-  return await userGoalDao.getUserGoal();
+// ユーザー目標取得
+export async function getUserGoal(): Promise<UserGoal | null> {
+  const userProf = await userProfileDao.getUserProfile();
+  const userGoal = await userGoalDao.getUserGoal();
+
+  let goalCalorie = 0;
+
+  if (userProf && userGoal) {
+    goalCalorie = calcGoalKcal(userProf, userGoal);
+  }
+
+  if (userGoal) {
+    return {
+      weight: userGoal.weight,
+      goalWeight: userGoal.goal_weight,
+      goalCalorie,
+      start: userGoal.start,
+      finish: userGoal.finish,
+      pfc: userGoal.pfc,
+    };
+  } else {
+    return null;
+  }
 }
 
-// ユーザープロフィール情報追加更新
+// ユーザー目標追加更新
 export async function upsertUserGoal(userGoalEntity: UserGoalEntity) {
   await userGoalDao.upsertUserGoalDao(userGoalEntity);
 }

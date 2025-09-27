@@ -6,7 +6,7 @@ import { router, useFocusEffect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import NotSetGoal from "@/components/setting/NotSetGoal";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
-import { getUserGoal } from "@/localDb/service/userGoalService";
+import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 
 export default function GoalScreen() {
   const [weight, setWeight] = useState("");
@@ -26,7 +26,7 @@ export default function GoalScreen() {
       setLoading(true);
       const fetchApi = async () => {
         try {
-          const res = await getUserGoal();
+          const res = await userGoalRepository.getUserGoal();
           if (res) {
             if (res.weight != null) {
               setWeight(String(res.weight));
