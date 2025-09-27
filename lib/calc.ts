@@ -1,7 +1,8 @@
 import { UserGoalEntity, UserProfileEntity } from "@/types/db";
 
 // 年齢計算
-export const calcAge = (birthday: Date) => {
+export const calcAge = (strBirthday: string) => {
+  const birthday = new Date(strBirthday);
   const year = birthday.getFullYear();
   const month = birthday.getMonth() + 1;
   const day = birthday.getDate();
@@ -69,7 +70,7 @@ export const calcDiffDays = (date1: Date, date2: Date): number => {
 
 // 目標摂取カロリー算出
 export const calcGoalKcal = (prof: UserProfileEntity, goal: UserGoalEntity) => {
-  const age = calcAge(new Date(prof.birthday));
+  const age = calcAge(prof.birthday);
   const bmr = calcBmr(prof.gender, prof.height, prof.weight, age);
   const totalCalorie = calcTotalCalorie(bmr, prof.active_level);
 

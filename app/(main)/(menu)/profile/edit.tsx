@@ -19,8 +19,8 @@ import { activeOptions } from "@/constants/activeOptions";
 import { router } from "expo-router";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateHeight, validateWeight } from "@/lib/validators";
-import { getUserProfile } from "@/localDb/service/userProfileService";
 import { auth } from "@/lib/firebaseConfig";
+import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userProfileService from "@/service/userProfileService";
 
 export default function ProfileEditScreen() {
@@ -85,7 +85,7 @@ export default function ProfileEditScreen() {
   // 画面初期表示時
   useEffect(() => {
     const fetchApi = async () => {
-      const res = await getUserProfile();
+      const res = await userProfileRepository.getUserProfile();
 
       if (res) {
         if (res.height != null) {

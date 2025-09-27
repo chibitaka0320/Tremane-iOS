@@ -7,3 +7,15 @@ export type UserGoal = {
   finish: string;
   pfc: number;
 };
+
+// ユーザープロフィールDTO
+export type UserProfile = {
+  height: number;
+  weight: number;
+  birthday: string;
+  age: number;
+  gender: number;
+  activeLevel: number;
+  bmr: number;
+  totalCalorie: number;
+};
