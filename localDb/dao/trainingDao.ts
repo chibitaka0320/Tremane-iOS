@@ -1,6 +1,10 @@
 import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
-import { DailyTrainingRow, TrainingDetail } from "@/types/dto/trainingDto";
+import {
+  DailyTrainingRow,
+  TrainingAnalysisRow,
+  TrainingDetail,
+} from "@/types/dto/trainingDto";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -121,14 +125,10 @@ export const getTrainingCount = async (
 };
 
 // トレーニング分析データ取得(全部)
-export const getTrainingAllDataByMaxWeightDao = async () => {
-  const rows = await db.getAllAsync<{
-    parts_id: number;
-    exercise_id: string;
-    name: string;
-    date: string;
-    weight: number;
-  }>(
+export async function getTrainingAllDataByMaxWeight(
+  limit: number
+): Promise<TrainingAnalysisRow[]> {
+  const rows = await db.getAllAsync<TrainingAnalysisRow>(
     `
     WITH daily_max AS (
       SELECT
@@ -151,29 +151,27 @@ export const getTrainingAllDataByMaxWeightDao = async () => {
       FROM daily_max
     )
     SELECT
-      e.parts_id,
-      t.exercise_id,
-      e.name,
+      e.parts_id AS bodyPartId,
+      t.exercise_id AS exerciseId,
+      e.name AS exerciseName,
       t.date,
       t.weight
     FROM ranked t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
-    WHERE t.rn <= 6
+    WHERE t.rn <= ?
     ORDER BY e.parts_id, t.exercise_id, t.date ASC;
-  `
+  `,
+    [limit]
   );
   return rows;
-};
+}
 
 // トレーニング分析データ取得(部位別)
-export const getTrainingDataByMaxWeightDao = async (partsId: string) => {
-  const rows = await db.getAllAsync<{
-    parts_id: number;
-    exercise_id: string;
-    name: string;
-    date: string;
-    weight: number;
-  }>(
+export async function getTrainingByMaxWeight(
+  bodyPartId: number,
+  limit: number
+): Promise<TrainingAnalysisRow[]> {
+  const rows = await db.getAllAsync<TrainingAnalysisRow>(
     `
     WITH daily_max AS (
       SELECT
@@ -204,13 +202,13 @@ export const getTrainingDataByMaxWeightDao = async (partsId: string) => {
     FROM ranked t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     WHERE e.parts_id = ?
-      AND t.rn <= 6
+      AND t.rn <= ?
     ORDER BY t.exercise_id, t.date ASC;
   `,
-    [partsId]
+    [bodyPartId, limit]
   );
   return rows;
-};
+}
 
 // トレーニング詳細取得
 export async function getTrainingDetail(

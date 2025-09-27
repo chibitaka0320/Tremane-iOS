@@ -10,19 +10,17 @@ import {
 import theme from "@/styles/theme";
 import { LineChart } from "react-native-chart-kit";
 import { selectLabel } from "@/types/common";
-import {
-  getTrainingByMaxWeight,
-  getWorkoutCount,
-} from "@/localDb/service/trainingService";
-import { TrainingAnalysis } from "@/types/training";
+import { getWorkoutCount } from "@/localDb/service/trainingService";
 import { Octicons } from "@expo/vector-icons";
 import { partsColors } from "@/styles/partsColor";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as trainingAnalysisRepository from "@/localDb/repository/trainingAnalysisRepository";
+import { TrainingAnalysisChart } from "@/types/dto/trainingDto";
 
 export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState("0");
   const [bodyPartOptions, setBodyPartOptions] = useState<selectLabel[]>([]);
-  const [datas, setDatas] = useState<TrainingAnalysis[]>([]);
+  const [datas, setDatas] = useState<TrainingAnalysisChart[]>([]);
   const [week, setWeek] = useState(0);
   const [month, setMonth] = useState(0);
   const [year, setYear] = useState(0);
@@ -65,7 +63,9 @@ export default function AnalysisScreen() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await getTrainingByMaxWeight(bodyParts);
+        const res = await trainingAnalysisRepository.getTrainingByMaxWeight(
+          Number(bodyParts)
+        );
         if (res) {
           setDatas(res);
         }
@@ -92,7 +92,7 @@ export default function AnalysisScreen() {
     fetch();
   }, [bodyParts]);
 
-  const dataRange = (target: TrainingAnalysis) => {
+  const dataRange = (target: TrainingAnalysisChart) => {
     const targetData = target.datasets[0].data;
     if (targetData.length === 0) return 0;
     const max = Math.max(...targetData);

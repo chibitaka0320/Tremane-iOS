@@ -46,3 +46,23 @@ export type TrainingDetail = {
   weight: number;
   reps: number;
 };
+
+// トレーニング分析グラフ用（行データ）
+export type TrainingAnalysisRow = {
+  bodyPartId: number;
+  exerciseId: string;
+  exerciseName: string;
+  date: string;
+  weight: number;
+};
+
+// トレーニング分析グラフ用
+export type TrainingAnalysisChart = {
+  labels: string[];
+  datasets: [
+    {
+      data: number[];
+    }
+  ];
+  name: string;
+};
