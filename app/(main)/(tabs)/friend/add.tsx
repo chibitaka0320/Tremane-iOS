@@ -4,7 +4,7 @@ import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
-import { UserAccountInfoResponse } from "@/types/api";
+import { UserSearchResponse } from "@/types/api";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -18,6 +18,8 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import * as friendService from "@/service/friendService";
+import { ApiError } from "@/lib/error";
 
 interface Props {
   onClose: () => void;
@@ -26,7 +28,7 @@ interface Props {
 export default function FriendAddScreen({ onClose }: Props) {
   const [email, setEmail] = useState(""); // メールアドレス
   const [resultText, setResultText] = useState("検索してください"); // 結果テキスト
-  const [user, setUser] = useState<UserAccountInfoResponse | null>(); // 検索ユーザー情報
+  const [user, setUser] = useState<UserSearchResponse | null>(); // 検索ユーザー情報
   const [status, setStatus] = useState<string | null>(); // 友達ステータス
   const [requestId, setRequestId] = useState<string | null>(); // 友達リクエストID
 
@@ -47,23 +49,27 @@ export default function FriendAddScreen({ onClose }: Props) {
   const search = async () => {
     setLoading(true);
     setUser(null);
+    if (auth.currentUser === null) return;
 
     try {
-      if (auth.currentUser === null) return;
-      const res = await apiRequestWithRefresh(`/users/search?email=${email}`);
-      if (res?.ok) {
-        const data: UserAccountInfoResponse = await res.json();
+      const data = await friendService.searchUserByEmail(email);
+
+      if (data) {
         setUser(data);
         setStatus(data.status);
         setRequestId(data.requestId);
       } else {
         setResultText("見つかりませんでした");
-        const data = await res?.json();
-        console.log(data);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
       setResultText("見つかりませんでした");
+      if (error instanceof ApiError) {
+        console.error(
+          `APIエラー(ユーザー検索)：[${error.status}]${error.message}`
+        );
+      } else {
+        console.error("ユーザー検索に失敗：" + error);
+      }
     } finally {
       setLoading(false);
     }

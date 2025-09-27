@@ -77,6 +77,15 @@ export type BodyPartResponse = {
   updatedAt: string;
 };
 
+// ユーザーメールアドレス検索API
+export type UserSearchResponse = {
+  userId: string;
+  email: string;
+  nickname: string;
+  status: string;
+  requestId: string;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
@@ -134,15 +143,6 @@ export type ExerciseRequest = {
   name: string;
   createdAt: string;
   updatedAt: string;
-};
-
-// ユーザーアカウント情報API
-export type UserAccountInfoResponse = {
-  userId: string;
-  email: string;
-  nickname: string;
-  status: string;
-  requestId: string;
 };
 
 // トレーニングランキングAPI

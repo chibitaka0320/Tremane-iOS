@@ -1,4 +1,4 @@
-import { UserResponse } from "@/types/api";
+import { UserResponse, UserSearchResponse } from "@/types/api";
 import { apiRequestAuth } from "./apiRequest";
 
 // GET /users
@@ -18,4 +18,16 @@ export async function updateUser(
 // DELETE /users
 export async function deleteUser() {
   await apiRequestAuth<void>("/users", "DELETE", null);
+}
+
+// GET /users/search
+export async function searchUserByEmail(
+  email: string
+): Promise<UserSearchResponse | null> {
+  const res = await apiRequestAuth<UserSearchResponse>(
+    `/users/search?email=${email}`,
+    "GET",
+    null
+  );
+  return res.data;
 }
