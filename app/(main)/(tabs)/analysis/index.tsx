@@ -10,7 +10,6 @@ import {
 import theme from "@/styles/theme";
 import { LineChart } from "react-native-chart-kit";
 import { selectLabel } from "@/types/common";
-import { getWorkoutCount } from "@/localDb/service/trainingService";
 import { Octicons } from "@expo/vector-icons";
 import { partsColors } from "@/styles/partsColor";
 import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
@@ -79,7 +78,9 @@ export default function AnalysisScreen() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await getWorkoutCount(bodyParts);
+        const res = await trainingAnalysisRepository.getWorkoutCount(
+          Number(bodyParts)
+        );
         if (res) {
           setWeek(res.week);
           setMonth(res.month);
@@ -156,8 +157,8 @@ export default function AnalysisScreen() {
             </View>
           </View>
         ) : (
-          datas.map((data) => (
-            <View style={styles.itemContainer} key={data.name}>
+          datas.map((data, index) => (
+            <View style={styles.itemContainer} key={index}>
               <Text style={styles.exercise}>{data.name}</Text>
               <LineChart
                 data={data}

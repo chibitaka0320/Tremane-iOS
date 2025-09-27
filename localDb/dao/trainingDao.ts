@@ -86,7 +86,7 @@ export async function getTrainingByDate(
 }
 
 // トレーニング件数取得(全部位)
-export const getTrainingAllCount = async (started: string, ended: string) => {
+export async function getTrainingAllCount(started: string, ended: string) {
   const rows = await db.getFirstAsync<{ count: number }>(
     `
     SELECT
@@ -99,14 +99,14 @@ export const getTrainingAllCount = async (started: string, ended: string) => {
   );
 
   return rows?.count ?? 0;
-};
+}
 
 // トレーニング件数取得（部位別）
-export const getTrainingCount = async (
+export async function getTrainingCount(
   started: string,
   ended: string,
-  partsId: string
-) => {
+  partsId: number
+) {
   const rows = await db.getFirstAsync<{ count: number }>(
     `
     SELECT
@@ -122,7 +122,7 @@ export const getTrainingCount = async (
   );
 
   return rows?.count ?? 0;
-};
+}
 
 // トレーニング分析データ取得(全部)
 export async function getTrainingAllDataByMaxWeight(
