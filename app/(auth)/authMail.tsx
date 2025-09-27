@@ -1,6 +1,7 @@
 import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
+import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import theme from "@/styles/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
@@ -29,6 +30,7 @@ export default function AuthMailScreen() {
       const refreshed = auth.currentUser;
 
       if (refreshed?.emailVerified) {
+        userSyncFromRemote();
         // TODO: 通知機能はpennding
         await registerPushTokenIfNeeded();
 
