@@ -1,14 +1,12 @@
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
-import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
 import theme from "@/styles/theme";
 import { Entypo } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { deleteUser, signInWithCustomToken } from "firebase/auth";
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import * as userService from "@/service/userService";
+import { ApiError } from "@/lib/error";
 
 export default function DeleteAccountScreen() {
   const [isLoading, setLoading] = useState(false);
@@ -27,30 +25,22 @@ export default function DeleteAccountScreen() {
           text: "削除する",
           style: "destructive",
           onPress: async () => {
+            setLoading(true);
             try {
-              const res = await apiRequestWithRefresh(
-                "/auth/reauth-token",
-                "POST"
-              );
-
-              if (res?.ok) {
-                const customToken = await res.text();
-                await signInWithCustomToken(auth, customToken);
-
-                await apiRequestWithRefresh(URL, "DELETE");
-                if (auth.currentUser) {
-                  await deleteUser(auth.currentUser);
-                  await clearLocalDb();
-                  AsyncStorage.removeItem("push_token_registered");
-                  router.dismissAll();
-                  router.replace("/(auth)/signIn");
-                }
-              } else {
-                Alert.alert("アカウントの削除に失敗しました。");
-              }
+              await userService.deleteUser(user);
+              router.dismissAll();
+              router.replace("/(auth)/signIn");
             } catch (error) {
-              console.log(error);
               Alert.alert("アカウントの削除に失敗しました。");
+              if (error instanceof ApiError) {
+                console.error(
+                  `APIエラー（アカウント情報削除）：[${error.status}]${error.message}`
+                );
+              } else {
+                console.error(`アカウント削除失敗：${error}`);
+              }
+            } finally {
+              setLoading(false);
             }
           },
         },

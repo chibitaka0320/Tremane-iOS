@@ -107,6 +107,11 @@ export async function apiRequestAuth<T>(
     return { status: res.status, data: null };
   }
 
-  const json = await res.json();
-  return { status: res.status, data: json };
+  if (res.headers.get("content-type")?.includes("application/json")) {
+    const json = await res.json();
+    return { status: res.status, data: json };
+  } else {
+    const text = await res.text();
+    return { status: res.status, data: text as T };
+  }
 }
