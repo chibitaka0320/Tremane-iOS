@@ -1,5 +1,5 @@
 // 友達申請DTO
 export type FriendRequest = {
-  requestId: string;
-  status: string;
+  requestId: string | null;
+  status: string | null;
 };

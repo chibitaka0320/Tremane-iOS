@@ -1,6 +1,5 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
@@ -126,21 +125,12 @@ export default function FriendAddScreen({ onClose }: Props) {
           }
 
           try {
-            const res = await apiRequestWithRefresh(
-              `/friends/${requestId}`,
-              "DELETE"
-            );
-
-            if (res?.ok) {
-              setStatus(null);
-              setRequestId(null);
-            } else {
-              Alert.alert("申請の取り消しに失敗しました。");
-              console.error(res);
-            }
+            await friendService.revokeFriend(requestId);
+            setStatus(null);
+            setRequestId(null);
           } catch (error) {
             Alert.alert("申請の取り消しに失敗しました。");
-            console.error(error);
+            errorHandle(error, "申請の取り消し");
           } finally {
             setStatusLoading(false);
           }
@@ -170,21 +160,12 @@ export default function FriendAddScreen({ onClose }: Props) {
             }
 
             try {
-              const res = await apiRequestWithRefresh(
-                `/friends/${requestId}`,
-                "DELETE"
-              );
-
-              if (res?.ok) {
-                setStatus(null);
-                setRequestId(null);
-              } else {
-                Alert.alert("友達から削除処理に失敗しました。");
-                console.error(res);
-              }
+              friendService.revokeFriend(requestId);
+              setStatus(null);
+              setRequestId(null);
             } catch (error) {
               Alert.alert("友達から削除処理に失敗しました。");
-              console.error(error);
+              errorHandle(error, "友達削除処理");
             } finally {
               setStatusLoading(false);
             }
@@ -204,16 +185,9 @@ export default function FriendAddScreen({ onClose }: Props) {
     }
 
     try {
-      const res = await apiRequestWithRefresh(
-        `/friends/${requestId}/accept`,
-        "PUT"
-      );
+      const res = await friendService.acceptFriend(requestId);
 
-      if (res?.ok) {
-        const requestId = await res.text();
-        setStatus("accepted");
-        setRequestId(requestId);
-      } else if (res?.status === 404) {
+      if (!res.requestId) {
         Alert.alert("すでに申請が取り消されています。", "", [
           {
             text: "OK",
@@ -223,13 +197,13 @@ export default function FriendAddScreen({ onClose }: Props) {
             },
           },
         ]);
-      } else {
-        Alert.alert("申請許可に失敗しました");
-        console.error(res);
       }
+
+      setStatus(res.status);
+      setRequestId(res.requestId);
     } catch (error) {
       Alert.alert("申請許可に失敗しました。");
-      console.error(error);
+      errorHandle(error, "申請許可");
     } finally {
       setStatusLoading(false);
     }
@@ -256,21 +230,12 @@ export default function FriendAddScreen({ onClose }: Props) {
             }
 
             try {
-              const res = await apiRequestWithRefresh(
-                `/friends/${requestId}`,
-                "DELETE"
-              );
-
-              if (res?.ok) {
-                setStatus(null);
-                setRequestId(null);
-              } else {
-                Alert.alert("申請の拒否に失敗しました。");
-                console.error(res);
-              }
+              await friendService.revokeFriend(requestId);
+              setStatus(null);
+              setRequestId(null);
             } catch (error) {
               Alert.alert("申請の拒否に失敗しました。");
-              console.error(error);
+              errorHandle(error, "申請の拒否");
             } finally {
               setStatusLoading(false);
             }

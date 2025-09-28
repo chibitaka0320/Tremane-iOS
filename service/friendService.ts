@@ -38,3 +38,21 @@ export async function requestFriend(
     status,
   };
 }
+
+// 友達申請取り消し・削除
+export async function revokeFriend(requestId: string) {
+  await friendApi.revokeFriend(requestId);
+}
+
+// 友達申請許可
+export async function acceptFriend(requestId: string): Promise<FriendRequest> {
+  const myRequestId = await friendApi.acceptFriend(requestId);
+  let status = null;
+  if (myRequestId) {
+    status = "accepted";
+  }
+  return {
+    status,
+    requestId: myRequestId,
+  };
+}
