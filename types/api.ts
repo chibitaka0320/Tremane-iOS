@@ -123,6 +123,12 @@ export type NotificationResponse = {
   status: string | null;
 };
 
+// 友達申請API
+export type FriendRequestResponse = {
+  requestId: string;
+  status: string;
+};
+
 // ==== リクエスト ====
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {

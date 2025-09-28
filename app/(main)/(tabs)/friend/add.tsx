@@ -36,6 +36,15 @@ export default function FriendAddScreen({ onClose }: Props) {
   const [isStatusLoading, setStatusLoading] = useState(false); // ステータスローディングフラグ
   const [isDisabled, setDisabled] = useState(true); // 検索ボタン活性非活性
 
+  // エラーハンドリング
+  const errorHandle = (error: any, process: string) => {
+    if (error instanceof ApiError) {
+      console.error(`APIエラー(${process})：[${error.status}]${error.message}`);
+    } else {
+      console.error(`${process}に失敗：${error}`);
+    }
+  };
+
   // ボタン活性非活性
   useEffect(() => {
     if (validateEmail(email)) {
@@ -63,13 +72,7 @@ export default function FriendAddScreen({ onClose }: Props) {
       }
     } catch (error) {
       setResultText("見つかりませんでした");
-      if (error instanceof ApiError) {
-        console.error(
-          `APIエラー(ユーザー検索)：[${error.status}]${error.message}`
-        );
-      } else {
-        console.error("ユーザー検索に失敗：" + error);
-      }
+      errorHandle(error, "ユーザー検索");
     } finally {
       setLoading(false);
     }
@@ -85,38 +88,21 @@ export default function FriendAddScreen({ onClose }: Props) {
     }
 
     try {
-      const res = await apiRequestWithRefresh(
-        `/friends/${user.userId}`,
-        "POST"
-      );
-
-      if (res?.ok) {
-        const requestId = await res.text();
-        setStatus("pending");
-        setRequestId(requestId);
-      } else if (res?.status === 409) {
-        const requestId = await res.text();
-        setStatus("pending");
-        setRequestId(requestId);
-      } else if (res?.status === 418) {
+      const res = await friendService.requestFriend(user.userId);
+      if (res.status === "receive") {
         Alert.alert("すでに友達申請を受けています。", "", [
           {
             text: "OK",
             style: "cancel",
-            onPress: async () => {
-              const requestId = await res.text();
-              setStatus("receive");
-              setRequestId(requestId);
-            },
           },
         ]);
-      } else {
-        Alert.alert("友達申請に失敗しました");
-        console.error(res);
       }
+
+      setStatus(res.status);
+      setRequestId(res.requestId);
     } catch (error) {
       Alert.alert("友達申請に失敗しました。");
-      console.error(error);
+      errorHandle(error, "友達申請");
     } finally {
       setStatusLoading(false);
     }

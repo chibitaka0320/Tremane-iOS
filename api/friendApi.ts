@@ -1,4 +1,5 @@
 import {
+  FriendRequestResponse,
   TimelineTrainingResponse,
   TrainingDateRankingResponse,
 } from "@/types/api";
@@ -7,8 +8,8 @@ import { apiRequestAuth } from "./apiRequest";
 // POST /friends/{receiveUserId}
 export async function requestFriend(
   receiveUserId: string
-): Promise<string | null> {
-  const res = await apiRequestAuth<string>(
+): Promise<FriendRequestResponse | null> {
+  const res = await apiRequestAuth<FriendRequestResponse>(
     `/friends/${receiveUserId}`,
     "POST",
     null
