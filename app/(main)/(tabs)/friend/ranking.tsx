@@ -1,28 +1,29 @@
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
-import { TrainingRankingResponse } from "@/types/api";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import * as rankingService from "@/service/rankingService";
+import { TrainingRanking } from "@/types/dto/rankingDto";
+import { ApiError } from "@/lib/error";
 
 export default function RankingScreen() {
-  const [rankingList, setRankingList] = useState<TrainingRankingResponse[]>();
+  const [rankingList, setRankingList] = useState<TrainingRanking[]>();
 
   const [isLoading, setLoading] = useState(false);
 
   const getRanking = async () => {
     try {
-      const res = await apiRequestWithRefresh(`/friends/ranking`);
-
-      if (res?.ok) {
-        const data: TrainingRankingResponse[] = await res.json();
-        setRankingList(data);
+      const res = await rankingService.getTrainingRankingMonthly();
+      setRankingList(res);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        console.error(
+          `APIエラー(トレーニングランキング取得)：[${error.status}]${error.message}`
+        );
       } else {
-        console.log(res);
+        console.error(`トレーニングランキング取得に失敗しました：${error}`);
       }
-    } catch (e) {
-      console.log(e);
     }
   };
 
@@ -57,7 +58,7 @@ export default function RankingScreen() {
                 <Text style={styles.name}>{ranking.nickname}</Text>
               </View>
               <View style={styles.itemRight}>
-                <Text style={styles.count}>{ranking.trainingCounts}</Text>
+                <Text style={styles.count}>{ranking.count}</Text>
                 <Text style={styles.unit}>days</Text>
               </View>
             </View>
