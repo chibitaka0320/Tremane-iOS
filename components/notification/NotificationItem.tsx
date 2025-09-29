@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import * as friendService from "@/service/friendService";
+import { ApiError } from "@/lib/error";
 
 type Props = {
   notification: NotificationResponse;
@@ -23,6 +24,15 @@ export const NotificationItem = ({ notification }: Props) => {
   );
 
   const [isStatusLoading, setStatusLoading] = useState<boolean>(false); // ステータスローディングフラグ
+
+  // エラーハンドリング
+  const errorHandle = (error: any, process: string) => {
+    if (error instanceof ApiError) {
+      console.error(`APIエラー(${process})：[${error.status}]${error.message}`);
+    } else {
+      console.error(`${process}に失敗：${error}`);
+    }
+  };
 
   const isFriendRequestType = () => {
     return "FRIEND_REQUEST" === notification.type;
@@ -38,16 +48,9 @@ export const NotificationItem = ({ notification }: Props) => {
     }
 
     try {
-      const res = await apiRequestWithRefresh(
-        `/friends/${requestId}/accept`,
-        "PUT"
-      );
+      const res = await friendService.acceptFriend(requestId);
 
-      if (res?.ok) {
-        const requestId = await res.text();
-        setStatus("accepted");
-        setRequestId(requestId);
-      } else if (res?.status === 404) {
+      if (!res.requestId) {
         Alert.alert("すでに申請が取り消されています。", "", [
           {
             text: "OK",
@@ -57,13 +60,13 @@ export const NotificationItem = ({ notification }: Props) => {
             },
           },
         ]);
-      } else {
-        Alert.alert("申請許可に失敗しました");
-        console.error(res);
       }
+
+      setStatus(res.status);
+      setRequestId(res.requestId);
     } catch (error) {
       Alert.alert("申請許可に失敗しました。");
-      console.error(error);
+      errorHandle(error, "申請許可");
     } finally {
       setStatusLoading(false);
     }
@@ -87,21 +90,12 @@ export const NotificationItem = ({ notification }: Props) => {
           }
 
           try {
-            const res = await apiRequestWithRefresh(
-              `/friends/${requestId}`,
-              "DELETE"
-            );
-
-            if (res?.ok) {
-              setStatus(null);
-              setRequestId(null);
-            } else {
-              Alert.alert("申請の拒否に失敗しました。");
-              console.error(res);
-            }
+            await friendService.revokeFriend(requestId);
+            setStatus(null);
+            setRequestId(null);
           } catch (error) {
             Alert.alert("申請の拒否に失敗しました。");
-            console.error(error);
+            errorHandle(error, "申請の拒否");
           } finally {
             setStatusLoading(false);
           }
@@ -128,21 +122,12 @@ export const NotificationItem = ({ notification }: Props) => {
           }
 
           try {
-            const res = await apiRequestWithRefresh(
-              `/friends/${requestId}`,
-              "DELETE"
-            );
-
-            if (res?.ok) {
-              setStatus(null);
-              setRequestId(null);
-            } else {
-              Alert.alert("友達から削除処理に失敗しました。");
-              console.error(res);
-            }
+            friendService.revokeFriend(requestId);
+            setStatus(null);
+            setRequestId(null);
           } catch (error) {
             Alert.alert("友達から削除処理に失敗しました。");
-            console.error(error);
+            errorHandle(error, "友達削除処理");
           } finally {
             setStatusLoading(false);
           }
@@ -161,38 +146,27 @@ export const NotificationItem = ({ notification }: Props) => {
     }
 
     try {
-      const res = await apiRequestWithRefresh(
-        `/friends/${notification.notificationSource}`,
-        "POST"
+      const res = await friendService.requestFriend(
+        notification.notificationSource
       );
-
-      if (res?.ok) {
-        const requestId = await res.text();
-        setStatus("pending");
-        setRequestId(requestId);
-      } else if (res?.status === 409) {
-        const requestId = await res.text();
-        setStatus("pending");
-        setRequestId(requestId);
-      } else if (res?.status === 418) {
+      if (res.status === "receive") {
         Alert.alert("すでに友達申請を受けています。", "", [
           {
             text: "OK",
             style: "cancel",
-            onPress: async () => {
-              const requestId = await res.text();
-              setStatus("request");
-              setRequestId(requestId);
+            onPress: () => {
+              setStatus("pending");
             },
           },
         ]);
       } else {
-        Alert.alert("友達申請に失敗しました");
-        console.error(res);
+        setStatus("request");
       }
+
+      setRequestId(res.requestId);
     } catch (error) {
       Alert.alert("友達申請に失敗しました。");
-      console.error(error);
+      errorHandle(error, "友達申請");
     } finally {
       setStatusLoading(false);
     }
@@ -216,21 +190,12 @@ export const NotificationItem = ({ notification }: Props) => {
           }
 
           try {
-            const res = await apiRequestWithRefresh(
-              `/friends/${requestId}`,
-              "DELETE"
-            );
-
-            if (res?.ok) {
-              setStatus(null);
-              setRequestId(null);
-            } else {
-              Alert.alert("申請の取り消しに失敗しました。");
-              console.error(res);
-            }
+            await friendService.revokeFriend(requestId);
+            setStatus(null);
+            setRequestId(null);
           } catch (error) {
             Alert.alert("申請の取り消しに失敗しました。");
-            console.error(error);
+            errorHandle(error, "申請の取り消し");
           } finally {
             setStatusLoading(false);
           }

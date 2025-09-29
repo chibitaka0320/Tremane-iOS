@@ -1,4 +1,4 @@
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import * as notificationApi from "@/api/notificationApi";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useEffect } from "react";
@@ -8,7 +8,7 @@ export function useNotificationHandler() {
     // 通知タップ時
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        apiRequestWithRefresh("/notifications/read", "PUT");
+        notificationApi.markAllRead();
 
         if (router.canDismiss()) {
           router.dismissAll();
