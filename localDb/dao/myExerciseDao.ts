@@ -24,7 +24,7 @@ export async function getMyExercise(
         updated_at AS updatedAt
     FROM exercises
     WHERE exercise_id = ?
-    AND owner_user_id != null
+    AND owner_user_id IS NOT null
     `,
     [exerciseId]
   );
@@ -99,7 +99,7 @@ export async function deleteMyExercise(exerciseId: string) {
 
 // マイトレーニング種目データ物理削除
 export async function deleteMyExercises() {
-  await db.runAsync("DELETE FROM exercises WHERE owner_user_id != null;");
+  await db.runAsync("DELETE FROM exercises WHERE owner_user_id IS NOT null;");
 }
 
 // フラグを同期済みにする

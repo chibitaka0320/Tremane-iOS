@@ -46,7 +46,7 @@ export async function getBodyPartsWithExercises(): Promise<BodyPart[]> {
       exerciseId: row.exerciseId,
       exerciseName: row.exerciseName,
       ownerUserId: row.ownerUserId,
-      myExerciseFlg: !row.ownerUserId,
+      myExerciseFlg: row.ownerUserId ? true : false,
     });
   }
 

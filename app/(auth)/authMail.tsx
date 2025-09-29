@@ -1,11 +1,10 @@
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { auth } from "@/lib/firebaseConfig";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import theme from "@/styles/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
-import { deleteUser, sendEmailVerification } from "firebase/auth";
+import { sendEmailVerification } from "firebase/auth";
 import {
   Keyboard,
   TouchableWithoutFeedback,
@@ -15,6 +14,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import * as userService from "@/service/userService";
 
 export default function AuthMailScreen() {
   const currentUser = auth.currentUser;
@@ -58,9 +58,13 @@ export default function AuthMailScreen() {
 
   // 新規登録に戻るボタン
   const backSignUp = async () => {
-    await apiRequestWithRefresh("/users", "DELETE");
-    await deleteUser(currentUser);
-    router.replace("/(auth)/signUp");
+    try {
+      await userService.deleteUser(currentUser);
+    } catch (error) {
+      console.error("メール認証画面から戻る時にエラー：", error);
+    } finally {
+      router.replace("/(auth)/signUp");
+    }
   };
 
   return (

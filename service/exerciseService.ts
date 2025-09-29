@@ -41,7 +41,7 @@ export async function upsertMyExercises(
     .upsertMyExercises(exerciseRequests)
     .then(async () => await exerciseRepository.setExercisesSynced([exerciseId]))
     .catch((error) => {
-      console.log("APIエラー(マイトレーニング種目追加更新)：" + error);
+      console.error("APIエラー(マイトレーニング種目追加更新)：" + error);
     });
 }
 
@@ -55,6 +55,6 @@ export async function deleteMyExercise(exerciseId: string) {
     .deleteMyExercise(exerciseId)
     .then(async () => await exerciseRepository.setExercisesSynced([exerciseId]))
     .catch((error) => {
-      console.log("APIエラー(マイトレーニング種目削除)：" + error);
+      console.error("APIエラー(マイトレーニング種目削除)：" + error);
     });
 }
