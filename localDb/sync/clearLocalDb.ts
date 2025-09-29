@@ -37,6 +37,8 @@ export const clearLocalDb = async () => {
   } catch (error) {
     console.error("ローカルDBデータクリアエラー：" + error);
   } finally {
-    ("========== ローカルDBデータクリア処理終了（マスタは除く） ==========");
+    console.log(
+      "========== ローカルDBデータクリア処理終了（マスタは除く） =========="
+    );
   }
 };

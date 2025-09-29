@@ -2,17 +2,18 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { MaterialIcons, SimpleLineIcons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import theme from "@/styles/theme";
-import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
-import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
+import * as authSercice from "@/service/authService";
+import { ApiError } from "@/lib/error";
+import { useState } from "react";
+import Indicator from "@/components/common/Indicator";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
 
 export default function MenuScreen() {
+  const [isLoading, setLoading] = useState(false);
+
   const onHome = () => {
     router.back();
   };
@@ -37,26 +38,29 @@ export default function MenuScreen() {
   };
 
   const onSignOut = async () => {
+    setLoading(true);
     try {
-      await syncLocalDb();
-      const response = await apiRequestWithRefresh(
-        "/push/unregister",
-        "DELETE"
-      );
-      if (response?.ok) {
-        await signOut(auth);
-        await clearLocalDb();
-        AsyncStorage.removeItem("push_token_registered");
-        router.dismissAll();
-        router.replace("/(auth)/signIn");
-      } else {
-        console.error("APIレスポンスエラー：" + response?.status);
-        Alert.alert("ログアウトに失敗しました");
-      }
-    } catch (e) {
+      await authSercice.signout();
+
+      router.dismissAll();
+      router.replace("/(auth)/signIn");
+    } catch (error) {
       Alert.alert("ログアウトに失敗しました");
+      if (error instanceof ApiError) {
+        console.error(
+          `API通信エラー（ログアウト処理）：[${error.status}]${error.message}`
+        );
+      } else {
+        console.error(`ログアウト処理失敗：${error}`);
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Indicator />;
+  }
 
   return (
     <View style={styles.container}>

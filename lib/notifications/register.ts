@@ -11,6 +11,7 @@ export async function registerPushTokenIfNeeded() {
     const alreadyRegistered = await AsyncStorage.getItem(
       PUSH_TOKEN_REGISTERED_KEY
     );
+
     if (alreadyRegistered) {
       console.log("PushToken登録済み。");
       return;
