@@ -10,11 +10,12 @@ import theme from "@/styles/theme";
 
 import AnalysisScreen from "./analysis";
 import { router, useFocusEffect, useNavigation } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import MainScreen from "./(home)/main";
 import FriendTabs from "./friend";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { useForegroundNotificationHandler } from "@/hooks/useForegroundNotificationHandler";
+import * as notificationService from "@/service/notificationService";
+import { ApiError } from "@/lib/error";
 
 const BottomTab = createBottomTabNavigator();
 
@@ -25,35 +26,32 @@ export default function TabsLayout() {
   // 未読件数取得
   const getNonNotificationCount = async () => {
     try {
-      const response = await apiRequestWithRefresh(
-        "/notifications/noread",
-        "GET"
-      );
-      if (response?.ok) {
-        const countStr = await response.text();
-        setCount(Number(countStr));
-      } else {
-        console.error("APIレスポンスエラー" + response?.status);
-      }
+      const count = await notificationService.getNoreadCount();
+      setCount(count);
     } catch (error) {
-      console.error("API取得エラー：" + error);
+      if (error instanceof ApiError) {
+        console.error(
+          `APIエラー（未読件数取得）：[${error.status}]${error.message}`
+        );
+      } else {
+        console.error(`未読件数の取得に失敗しました：${error}`);
+      }
     }
   };
 
   // 通知を既読化
   const markReadAll = async () => {
     try {
-      const response = await apiRequestWithRefresh(
-        "/notifications/read",
-        "PUT"
-      );
-      if (response?.ok) {
-        setCount(0);
-      } else {
-        console.error("APIレスポンスエラー" + response?.status);
-      }
+      await notificationService.markReadAll();
+      setCount(0);
     } catch (error) {
-      console.error("API取得エラー：" + error);
+      if (error instanceof ApiError) {
+        console.error(
+          `APIエラー（通知を既読化）：[${error.status}]${error.message}`
+        );
+      } else {
+        console.error(`通知の既読化処理に失敗しました：${error}`);
+      }
     }
   };
 
