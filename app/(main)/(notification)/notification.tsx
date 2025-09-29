@@ -1,31 +1,30 @@
 import Indicator from "@/components/common/Indicator";
 import { NotificationItem } from "@/components/notification/NotificationItem";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import theme from "@/styles/theme";
-import { NotificationResponse } from "@/types/api";
+import { Notification } from "@/types/dto/notificationDto";
 import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import * as notificationService from "@/service/notificationService";
+import { ApiError } from "@/lib/error";
 
 /** 通知一覧画面 */
 export default function NotificationScreen() {
-  const [notifications, setNotifications] = useState<NotificationResponse[]>(); // 通知一覧リスト
+  const [notifications, setNotifications] = useState<Notification[]>(); // 通知一覧リスト
 
   const [isLoading, setIsLoading] = useState<boolean>(false); // ローディングフラグ
 
   // 通知一覧の取得
   const getNotifications = async () => {
     try {
-      const response = await apiRequestWithRefresh("/notifications", "GET");
-      if (response?.ok) {
-        const data: NotificationResponse[] = await response.json();
-        setNotifications(data);
-      } else {
-        setNotifications([]);
-        console.error("APIレスポンスエラー：" + response?.status);
-      }
-    } catch (e) {
+      const res = await notificationService.getNotification();
+      setNotifications(res);
+    } catch (error) {
       setNotifications([]);
-      console.error("API取得でエラーが起きました：" + e);
+      if (error instanceof ApiError) {
+        console.error(`APIレスポンスエラー：[${error.status}]${error.message}`);
+      } else {
+        console.error(`通知の取得でエラーが起きました。:${error}`);
+      }
     }
   };
 

@@ -1,5 +1,3 @@
-import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
-
 // ==== レスポンス ====
 // ユーザー情報取得API
 export type UserResponse = {
@@ -119,7 +117,7 @@ export type NotificationResponse = {
   type: string;
   message: string;
   relatedId: string;
-  createdAt: Timestamp;
+  createdAt: string;
   status: string | null;
 };
 
