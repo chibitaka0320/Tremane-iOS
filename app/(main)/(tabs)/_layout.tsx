@@ -11,7 +11,7 @@ import theme from "@/styles/theme";
 import AnalysisScreen from "./analysis";
 import { router, useFocusEffect, useNavigation } from "expo-router";
 import { useCallback, useState } from "react";
-import MainScreen from "./(home)/main";
+import MainScreen from "./(home)";
 import FriendTabs from "./friend";
 import { useForegroundNotificationHandler } from "@/hooks/useForegroundNotificationHandler";
 import * as notificationService from "@/service/notificationService";
