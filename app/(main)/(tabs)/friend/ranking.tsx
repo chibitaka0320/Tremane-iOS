@@ -4,8 +4,8 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import * as rankingService from "@/service/rankingService";
-import { TrainingRanking } from "@/types/dto/rankingDto";
 import { ApiError } from "@/lib/error";
+import { TrainingRanking } from "@/types/dto/friendDto";
 
 export default function RankingScreen() {
   const [rankingList, setRankingList] = useState<TrainingRanking[]>();

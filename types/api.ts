@@ -99,7 +99,7 @@ export type TimelineTrainingResponse = {
   bodyParts: {
     partsId: number;
     bodyPartsName: string;
-  };
+  }[];
 };
 
 // トレーニングランキング取得API

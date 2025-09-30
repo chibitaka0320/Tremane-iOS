@@ -1,30 +1,30 @@
 import Indicator from "@/components/common/Indicator";
-import { apiRequestWithRefresh } from "@/lib/apiClient";
 import { partsColors } from "@/styles/partsColor";
 import theme from "@/styles/theme";
-import { TimelineTrainingResponse } from "@/types/api";
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
+import * as timelineService from "@/service/timelineService";
+import { ApiError } from "@/lib/error";
+import { TrainingTimeline } from "@/types/dto/friendDto";
 
 export default function FriendScreen() {
-  const [timelineList, setTimelineList] = useState<TimelineTrainingResponse[]>(
-    []
-  );
+  const [timelineList, setTimelineList] = useState<TrainingTimeline[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const getTimeline = async () => {
     setLoading(true);
     try {
-      const res = await apiRequestWithRefresh(`/friends/timeline`);
-      if (res?.ok) {
-        const data: TimelineTrainingResponse[] = await res.json();
-        setTimelineList(data);
+      const res = await timelineService.getTrainingTimeline();
+      setTimelineList(res);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        console.error(
+          `タイムライン取得APIレスポンスエラー：[${error.status}]${error.message}`
+        );
       } else {
-        console.error(res);
+        console.error(`タイムライン取得に失敗：${error}`);
       }
-    } catch (e) {
-      console.error(e);
     } finally {
       setLoading(false);
     }

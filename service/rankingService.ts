@@ -1,5 +1,5 @@
 import * as friendApi from "@/api/friendApi";
-import { TrainingRanking } from "@/types/dto/rankingDto";
+import { TrainingRanking } from "@/types/dto/friendDto";
 
 // 月間トレーニング回数ランキング取得
 export async function getTrainingRankingMonthly(): Promise<TrainingRanking[]> {
