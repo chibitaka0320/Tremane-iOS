@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiRequestWithRefresh } from "../apiClient";
 import { registerForPushNotificationsAsync } from "./permissions";
 import * as pushTokenApi from "@/api/pushTokenApi";
 import { ApiError } from "../error";
