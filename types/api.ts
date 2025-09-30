@@ -185,10 +185,3 @@ export type ExerciseRequest = {
   createdAt: string;
   updatedAt: string;
 };
-
-// ==== 共通系 ====
-// エラータイプ
-export type ErrorType = {
-  error: string;
-  code?: number;
-};
