@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiRequestWithRefresh } from "../apiClient";
 import { registerForPushNotificationsAsync } from "./permissions";
+import * as pushTokenApi from "@/api/pushTokenApi";
+import { ApiError } from "../error";
 
 /** Expo Push Tokenを取得しバックエンドに登録 */
 export async function registerPushTokenIfNeeded() {
@@ -20,17 +22,15 @@ export async function registerPushTokenIfNeeded() {
     const token = await registerForPushNotificationsAsync();
     if (!token) return;
 
-    const res = await apiRequestWithRefresh("/push/register", "POST", {
-      token,
-    });
+    const res = await pushTokenApi.registerPushToken(token);
 
-    if (res?.ok) {
-      console.log("PushToken登録成功");
-      await AsyncStorage.setItem(PUSH_TOKEN_REGISTERED_KEY, "true");
+    await AsyncStorage.setItem(PUSH_TOKEN_REGISTERED_KEY, "true");
+    console.log("PushToken登録成功");
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error(`PushToken登録失敗:[${error.status}]${error.message}`);
     } else {
-      console.error("PushToken登録失敗", res?.status);
+      console.error(`PushToken登録処理エラー：${error}`);
     }
-  } catch (e) {
-    console.error("PushToken登録処理エラー：", e);
   }
 }
