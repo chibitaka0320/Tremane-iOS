@@ -40,14 +40,13 @@ export async function getUnsyncedTrainings(
 }
 
 // 日別部位別トレーニング集計
-export const getTrainingPartsDao = async () => {
-  const rows = await db.getAllAsync<{
-    date: string;
-    parts_id: number;
-    name: string;
-  }>(
+export async function getTrainingWithBodyPart(): Promise<DailyTrainingRow[]> {
+  const rows = await db.getAllAsync<DailyTrainingRow>(
     `
-    SELECT t.date, b.parts_id, b.name
+    SELECT
+      t.date,
+      b.parts_id AS partsId,
+      b.name
     FROM trainings t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     LEFT JOIN body_parts b ON e.parts_id = b.parts_id
@@ -57,7 +56,7 @@ export const getTrainingPartsDao = async () => {
   );
 
   return rows;
-};
+}
 
 // 日別トレーニング情報取得
 export async function getTrainingByDate(

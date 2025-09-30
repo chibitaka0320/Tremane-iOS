@@ -1,5 +1,6 @@
 // 1日のトレーニング情報(行データ)
 export type DailyTrainingRow = {
+  date: string;
   trainingId: string;
   partsId: number;
   partsName: string;

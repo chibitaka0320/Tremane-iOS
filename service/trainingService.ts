@@ -3,6 +3,9 @@ import * as trainingApi from "@/api/trainingApi";
 import { TrainingEntity } from "@/types/db";
 import { format } from "date-fns";
 import { TrainingRequest } from "@/types/api";
+import { MarkedDates } from "react-native-calendars/src/types";
+import theme from "@/styles/theme";
+import { partsColors } from "@/styles/partsColor";
 
 // トレーニング情報追加更新
 export async function upsertTraining(
@@ -64,4 +67,36 @@ export async function deleteTraining(trainingId: string) {
     .catch((error) => {
       console.error("APIエラー(トレーニング情報削除)：" + error);
     });
+}
+
+// カレンダーマークデータの取得
+export async function getMarkedDate(
+  selectedDate: string
+): Promise<MarkedDates> {
+  const marked: MarkedDates = {};
+
+  const dailyTrainings = await trainingRepository.getTrainingsWithBodyPart();
+
+  for (const training of dailyTrainings) {
+    if (!marked[training.date]) {
+      marked[training.date] = {
+        dots: [],
+        selectedColor: theme.colors.primary,
+      };
+    }
+
+    const partColor = partsColors[training.partsId];
+    marked[training.date].dots?.push({
+      key: String(training.partsId),
+      color: partColor,
+    });
+
+    // 選択されている場合は、ドット表示をなくす。
+    marked[selectedDate] = {
+      dots: [],
+      selectedColor: theme.colors.primary,
+    };
+  }
+
+  return marked;
 }

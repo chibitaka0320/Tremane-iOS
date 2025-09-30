@@ -3,7 +3,11 @@ import * as trainingApi from "@/api/trainingApi";
 import { format } from "date-fns";
 import { TrainingRequest, TrainingResponse } from "@/types/api";
 import { TrainingEntity } from "@/types/db";
-import { BodyPart, DailyTraining } from "@/types/dto/trainingDto";
+import {
+  BodyPart,
+  DailyTraining,
+  DailyTrainingRow,
+} from "@/types/dto/trainingDto";
 
 // リモートDBからトレーニングデータの最新情報を同期
 export async function syncTrainingsFromRemote() {
@@ -112,6 +116,11 @@ export async function getTrainingByDate(date: string): Promise<DailyTraining> {
     date,
     bodyParts: Object.values(bodyPartMap),
   };
+}
+
+// 日別トレーニング一覧情報取得
+export async function getTrainingsWithBodyPart(): Promise<DailyTrainingRow[]> {
+  return await trainingDao.getTrainingWithBodyPart();
 }
 
 // トレーニング情報追加更新

@@ -19,7 +19,7 @@ import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typesc
 import { CircleButton } from "@/components/common/CircleButton";
 import { RecordMenu } from "@/components/menu/RecordMenu";
 import { MarkedDates } from "react-native-calendars/src/types";
-import { getMarkedDate } from "@/lib/getMarkedDate";
+import * as trainingService from "@/service/trainingService";
 
 const TopTab = createMaterialTopTabNavigator();
 
@@ -45,8 +45,12 @@ export default function MainScreen() {
 
   useEffect(() => {
     const fetch = async () => {
-      const res = await getMarkedDate(selectedDate);
-      setMarkedDates(res);
+      try {
+        const res = await trainingService.getMarkedDate(selectedDate);
+        setMarkedDates(res);
+      } catch (error) {
+        console.error(`カレンダーマーク情報の取得に失敗：${error}`);
+      }
     };
     fetch();
   }, [selectedDate]);
