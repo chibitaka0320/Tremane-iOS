@@ -9,12 +9,10 @@ import { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { DailyEating } from "@/types/dto/eatingDto";
+import { useCalendar } from "@/context/CalendarContext";
 
-type Props = {
-  selectedDate: string;
-};
-
-export default function EatingScreen({ selectedDate }: Props) {
+export default function EatingScreen() {
+  const { selectedDate } = useCalendar();
   const { setError } = useAlert();
 
   const [dailyEating, setDailyEating] = useState<DailyEating>();

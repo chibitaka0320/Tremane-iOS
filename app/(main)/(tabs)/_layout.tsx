@@ -16,6 +16,7 @@ import FriendTabs from "./friend";
 import { useForegroundNotificationHandler } from "@/hooks/useForegroundNotificationHandler";
 import * as notificationService from "@/service/notificationService";
 import { ApiError } from "@/lib/error";
+import { CalendarProvider } from "@/context/CalendarContext";
 
 const BottomTab = createBottomTabNavigator();
 
@@ -77,79 +78,81 @@ export default function TabsLayout() {
   };
 
   return (
-    <BottomTab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.font.gray,
-        tabBarStyle: {
-          backgroundColor: theme.colors.background.light,
-          borderTopColor: theme.colors.lightGray,
-          paddingBottom: 5,
-          paddingTop: 5,
-        },
-        headerShown: true,
-        headerTitle: "",
-        headerRight: () => {
-          return (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <TouchableOpacity
-                onPress={onNotification}
-                style={{ marginRight: 24 }}
-              >
-                <Ionicons
-                  name="notifications-outline"
-                  size={25}
-                  color="black"
-                />
-                {count > 0 && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      right: 1,
-                      top: 1,
-                      backgroundColor: "red",
-                      borderRadius: "50%",
-                      width: 10,
-                      height: 10,
-                    }}
-                  ></View>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onMenu} style={{ marginRight: 16 }}>
-                <Feather name="menu" size={25} />
-              </TouchableOpacity>
-            </View>
-          );
-        },
-      }}
-    >
-      <BottomTab.Screen
-        name="メイン"
-        component={MainScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color} />
-          ),
+    <CalendarProvider>
+      <BottomTab.Navigator
+        screenOptions={{
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.font.gray,
+          tabBarStyle: {
+            backgroundColor: theme.colors.background.light,
+            borderTopColor: theme.colors.lightGray,
+            paddingBottom: 5,
+            paddingTop: 5,
+          },
+          headerShown: true,
+          headerTitle: "",
+          headerRight: () => {
+            return (
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TouchableOpacity
+                  onPress={onNotification}
+                  style={{ marginRight: 24 }}
+                >
+                  <Ionicons
+                    name="notifications-outline"
+                    size={25}
+                    color="black"
+                  />
+                  {count > 0 && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        right: 1,
+                        top: 1,
+                        backgroundColor: "red",
+                        borderRadius: "50%",
+                        width: 10,
+                        height: 10,
+                      }}
+                    ></View>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onMenu} style={{ marginRight: 16 }}>
+                  <Feather name="menu" size={25} />
+                </TouchableOpacity>
+              </View>
+            );
+          },
         }}
-      />
-      <BottomTab.Screen
-        name="分析"
-        component={AnalysisScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="analytics" size={size} color={color} />
-          ),
-        }}
-      />
-      <BottomTab.Screen
-        name="友達"
-        component={FriendTabs}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome6 name="user-group" size={size - 6} color={color} />
-          ),
-        }}
-      />
-    </BottomTab.Navigator>
+      >
+        <BottomTab.Screen
+          name="メイン"
+          component={MainScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="home" size={size} color={color} />
+            ),
+          }}
+        />
+        <BottomTab.Screen
+          name="分析"
+          component={AnalysisScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="analytics" size={size} color={color} />
+            ),
+          }}
+        />
+        <BottomTab.Screen
+          name="友達"
+          component={FriendTabs}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome6 name="user-group" size={size - 6} color={color} />
+            ),
+          }}
+        />
+      </BottomTab.Navigator>
+    </CalendarProvider>
   );
 }

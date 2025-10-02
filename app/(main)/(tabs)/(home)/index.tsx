@@ -7,7 +7,6 @@ import { CalendarProvider, Agenda } from "react-native-calendars";
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
 import { Entypo } from "@expo/vector-icons";
-import { format } from "date-fns";
 import theme from "@/styles/theme";
 import {
   BottomSheetBackdrop,
@@ -20,27 +19,25 @@ import { CircleButton } from "@/components/common/CircleButton";
 import { RecordMenu } from "@/components/menu/RecordMenu";
 import { MarkedDates } from "react-native-calendars/src/types";
 import * as trainingService from "@/service/trainingService";
+import { useCalendar } from "@/context/CalendarContext";
 
 const TopTab = createMaterialTopTabNavigator();
 
 // トップタブナビゲーター（トレーニングと食事）
-function TopTabNavigator({ selectedDate }: { selectedDate: string }) {
+function TopTabNavigator() {
   return (
     <TopTab.Navigator>
       <TopTab.Screen name="トレーニング">
-        {() => <TrainingScreen selectedDate={selectedDate} />}
+        {() => <TrainingScreen />}
       </TopTab.Screen>
-      <TopTab.Screen name="食事">
-        {() => <EatingScreen selectedDate={selectedDate} />}
-      </TopTab.Screen>
+      <TopTab.Screen name="食事">{() => <EatingScreen />}</TopTab.Screen>
     </TopTab.Navigator>
   );
 }
 
 export default function MainScreen() {
-  const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
+  const { selectedDate, setSelectedDate } = useCalendar();
+
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
 
   useEffect(() => {
@@ -98,9 +95,7 @@ export default function MainScreen() {
             agendaDayNumColor: theme.colors.font.black,
             agendaTodayColor: theme.colors.primary,
           }}
-          renderEmptyData={() => (
-            <TopTabNavigator selectedDate={selectedDate} />
-          )}
+          renderEmptyData={() => <TopTabNavigator />}
         />
 
         <CircleButton onPress={onPlusButton} style={styles.button}>

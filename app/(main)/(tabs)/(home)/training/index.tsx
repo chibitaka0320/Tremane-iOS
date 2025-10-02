@@ -14,12 +14,11 @@ import Indicator from "@/components/common/Indicator";
 import { useAlert } from "@/context/AlertContext";
 import { DailyTraining } from "@/types/dto/trainingDto";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import { useCalendar } from "@/context/CalendarContext";
 
-type Props = {
-  selectedDate: string;
-};
-
-export default function TrainingScreen({ selectedDate }: Props) {
+export default function TrainingScreen() {
+  const { selectedDate } = useCalendar();
+  console.log(selectedDate);
   const { setError } = useAlert();
 
   const [trainingData, setData] = useState<DailyTraining>();
