@@ -18,7 +18,6 @@ import { useCalendar } from "@/context/CalendarContext";
 
 export default function TrainingScreen() {
   const { selectedDate } = useCalendar();
-  console.log(selectedDate);
   const { setError } = useAlert();
 
   const [trainingData, setData] = useState<DailyTraining>();
