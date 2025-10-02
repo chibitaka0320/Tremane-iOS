@@ -1,31 +1,30 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import Indicator from "@/components/common/Indicator";
 import TrainingItem from "@/components/training/TrainingItem";
+import { useAlert } from "@/context/AlertContext";
+import { useCalendar } from "@/context/CalendarContext";
+import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import theme from "@/styles/theme";
-import { useCallback, useEffect, useState } from "react";
+import { DailyTraining } from "@/types/dto/trainingDto";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import Indicator from "@/components/common/Indicator";
-import { useAlert } from "@/context/AlertContext";
-import { DailyTraining } from "@/types/dto/trainingDto";
-import * as trainingRepository from "@/localDb/repository/trainingRepository";
-import { useCalendar } from "@/context/CalendarContext";
+import { useCallback, useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
+// トレーニング一覧画面
 export default function TrainingScreen() {
-  const { selectedDate } = useCalendar();
+  const { selectedDate } = useCalendar(); // カレンダーで選択された日付
   const { setError } = useAlert();
 
   const [trainingData, setData] = useState<DailyTraining>();
 
   const [isFetching, setFetching] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchTrainingData = async (isRefresh = false) => {
     if (isRefresh) {
@@ -69,7 +68,7 @@ export default function TrainingScreen() {
 
   return (
     <View style={styles.container}>
-      {trainingData?.bodyParts.length == 0 ? (
+      {trainingData?.bodyParts.length === 0 ? (
         <TouchableOpacity style={styles.nonDataContainer}>
           <MaterialIcons name="note-add" size={60} color="#ccc" />
           <Text style={styles.text}>データがありません</Text>
