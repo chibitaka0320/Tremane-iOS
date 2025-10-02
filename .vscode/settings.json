@@ -1,0 +1,5 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit" // import 整理
+  }
+}
