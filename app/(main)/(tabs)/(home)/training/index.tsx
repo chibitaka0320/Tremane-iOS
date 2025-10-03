@@ -6,7 +6,7 @@ import * as trainingService from "@/service/trainingService";
 import theme from "@/styles/theme";
 import { DailyTraining } from "@/types/dto/trainingDto";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
@@ -21,70 +21,94 @@ export default function TrainingScreen() {
   const { selectedDate } = useCalendar(); // カレンダーで選択された日付
   const { setError } = useAlert();
 
-  const [dailyTraining, setDailyTraining] = useState<DailyTraining>();
+  const [dailyTraining, setDailyTraining] = useState<DailyTraining>(); // トレーニングデータ
 
-  const [isFetching, setFetching] = useState(true);
-  const [isRefreshing, setRefreshing] = useState(false);
+  const [isLoading, setLoading] = useState(true); // ローディング判定
+  const [isRefreshing, setRefreshing] = useState(false); // リフレッシュ判定
 
-  const fetchTrainingData = async (isRefresh = false) => {
+  // 選択された日付のトレーニングデータを取得
+  const fetchDailyTraining = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
-      setFetching(true);
+      setLoading(true);
     }
 
     try {
-      const data = await trainingService.getTrainingByDate(selectedDate);
-      if (data != null) {
-        setDailyTraining(data);
+      const fetchedDailyTraining = await trainingService.getTrainingByDate(
+        selectedDate
+      );
+      if (fetchedDailyTraining) {
+        setDailyTraining(fetchedDailyTraining);
       }
-    } catch (e) {
-      console.error(e);
-      setError("時間をおいて再度アプリを起動してください", () => {
-        router.replace("/(auth)/signIn");
-      });
+    } catch (error) {
+      // TODO: エラーハンドリングのルールを検討
+      console.error(`トレーニングデータ取得でエラー発生：${error}`);
+      if (!dailyTraining) {
+        // TODO: ログイン画面に戻さなくて良いかしばらく検証
+        // setError("時間をおいて再度アプリを起動してください", () => {
+        //   router.replace("/(auth)/signIn");
+        // });
+
+        setError("トレーニングデータの読み込みに失敗しました。");
+      }
     } finally {
       if (isRefresh) {
         setRefreshing(false);
       } else {
-        setFetching(false);
+        setLoading(false);
       }
     }
   };
 
+  // 初期表示のみ
   useEffect(() => {
-    fetchTrainingData(false);
+    fetchDailyTraining(false);
   }, []);
 
+  // 画面表示毎
   useFocusEffect(
     useCallback(() => {
-      fetchTrainingData(true);
+      fetchDailyTraining(true);
     }, [selectedDate])
   );
 
-  if (isFetching) {
+  // 1. 初期ロード（キャッシュなし）
+  if (isLoading && !dailyTraining) {
     return <Indicator />;
   }
 
-  return (
-    <View style={styles.container}>
-      {dailyTraining?.bodyParts.length === 0 ? (
+  // 2. データ取得失敗（キャッシュなし）
+  if (!dailyTraining) {
+    // TODO: UIは別途検討
+    return <Text>データを読み込めませんでした</Text>;
+  }
+
+  // 3. データはあるが空
+  if (dailyTraining.bodyParts.length === 0) {
+    return (
+      <View style={styles.container}>
         <TouchableOpacity style={styles.nonDataContainer}>
           <MaterialIcons name="note-add" size={60} color="#ccc" />
           <Text style={styles.text}>データがありません</Text>
           <Text style={styles.subText}>トレーニングを追加しましょう</Text>
         </TouchableOpacity>
-      ) : (
-        <FlatList
-          data={dailyTraining?.bodyParts}
-          style={styles.trainingContainer}
-          renderItem={({ item }) => <TrainingItem bodyPart={item} />}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.name}
-          ListFooterComponent={<View style={styles.trainingItemFooter}></View>}
-          refreshing={isRefreshing}
-        />
-      )}
+      </View>
+    );
+  }
+
+  // 4. データあり
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={dailyTraining.bodyParts}
+        style={styles.trainingContainer}
+        renderItem={({ item }) => <TrainingItem bodyPart={item} />}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item) => item.bodyPartId.toString()}
+        ListFooterComponent={<View style={styles.trainingItemFooter}></View>}
+        refreshing={isRefreshing}
+      />
     </View>
   );
 }
