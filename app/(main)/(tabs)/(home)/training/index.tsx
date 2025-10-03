@@ -21,7 +21,7 @@ export default function TrainingScreen() {
   const { selectedDate } = useCalendar(); // カレンダーで選択された日付
   const { setError } = useAlert();
 
-  const [trainingData, setData] = useState<DailyTraining>();
+  const [dailyTraining, setDailyTraining] = useState<DailyTraining>();
 
   const [isFetching, setFetching] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
@@ -36,7 +36,7 @@ export default function TrainingScreen() {
     try {
       const data = await trainingRepository.getTrainingByDate(selectedDate);
       if (data != null) {
-        setData(data);
+        setDailyTraining(data);
       }
     } catch (e) {
       console.error(e);
@@ -68,7 +68,7 @@ export default function TrainingScreen() {
 
   return (
     <View style={styles.container}>
-      {trainingData?.bodyParts.length === 0 ? (
+      {dailyTraining?.bodyParts.length === 0 ? (
         <TouchableOpacity style={styles.nonDataContainer}>
           <MaterialIcons name="note-add" size={60} color="#ccc" />
           <Text style={styles.text}>データがありません</Text>
@@ -76,7 +76,7 @@ export default function TrainingScreen() {
         </TouchableOpacity>
       ) : (
         <FlatList
-          data={trainingData?.bodyParts}
+          data={dailyTraining?.bodyParts}
           style={styles.trainingContainer}
           renderItem={({ item }) => <TrainingItem bodyPart={item} />}
           showsVerticalScrollIndicator={false}
