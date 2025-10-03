@@ -1,11 +1,17 @@
-import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import * as trainingApi from "@/api/trainingApi";
-import { TrainingEntity } from "@/types/db";
-import { format } from "date-fns";
-import { TrainingRequest } from "@/types/api";
-import { MarkedDates } from "react-native-calendars/src/types";
-import theme from "@/styles/theme";
+import * as trainingRepository from "@/localDb/repository/trainingRepository";
 import { partsColors } from "@/styles/partsColor";
+import theme from "@/styles/theme";
+import { TrainingRequest } from "@/types/api";
+import { TrainingEntity } from "@/types/db";
+import { DailyTraining } from "@/types/dto/trainingDto";
+import { format } from "date-fns";
+import { MarkedDates } from "react-native-calendars/src/types";
+
+// 1日のトレーニング情報取得
+export async function getTrainingByDate(date: string): Promise<DailyTraining> {
+  return await trainingRepository.getTrainingByDate(date);
+}
 
 // トレーニング情報追加更新
 export async function upsertTraining(

@@ -2,7 +2,7 @@ import Indicator from "@/components/common/Indicator";
 import TrainingItem from "@/components/training/TrainingItem";
 import { useAlert } from "@/context/AlertContext";
 import { useCalendar } from "@/context/CalendarContext";
-import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import * as trainingService from "@/service/trainingService";
 import theme from "@/styles/theme";
 import { DailyTraining } from "@/types/dto/trainingDto";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -34,7 +34,7 @@ export default function TrainingScreen() {
     }
 
     try {
-      const data = await trainingRepository.getTrainingByDate(selectedDate);
+      const data = await trainingService.getTrainingByDate(selectedDate);
       if (data != null) {
         setDailyTraining(data);
       }
