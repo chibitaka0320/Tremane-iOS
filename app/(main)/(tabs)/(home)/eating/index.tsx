@@ -3,64 +3,82 @@ import EatingRow from "@/components/eating/EatingRow";
 import Summary from "@/components/eating/Summary";
 import { PFC_LABELS } from "@/constants/pfc";
 import { useAlert } from "@/context/AlertContext";
-import theme from "@/styles/theme";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
-import * as eatingRepository from "@/localDb/repository/eatingRepository";
-import { DailyEating } from "@/types/dto/eatingDto";
 import { useCalendar } from "@/context/CalendarContext";
+import * as eatingService from "@/service/eatingService";
+import theme from "@/styles/theme";
+import { DailyEating } from "@/types/dto/eatingDto";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 
+// 食事一覧画面
 export default function EatingScreen() {
-  const { selectedDate } = useCalendar();
+  const { selectedDate } = useCalendar(); // カレンダーで選択された日付
   const { setError } = useAlert();
 
-  const [dailyEating, setDailyEating] = useState<DailyEating>();
-  const [isLoading, setLoading] = useState(false);
+  const [dailyEating, setDailyEating] = useState<DailyEating>(); // 食事データ
 
-  const [isFetching, setFetching] = useState(false);
-  const [isRefreshing, setRefreshing] = useState(false);
+  const [isLoading, setLoading] = useState(true); // ローディング判定
+  const [isRefreshing, setRefreshing] = useState(false); // リフレッシュ判定
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const fetchEatingData = async (isRefresh = false) => {
+  // 選択された日付の食事データを取得
+  const fetchDailyEating = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
-      setFetching(true);
+      setLoading(true);
     }
 
     try {
-      const dailyEating = await eatingRepository.getEatingByDate(selectedDate);
-      setDailyEating(dailyEating);
-    } catch (e) {
-      console.error(e);
-      setError("時間をおいて再度アプリを起動してください", () => {
-        router.replace("/(auth)/signIn");
-      });
+      const fetchedDailyEating = await eatingService.getEatingByDate(
+        selectedDate
+      );
+      if (fetchedDailyEating) {
+        setDailyEating(fetchedDailyEating);
+      }
+    } catch (error) {
+      // TODO: エラーハンドリングのルールを検討
+      console.error(error);
+      if (!dailyEating) {
+        // TODO: ログイン画面に戻さなくて良いかしばらく検証
+        // setError("時間をおいて再度アプリを起動してください", () => {
+        //   router.replace("/(auth)/signIn");
+        // });
+        setError("食事データの読み込みに失敗しました。");
+      }
     } finally {
       if (isRefresh) {
         setRefreshing(false);
       } else {
-        setFetching(false);
+        setLoading(false);
       }
     }
   };
 
+  // 初期表示のみ
   useEffect(() => {
-    fetchEatingData(false);
+    fetchDailyEating(false);
   }, []);
 
+  // 画面表示毎
   useFocusEffect(
     useCallback(() => {
-      fetchEatingData(true);
+      fetchDailyEating(true);
     }, [selectedDate])
   );
 
-  if (isFetching) {
+  // 1. 初期ロード（キャッシュなし）
+  if (isLoading && !dailyEating) {
     return <Indicator />;
   }
 
+  // 2. データ取得失敗（キャッシュなし）
+  if (!dailyEating) {
+    // TODO: UIは別途検討
+    return <Text>データを読み込めませんでした</Text>;
+  }
+
+  // 3. データ取得完了
   return (
     <ScrollView style={styles.container}>
       <Summary
@@ -79,17 +97,19 @@ export default function EatingScreen() {
           ))}
         </View>
         <View style={styles.border}></View>
-        {dailyEating?.meals && dailyEating.meals.length > 0 ? (
+        {dailyEating.meals.length === 0 ? (
+          // データが空
+          <View style={styles.nonDataContainer}>
+            <Text style={styles.text}>データがありません</Text>
+          </View>
+        ) : (
+          // データあり
           <FlatList
             data={dailyEating.meals}
             renderItem={({ item }) => <EatingRow meal={item} />}
             scrollEnabled={false}
             refreshing={isRefreshing}
           />
-        ) : (
-          <View style={styles.nonDataContainer}>
-            <Text style={styles.text}>データがありません</Text>
-          </View>
         )}
       </View>
     </ScrollView>
