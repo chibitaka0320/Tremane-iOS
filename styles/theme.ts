@@ -11,9 +11,9 @@ const colors = {
   black: "#000000",
   dark: "#002333",
   background: {
+    dark: "#E4E4E4",
     light: "#FFFFFF",
     lightGray: "#FAFAFA",
-    main: "#E4E4E4",
   },
   lightGray: "#e0e0e0",
   font: {

@@ -116,7 +116,7 @@ export default function TrainingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background.main,
+    backgroundColor: theme.colors.background.dark,
   },
   nonDataContainer: {
     padding: theme.spacing[5],

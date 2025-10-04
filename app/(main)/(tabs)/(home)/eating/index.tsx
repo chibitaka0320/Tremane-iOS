@@ -119,7 +119,7 @@ export default function EatingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background.main,
+    backgroundColor: theme.colors.background.dark,
     paddingVertical: theme.spacing[5],
   },
   eatingContainer: {
