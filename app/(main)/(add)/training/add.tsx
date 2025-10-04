@@ -1,29 +1,28 @@
+import CustomTextInput from "@/components/common/CustomTextInput";
+import Indicator from "@/components/common/Indicator";
+import PickerModal, { SelectLabel } from "@/components/common/PickerModal";
+import { auth } from "@/lib/firebaseConfig";
+import { validateReps, validateWeight } from "@/lib/validators";
+import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as trainingService from "@/service/trainingService";
+import theme from "@/styles/theme";
+import { BodyPart } from "@/types/dto/bodyPartDto";
+import { format } from "date-fns";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  Alert,
+  Keyboard,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
-  Keyboard,
   TouchableOpacity,
-  Modal,
-  Alert,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import theme from "@/styles/theme";
-import { format } from "date-fns";
-import Indicator from "@/components/common/Indicator";
-import { router } from "expo-router";
-import { SelectLabel } from "@/types/common";
-import CustomTextInput from "@/components/common/CustomTextInput";
-import { validateReps, validateWeight } from "@/lib/validators";
 import uuid from "react-native-uuid";
-import { auth } from "@/lib/firebaseConfig";
-import { Picker } from "@react-native-picker/picker";
-import * as trainingService from "@/service/trainingService";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import { BodyPart } from "@/types/dto/bodyPartDto";
 
+// トレーニング追加画面
 export default function TrainingAddScreen() {
   // 表示データ
   const [date, setDate] = useState(new Date());
@@ -36,8 +35,8 @@ export default function TrainingAddScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
-  const [bodyPartsModal, setBodyPartsModal] = useState(false);
-  const [exerciseModal, setExerciseModal] = useState(false);
+  const [isBodyPartsModalVisible, setBodyPartsModalVisible] = useState(false);
+  const [isExerciseModalVisible, setExerciseModalVisible] = useState(false);
 
   // ピッカーデータ関連
   const [bodyPartData, setBodyPartData] = useState<BodyPart[]>([]);
@@ -162,80 +161,35 @@ export default function TrainingAddScreen() {
           <Text style={styles.label}>部位</Text>
           <TouchableOpacity
             style={styles.inputValue}
-            onPress={() => setBodyPartsModal(true)}
+            onPress={() => setBodyPartsModalVisible(true)}
           >
             <Text>{selectedBodyParts}</Text>
           </TouchableOpacity>
 
-          <Modal visible={bodyPartsModal} transparent animationType="slide">
-            <TouchableWithoutFeedback onPress={() => setBodyPartsModal(false)}>
-              <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback>
-                  <View style={styles.modalContent}>
-                    <View style={styles.header}>
-                      <TouchableOpacity
-                        onPress={() => setBodyPartsModal(false)}
-                      >
-                        <Text style={styles.headerText}>Done</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <Picker
-                      selectedValue={bodyParts}
-                      onValueChange={(itemValue) => setBodyParts(itemValue)}
-                    >
-                      <Picker.Item
-                        label="選択してください"
-                        value=""
-                        enabled={false}
-                      />
-                      {bodyPartOptions.map(({ label, value }) => (
-                        <Picker.Item key={value} label={label} value={value} />
-                      ))}
-                    </Picker>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
+          <PickerModal
+            visible={isBodyPartsModalVisible}
+            onClose={() => setBodyPartsModalVisible(false)}
+            selectedValue={bodyParts}
+            onChange={(val) => setBodyParts(val)}
+            options={bodyPartOptions}
+          />
         </View>
         <View style={styles.item}>
           <Text style={styles.label}>種目</Text>
           <TouchableOpacity
             style={styles.inputValue}
-            onPress={() => setExerciseModal(true)}
+            onPress={() => setExerciseModalVisible(true)}
             disabled={!bodyParts}
           >
             <Text>{selectedExercise}</Text>
           </TouchableOpacity>
-
-          <Modal visible={exerciseModal} transparent animationType="slide">
-            <TouchableWithoutFeedback onPress={() => setExerciseModal(false)}>
-              <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback>
-                  <View style={styles.modalContent}>
-                    <View style={styles.header}>
-                      <TouchableOpacity onPress={() => setExerciseModal(false)}>
-                        <Text style={styles.headerText}>Done</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <Picker
-                      selectedValue={exercise}
-                      onValueChange={(itemValue) => setExercise(itemValue)}
-                    >
-                      <Picker.Item
-                        label="選択してください"
-                        value=""
-                        enabled={false}
-                      />
-                      {exerciseOptions.map(({ label, value }) => (
-                        <Picker.Item key={value} label={label} value={value} />
-                      ))}
-                    </Picker>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
+          <PickerModal
+            visible={isExerciseModalVisible}
+            onClose={() => setExerciseModalVisible(false)}
+            selectedValue={exercise}
+            onChange={(val) => setExercise(val)}
+            options={exerciseOptions}
+          />
         </View>
         <View style={[styles.item, styles.row]}>
           <View style={styles.rowItem}>

@@ -29,6 +29,10 @@ const colors = {
     6: "#718BFF",
     7: "#FFE571",
   },
+  border: {
+    light: "#E0E0E0",
+    dark: "#B0B0B0",
+  },
 };
 
 // 文字サイズ
@@ -38,10 +42,21 @@ const fontSizes = {
   large: 20,
 };
 
+const fontSize = {
+  xxs: 10,
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 22,
+  xxl: 28,
+};
+
 const theme = {
   colors,
   fontSizes,
   spacing,
+  fontSize,
 };
 
 export default theme;
