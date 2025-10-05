@@ -1,17 +1,18 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { MaterialIcons, SimpleLineIcons, Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
-import theme from "@/styles/theme";
+import Indicator from "@/components/common/Indicator";
+import { ApiError } from "@/lib/error";
 import { auth } from "@/lib/firebaseConfig";
 import * as authSercice from "@/service/authService";
-import { ApiError } from "@/lib/error";
-import { useState } from "react";
-import Indicator from "@/components/common/Indicator";
+import theme from "@/styles/theme";
+import { Feather, MaterialIcons, SimpleLineIcons } from "@expo/vector-icons";
+import { router, useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const COLOR = "#8C8C88";
 const FONTSIZE = 16;
 
 export default function MenuScreen() {
+  const navigation = useNavigation();
   const [isLoading, setLoading] = useState(false);
 
   const onHome = () => {
@@ -36,6 +37,11 @@ export default function MenuScreen() {
       router.push("/(main)/(menu)/account/menu");
     }
   };
+
+  // ローディング時にヘッダーボタンを非表示
+  useEffect(() => {
+    navigation.setOptions({ headerShown: !isLoading });
+  }, [isLoading]);
 
   const onSignOut = async () => {
     setLoading(true);
