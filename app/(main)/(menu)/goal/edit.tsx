@@ -1,28 +1,29 @@
+import Indicator from "@/components/common/Indicator";
+import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
+import { pfcOptions } from "@/constants/pfcOptions";
+import { auth } from "@/lib/firebaseConfig";
+import { validateWeight } from "@/lib/validators";
+import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
+import * as userGoalService from "@/service/userGoalService";
+import theme from "@/styles/theme";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { format } from "date-fns";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  Alert,
+  Keyboard,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import theme from "@/styles/theme";
-import Indicator from "@/components/common/Indicator";
-import { format } from "date-fns";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { router } from "expo-router";
-import { pfcOptions } from "@/constants/pfcOptions";
-import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
-import { FontAwesome6 } from "@expo/vector-icons";
-import { validateWeight } from "@/lib/validators";
-import { auth } from "@/lib/firebaseConfig";
-import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
-import * as userGoalService from "@/service/userGoalService";
 
+// 目標設定更新画面
 export default function GoalEditScreen() {
   const [weight, setWeight] = useState("");
   const [goalWeight, setGoalWeight] = useState("");

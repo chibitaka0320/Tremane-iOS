@@ -82,9 +82,9 @@ export default function EatingScreen() {
   return (
     <ScrollView style={styles.container}>
       <Summary
-        total={dailyEating?.total}
-        goal={dailyEating?.goal}
-        rate={dailyEating?.rate}
+        total={dailyEating.total}
+        goal={dailyEating.goal}
+        rate={dailyEating.rate}
       />
       <View style={styles.eatingContainer}>
         <View style={styles.row}>

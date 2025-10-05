@@ -1,12 +1,12 @@
+import * as eatingApi from "@/api/eatingApi";
+import { calcGoalKcal } from "@/lib/calc";
 import * as eatingDao from "@/localDb/dao/eatingDao";
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
 import * as userProfileDao from "@/localDb/dao/userProfileDao";
-import * as eatingApi from "@/api/eatingApi";
-import { format } from "date-fns";
 import { EatingRequest, EatingResponse } from "@/types/api";
 import { EatingEntity, UserGoalEntity, UserProfileEntity } from "@/types/db";
 import { DailyEating, MealRecord, Nutrition } from "@/types/dto/eatingDto";
-import { calcGoalKcal } from "@/lib/calc";
+import { format } from "date-fns";
 
 // リモートDBから食事データの最新情報を同期
 export async function syncEatingsFromRemote() {
@@ -158,7 +158,7 @@ function getGoalNutrition(
     // 目標PFC栄養素算出
     // TODO: 比率の保持については改善
     if (calories > 0) {
-      switch (userGoal.pfc) {
+      switch (Number(userGoal.pfc)) {
         case 0:
           protein = Math.round((calories * 0.4) / 4);
           fat = Math.round((calories * 0.2) / 9);

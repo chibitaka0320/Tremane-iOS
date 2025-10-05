@@ -1,12 +1,12 @@
-import React, { useCallback, useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
-import { router, useFocusEffect } from "expo-router";
-import { Feather } from "@expo/vector-icons";
 import NotSetGoal from "@/components/setting/NotSetGoal";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
+import theme from "@/styles/theme";
+import { Feather } from "@expo/vector-icons";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function GoalScreen() {
   const [weight, setWeight] = useState("");
@@ -98,7 +98,7 @@ export default function GoalScreen() {
       <View style={styles.item}>
         <Text style={styles.label}>目標摂取カロリー</Text>
         <Text style={styles.value}>
-          {goalCalorie ? goalCalorie + " kcal" : "未設定項目あり"}
+          {goalCalorie !== "0" ? goalCalorie + " kcal" : "未設定項目あり"}
         </Text>
       </View>
       <View style={styles.item}>

@@ -1,5 +1,5 @@
 import theme from "@/styles/theme";
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 type Props = {
   intake?: number;
@@ -11,7 +11,7 @@ export default function Value({ intake, goal }: Props) {
     <View style={styles.container}>
       <Text>{intake ? intake : 0}</Text>
       <Text style={styles.slash}>/</Text>
-      <Text>{goal ? goal : "未設定"}</Text>
+      <Text>{goal !== null ? goal : "未設定"}</Text>
     </View>
   );
 }

@@ -42,14 +42,14 @@ export async function getUserGoal(): Promise<UserGoalEntity | null> {
   const data = await db.getFirstAsync<UserGoalEntity>(
     `
     SELECT
-      user_id AS userId,
+      user_id,
       weight,
-      goal_weight AS goalWeight,
+      goal_weight,
       start,
       finish,
       pfc,
-      created_at AS createdAt,
-      updated_at AS updatedAt
+      created_at,
+      updated_at
     FROM users_goal;
     `
   );

@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import Value from "./Value";
-import theme from "@/styles/theme";
 import { PFC_LABELS } from "@/constants/pfc";
-import CircleProgress from "../common/CircleProgress";
+import theme from "@/styles/theme";
 import { Nutrition } from "@/types/dto/eatingDto";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import CircleProgress from "../common/CircleProgress";
+import Value from "./Value";
 
 const screenWidth = Dimensions.get("window").width / 2.4;
 
