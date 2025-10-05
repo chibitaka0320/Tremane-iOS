@@ -3,7 +3,7 @@ import Indicator from "@/components/common/Indicator";
 import PickerModal, { SelectLabel } from "@/components/common/PickerModal";
 import { auth } from "@/lib/firebaseConfig";
 import { validateReps, validateWeight } from "@/lib/validators";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as bodyPartService from "@/service/bodyPartService";
 import * as trainingService from "@/service/trainingService";
 import theme from "@/styles/theme";
 import { BodyPart } from "@/types/dto/bodyPartDto";
@@ -34,7 +34,6 @@ export default function TrainingAddScreen() {
   // フラグ
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [isDisabled, setDisabled] = useState(true);
   const [isBodyPartsModalVisible, setBodyPartsModalVisible] = useState(false);
   const [isExerciseModalVisible, setExerciseModalVisible] = useState(false);
 
@@ -54,11 +53,12 @@ export default function TrainingAddScreen() {
   // 部位・種別情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await bodyPartRepository.getBodyPartsWithExercises();
-      if (res) {
-        setBodyPartData(res);
+      const fetchedBodyParts =
+        await bodyPartService.getBodyPartsWithExercises();
+      if (fetchedBodyParts) {
+        setBodyPartData(fetchedBodyParts);
         setBodyPartOptions(
-          res.map((part) => ({
+          fetchedBodyParts.map((part) => ({
             label: part.partName,
             value: String(part.partsId),
           }))
@@ -86,29 +86,21 @@ export default function TrainingAddScreen() {
     }
   }, [bodyParts, bodyPartData]);
 
-  // ボタン活性・非活性
-  useEffect(() => {
-    if (validateWeight(weight) && validateReps(reps) && bodyParts && exercise) {
-      setDisabled(false);
-    } else {
-      setDisabled(true);
-    }
-  }, [bodyParts, exercise, weight, reps]);
-
-  // ピッカー開閉
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
+  // 入力値バリデーション
+  const isFormValid = (): boolean => {
+    return (
+      validateWeight(weight) && validateReps(reps) && !!bodyParts && !!exercise
+    );
   };
-  const hideDatePicker = () => {
+
+  // 日付選択送信
+  const handleDatePickerConfirm = (date: Date) => {
+    setDate(date);
     setDatePickerVisibility(false);
   };
-  const handleConfirm = (date: Date) => {
-    setDate(date);
-    hideDatePicker();
-  };
 
-  // トレーニング記録
-  const onRecordTraining = async () => {
+  // トレーニング記録追加
+  const handleAddTraining = async () => {
     setLoading(true);
     if (auth.currentUser === null) return;
 
@@ -140,7 +132,10 @@ export default function TrainingAddScreen() {
       <View style={styles.container}>
         <View style={styles.item}>
           <Text style={styles.label}>日付</Text>
-          <TouchableOpacity style={styles.inputValue} onPress={showDatePicker}>
+          <TouchableOpacity
+            style={styles.inputValue}
+            onPress={() => setDatePickerVisibility(true)}
+          >
             <Text style={styles.inputValueText}>
               {format(date, "yyyy年MM月dd日")}
             </Text>
@@ -150,8 +145,8 @@ export default function TrainingAddScreen() {
             isVisible={isDatePickerVisible}
             mode="date"
             locale="ja"
-            onConfirm={handleConfirm}
-            onCancel={hideDatePicker}
+            onConfirm={handleDatePickerConfirm}
+            onCancel={() => setDatePickerVisibility(false)}
             pickerStyleIOS={{ alignSelf: "center" }}
             confirmTextIOS="完了"
             cancelTextIOS="キャンセル"
@@ -210,9 +205,9 @@ export default function TrainingAddScreen() {
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.button, isDisabled && styles.buttonDisabled]}
-          onPress={onRecordTraining}
-          disabled={isDisabled}
+          style={[styles.button, !isFormValid() && styles.buttonDisabled]}
+          onPress={handleAddTraining}
+          disabled={!isFormValid()}
         >
           <Text style={styles.buttonText}>トレーニングを記録</Text>
         </TouchableOpacity>
