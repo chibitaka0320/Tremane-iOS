@@ -1,21 +1,22 @@
+import { SelectLabel } from "@/components/common/PickerModal";
+import * as bodyPartService from "@/service/bodyPartService";
+import * as trainingAnalysisService from "@/service/trainingAnalysisService";
+import { partsColors } from "@/styles/partsColor";
+import theme from "@/styles/theme";
+import { TrainingAnalysisChart } from "@/types/dto/trainingDto";
+import { Octicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
   Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import theme from "@/styles/theme";
 import { LineChart } from "react-native-chart-kit";
-import { SelectLabel } from "@/types/common";
-import { Octicons } from "@expo/vector-icons";
-import { partsColors } from "@/styles/partsColor";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import * as trainingAnalysisRepository from "@/localDb/repository/trainingAnalysisRepository";
-import { TrainingAnalysisChart } from "@/types/dto/trainingDto";
 
+// トレーニング分析一覧画面
 export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState("0");
   const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
@@ -27,7 +28,7 @@ export default function AnalysisScreen() {
   // 部位・種別情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await bodyPartRepository.getBodyPartsWithExercises();
+      const res = await bodyPartService.getBodyPartsWithExercises();
       if (res) {
         setBodyPartOptions([
           { label: "全て", value: "0" },
@@ -62,7 +63,7 @@ export default function AnalysisScreen() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await trainingAnalysisRepository.getTrainingByMaxWeight(
+        const res = await trainingAnalysisService.getTrainingByMaxWeight(
           Number(bodyParts)
         );
         if (res) {
@@ -78,7 +79,7 @@ export default function AnalysisScreen() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await trainingAnalysisRepository.getWorkoutCount(
+        const res = await trainingAnalysisService.getWorkoutCount(
           Number(bodyParts)
         );
         if (res) {

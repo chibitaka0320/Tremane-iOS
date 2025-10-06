@@ -193,9 +193,9 @@ export async function getTrainingByMaxWeight(
       FROM daily_max
     )
     SELECT
-      e.parts_id,
-      t.exercise_id,
-      e.name,
+      e.parts_id AS bodyPartId,
+      t.exercise_id AS exerciseId,
+      e.name AS exerciseName,
       t.date,
       t.weight
     FROM ranked t
