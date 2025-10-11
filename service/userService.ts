@@ -1,10 +1,10 @@
-import * as firebaseAuth from "firebase/auth";
-import * as userRepository from "@/localDb/repository/userRepository";
-import * as userApi from "@/api/userApi";
 import * as authApi from "@/api/authApi";
+import * as userApi from "@/api/userApi";
 import { auth } from "@/lib/firebaseConfig";
+import * as userRepository from "@/localDb/repository/userRepository";
 import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as firebaseAuth from "firebase/auth";
 
 // ユーザー情報の登録
 export async function registerUser(
@@ -107,18 +107,22 @@ export async function updateUser(user: firebaseAuth.User, nickname: string) {
 }
 
 // ユーザー削除（退会）
-export async function deleteUser(user: firebaseAuth.User) {
+export async function deleteUser() {
   // カスタムトークン取得
   const customToken = await authApi.reauthToken();
   if (customToken) {
     // カスタムトークンを使用して認証
     await firebaseAuth.signInWithCustomToken(auth, customToken);
 
+    // 現在のユーザー（再認証後）
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("ユーザー情報を取得できません。");
+
     // リモートDBのユーザー削除
     await userApi.deleteUser();
 
     // firebaseユーザーの削除
-    await firebaseAuth.deleteUser(user);
+    await firebaseAuth.deleteUser(currentUser);
 
     // ローカルDB削除
     await clearLocalDb();

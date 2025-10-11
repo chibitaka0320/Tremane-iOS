@@ -1,20 +1,20 @@
 import { auth } from "@/lib/firebaseConfig";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
+import * as userService from "@/service/userService";
 import theme from "@/styles/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
 import { sendEmailVerification } from "firebase/auth";
 import {
+  Alert,
   Keyboard,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
 } from "react-native";
-import * as userService from "@/service/userService";
 
 export default function AuthMailScreen() {
   const currentUser = auth.currentUser;
@@ -52,14 +52,18 @@ export default function AuthMailScreen() {
       await sendEmailVerification(currentUser);
       Alert.alert("確認メールを再送しました。");
     } catch (e) {
-      Alert.alert("再送に失敗しました。");
+      console.error("メール再送エラー：", e);
+      Alert.alert(
+        "再送に失敗しました。",
+        "しばらく時間を置いてから再度お試しください。"
+      );
     }
   };
 
   // 新規登録に戻るボタン
   const backSignUp = async () => {
     try {
-      await userService.deleteUser(currentUser);
+      await userService.deleteUser();
     } catch (error) {
       console.error("メール認証画面から戻る時にエラー：", error);
     } finally {

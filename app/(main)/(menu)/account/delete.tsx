@@ -1,12 +1,12 @@
 import Indicator from "@/components/common/Indicator";
+import { ApiError } from "@/lib/error";
 import { auth } from "@/lib/firebaseConfig";
+import * as userService from "@/service/userService";
 import theme from "@/styles/theme";
 import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import * as userService from "@/service/userService";
-import { ApiError } from "@/lib/error";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function DeleteAccountScreen() {
   const [isLoading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function DeleteAccountScreen() {
           onPress: async () => {
             setLoading(true);
             try {
-              await userService.deleteUser(user);
+              await userService.deleteUser();
               router.dismissAll();
               router.replace("/(auth)/signIn");
             } catch (error) {
