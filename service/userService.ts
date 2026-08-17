@@ -35,10 +35,10 @@ export async function registerUser(
 
   // 認証メール送信
   try {
-    await firebaseAuth.sendEmailVerification(user);
+    await authApi.sendVerificationEmail();
   } catch (error) {
     // エラーの場合はFireabseのユーザーおよびリモートDBのユーザー削除
-    console.error("Firebaseエラー（認証メール送信）：" + error);
+    console.error("認証メール送信エラー：" + error);
     await userApi.deleteUser();
     await firebaseAuth.deleteUser(user);
     throw new Error("登録処理に失敗しました。");

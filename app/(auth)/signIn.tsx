@@ -1,3 +1,4 @@
+import * as authApi from "@/api/authApi";
 import theme from "@/styles/theme";
 import { Link, router } from "expo-router";
 import {
@@ -12,10 +13,7 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/lib/validators";
-import {
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { Header } from "@/components/auth/Header";
 import CustomTextInput from "@/components/common/CustomTextInput";
@@ -75,7 +73,7 @@ export default function SignInScreen() {
               onPress: async () => {
                 try {
                   // 認証メールを送信し、メール認証画面へ遷移する。
-                  await sendEmailVerification(userCredentical.user);
+                  await authApi.sendVerificationEmail();
                   router.replace("/authMail");
                 } catch (e) {
                   console.error(e);

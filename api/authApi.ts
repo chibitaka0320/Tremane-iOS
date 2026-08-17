@@ -10,3 +10,8 @@ export async function reauthToken(): Promise<string | null> {
   const res = await apiRequestAuth<string>(`/auth/reauth-token`, "POST", null);
   return res.data;
 }
+
+// POST /auth/send-verification-email
+export async function sendVerificationEmail(): Promise<void> {
+  await apiRequestAuth<void>("/auth/send-verification-email", "POST", null);
+}

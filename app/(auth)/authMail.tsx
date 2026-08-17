@@ -1,3 +1,4 @@
+import * as authApi from "@/api/authApi";
 import { auth } from "@/lib/firebaseConfig";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
@@ -5,7 +6,6 @@ import * as userService from "@/service/userService";
 import theme from "@/styles/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { Redirect, router } from "expo-router";
-import { sendEmailVerification } from "firebase/auth";
 import {
   Alert,
   Keyboard,
@@ -49,7 +49,7 @@ export default function AuthMailScreen() {
   // 確認メール再送
   const reSubmit = async () => {
     try {
-      await sendEmailVerification(currentUser);
+      await authApi.sendVerificationEmail();
       Alert.alert("確認メールを再送しました。");
     } catch (e) {
       console.error("メール再送エラー：", e);
