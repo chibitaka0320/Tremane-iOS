@@ -15,8 +15,8 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   signOut,
-  verifyBeforeUpdateEmail,
 } from "firebase/auth";
+import * as authApi from "@/api/authApi";
 import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
@@ -52,7 +52,7 @@ export default function EmailEditScreen() {
 
       await reauthenticateWithCredential(user, credential);
 
-      await verifyBeforeUpdateEmail(user, newEmail);
+      await authApi.sendChangeEmailVerification(newEmail);
 
       Alert.alert(
         "新しいメールアドレスにメールを送信しました",

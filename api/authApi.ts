@@ -20,3 +20,12 @@ export async function sendVerificationEmail(): Promise<void> {
 export async function sendPasswordResetEmail(email: string): Promise<void> {
   await apiRequest<void>("/auth/send-password-reset-email", "POST", { email });
 }
+
+// POST /auth/send-change-email-verification
+export async function sendChangeEmailVerification(
+  newEmail: string
+): Promise<void> {
+  await apiRequestAuth<void>("/auth/send-change-email-verification", "POST", {
+    newEmail,
+  });
+}
