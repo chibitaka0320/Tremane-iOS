@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  useWindowDimensions,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/lib/validators";
@@ -19,6 +20,7 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import * as userService from "@/service/userService";
 
 export default function SignUpScreen() {
+  const { height: windowHeight } = useWindowDimensions();
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,8 +79,10 @@ export default function SignUpScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ flex: 1 }}>
-            <View style={styles.headerContainer}>
+          <View style={{ flexGrow: 1 }}>
+            <View
+              style={[styles.headerContainer, { height: windowHeight * 0.25 }]}
+            >
               <Header />
             </View>
             <View style={styles.contentContainer}>
@@ -145,14 +149,12 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    height: "25%",
-  },
+  headerContainer: {},
   contentContainer: {
-    flex: 1,
     backgroundColor: theme.colors.background.lightGray,
     paddingTop: theme.spacing[5],
     paddingHorizontal: theme.spacing[5],
+    paddingBottom: theme.spacing[5],
   },
   // タイトル
   titleContainer: {
