@@ -1,9 +1,8 @@
+import * as authApi from "@/api/authApi";
 import CustomTextInput from "@/components/common/CustomTextInput";
-import { auth } from "@/lib/firebaseConfig";
 import { validateEmail } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { router } from "expo-router";
-import { sendPasswordResetEmail } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   Keyboard,
@@ -28,11 +27,11 @@ export default function ResetPasswordScreen() {
     }
   }, [email]);
 
-  const handlePress = (): void => {
+  const handlePress = async (): Promise<void> => {
     setIsLoading(true);
 
     try {
-      sendPasswordResetEmail(auth, email);
+      await authApi.sendPasswordResetEmail(email);
       Alert.alert("再設定メールを送信しました。", "", [
         {
           text: "OK",
@@ -42,6 +41,7 @@ export default function ResetPasswordScreen() {
         },
       ]);
     } catch (error) {
+      console.error("パスワード再設定メール送信エラー：", error);
       Alert.alert("メールアドレスを正しく入力してください");
     } finally {
       setIsLoading(false);
