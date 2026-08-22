@@ -10,7 +10,7 @@
     },
     "preview": {
       "autoIncrement": true,
-      "ios": { "distribution": "store" },
+      "ios": { "distribution": "internal" },
       "environment": "preview"
     },
     "production": {
