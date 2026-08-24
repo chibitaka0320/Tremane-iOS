@@ -28,3 +28,17 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: npx eas-cli build --platform ios --profile production --non-interactive --auto-submit
+
+      - name: Notify Slack on success
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"✅ *Tremane-iOS* TestFlight配布成功\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Actionsログを見る>\"}" \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
+
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"🚨 *Tremane-iOS* TestFlight配布失敗\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Actionsログを見る>\"}" \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
