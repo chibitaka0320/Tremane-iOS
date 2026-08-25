@@ -6,7 +6,7 @@ import { BodyPartResponse } from "@/types/api";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 
 // リモートDBから部位データを同期
-export async function syncBodyPartsFromRemte() {
+export async function syncBodyPartsFromRemote() {
   // ローカルDBの最終更新日を取得
   const lastUpdated = await bodyPartDao.getLastUpdatedAt();
 

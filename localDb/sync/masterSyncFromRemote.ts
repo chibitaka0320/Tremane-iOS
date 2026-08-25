@@ -7,7 +7,7 @@ export const masterSyncFromRemote = async () => {
   console.log("========== マスタデータ同期開始 ==========");
   try {
     // 部位テーブル初期化
-    await bodyPartRepository.syncBodyPartsFromRemte();
+    await bodyPartRepository.syncBodyPartsFromRemote();
     console.log("部位データ同期完了");
 
     // 種目テーブル初期化

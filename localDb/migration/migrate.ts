@@ -4,7 +4,7 @@ import { eatingsSchema } from "../schema/eatingsSchema";
 import { exercisesSchema } from "../schema/exercisesSchema";
 import { trainingsSchema } from "../schema/trainingsSchema";
 import { userGoalsSchema } from "../schema/userGoalsSchema";
-import { userProfilesShema } from "../schema/userProfilesShema";
+import { userProfilesSchema } from "../schema/userProfilesSchema";
 import { usersSchema } from "../schema/usersSchema";
 
 // DBにスキーマを適用
@@ -19,7 +19,7 @@ export async function migrate() {
     ${bodyPartsSchema}
     ${exercisesSchema}
     ${usersSchema}
-    ${userProfilesShema}
+    ${userProfilesSchema}
     ${userGoalsSchema}
     ${trainingsSchema}
     ${eatingsSchema}

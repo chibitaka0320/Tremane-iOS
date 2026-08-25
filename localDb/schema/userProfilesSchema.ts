@@ -1,5 +1,5 @@
 // ユーザープロフィールテーブル
-export const userProfilesShema = `
+export const userProfilesSchema = `
 CREATE TABLE IF NOT EXISTS users_profile (
     user_id TEXT PRIMARY KEY,
     height INTEGER,
