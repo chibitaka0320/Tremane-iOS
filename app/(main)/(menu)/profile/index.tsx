@@ -8,7 +8,7 @@ import { genderOptions } from "@/constants/genderOptions";
 import NotSetProfile from "@/components/setting/NotSetProfile";
 import { Feather } from "@expo/vector-icons";
 import { activeOptions } from "@/constants/activeOptions";
-import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
+import * as userProfileService from "@/service/userProfileService";
 
 export default function ProfileScreen() {
   const [height, setHeight] = useState("");
@@ -30,7 +30,7 @@ export default function ProfileScreen() {
       setLoading(true);
       const fetchApi = async () => {
         try {
-          const res = await userProfileRepository.getUserProfile();
+          const res = await userProfileService.getUserProfile();
 
           if (res === null) {
             setIsNotSet(true);

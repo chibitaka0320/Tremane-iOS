@@ -19,7 +19,6 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";
 import * as eatingService from "@/service/eatingService";
-import * as eatingRepository from "@/localDb/repository/eatingRepository";
 
 export default function EatingEditScreen() {
   // パスパラメーター
@@ -48,7 +47,7 @@ export default function EatingEditScreen() {
     const fetchEating = async () => {
       setLoading(true);
       try {
-        const res = await eatingRepository.getEating(eatingId);
+        const res = await eatingService.getEating(eatingId);
 
         if (res) {
           setDate(new Date(res.date));

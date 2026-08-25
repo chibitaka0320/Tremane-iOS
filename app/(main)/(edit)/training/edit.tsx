@@ -20,8 +20,7 @@ import { validateReps, validateWeight } from "@/lib/validators";
 import { auth } from "@/lib/firebaseConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
-import * as trainingRepository from "@/localDb/repository/trainingRepository";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as bodyPartService from "@/service/bodyPartService";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 
 export default function TrainingEditScreen() {
@@ -62,7 +61,7 @@ export default function TrainingEditScreen() {
 
   // 部位・種目情報取得
   const fetchBodyParts = async () => {
-    const res = await bodyPartRepository.getBodyPartsWithExercises();
+    const res = await bodyPartService.getBodyPartsWithExercises();
     if (res) {
       setBodyPartData(res);
       setBodyPartOptions(
@@ -77,7 +76,7 @@ export default function TrainingEditScreen() {
   // トレーニング詳細取得
   const fetchTraining = async () => {
     if (!trainingId) return;
-    const res = await trainingRepository.getTrainingDetail(trainingId);
+    const res = await trainingService.getTrainingDetail(trainingId);
 
     if (res) {
       setDate(new Date(res.date));

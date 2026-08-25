@@ -3,12 +3,17 @@ import { calcKcal } from "@/lib/calc";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { EatingRequest } from "@/types/api";
 import { EatingEntity } from "@/types/db";
-import { DailyEating } from "@/types/dto/eatingDto";
+import { DailyEating, MealRecord } from "@/types/dto/eatingDto";
 import { format } from "date-fns";
 
 // 1日のトレーニング情報取得
 export async function getEatingByDate(date: string): Promise<DailyEating> {
   return await eatingRepository.getEatingByDate(date);
+}
+
+// 食事詳細情報取得
+export async function getEating(eatingId: string): Promise<MealRecord | null> {
+  return await eatingRepository.getEating(eatingId);
 }
 
 // 食事情報追加更新

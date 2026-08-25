@@ -102,7 +102,7 @@ function toEntity(userProfileResponse: UserProfileResponse): UserProfileEntity {
 // エンティティをリクエストに変換
 function toRequest(userProfileEntity: UserProfileEntity): UserProfileRequest {
   return {
-    userId: userProfileEntity.updated_at,
+    userId: userProfileEntity.user_id,
     height: userProfileEntity.height,
     weight: userProfileEntity.weight,
     birthday: userProfileEntity.birthday,

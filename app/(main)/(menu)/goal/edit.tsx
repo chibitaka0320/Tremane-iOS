@@ -3,7 +3,6 @@ import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
 import { pfcOptions } from "@/constants/pfcOptions";
 import { auth } from "@/lib/firebaseConfig";
 import { validateWeight } from "@/lib/validators";
-import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as userGoalService from "@/service/userGoalService";
 import theme from "@/styles/theme";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -103,7 +102,7 @@ export default function GoalEditScreen() {
     const fetchApi = async () => {
       const URL = "/users/goal";
 
-      const res = await userGoalRepository.getUserGoal();
+      const res = await userGoalService.getUserGoal();
       if (res) {
         if (res.weight != null) {
           setWeight(String(res.weight));

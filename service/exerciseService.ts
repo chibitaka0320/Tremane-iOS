@@ -2,6 +2,14 @@ import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 import * as exerciseApi from "@/api/exerciseApi";
 import { ExerciseRequest } from "@/types/api";
 import { ExerciseEntity } from "@/types/db";
+import { Exercise } from "@/types/dto/exerciseDto";
+
+// マイトレーニング種目取得
+export async function getMyExercise(
+  exerciseId: string
+): Promise<Exercise | null> {
+  return await exerciseRepository.getMyExercise(exerciseId);
+}
 
 // マイトレーニング種目追加更新
 export async function upsertMyExercises(

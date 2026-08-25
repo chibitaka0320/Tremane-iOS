@@ -16,8 +16,7 @@ import {
   Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
-import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
+import * as bodyPartService from "@/service/bodyPartService";
 import * as exerciseService from "@/service/exerciseService";
 
 export default function ExerciseEditScreen() {
@@ -49,7 +48,7 @@ export default function ExerciseEditScreen() {
 
   // 部位詳細取得
   const fetchExercise = async () => {
-    const res = await exerciseRepository.getMyExercise(exerciseId);
+    const res = await exerciseService.getMyExercise(exerciseId);
     if (res) {
       setBodyParts(res.partsId.toString());
       setExercise(res.name);
@@ -60,7 +59,7 @@ export default function ExerciseEditScreen() {
   // 部位情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await bodyPartRepository.getBodyPartsWithExercises();
+      const res = await bodyPartService.getBodyPartsWithExercises();
       if (res) {
         setBodyPartOptions(
           res.map((part) => ({
