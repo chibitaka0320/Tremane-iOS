@@ -21,7 +21,7 @@ import { auth } from "@/lib/firebaseConfig";
 import uuid from "react-native-uuid";
 import { Picker } from "@react-native-picker/picker";
 import * as trainingService from "@/service/trainingService";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as bodyPartService from "@/service/bodyPartService";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 
 export default function TrainingWithExerciseScreen() {
@@ -60,7 +60,7 @@ export default function TrainingWithExerciseScreen() {
 
   // 部位・種別情報取得
   const fetchBodyParts = async () => {
-    const res = await bodyPartRepository.getBodyPartsWithExercises();
+    const res = await bodyPartService.getBodyPartsWithExercises();
     if (res) {
       setBodyPartData(res);
       setBodyPartOptions(

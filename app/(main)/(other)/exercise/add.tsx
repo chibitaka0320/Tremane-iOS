@@ -17,7 +17,7 @@ import {
   Alert,
 } from "react-native";
 import uuid from "react-native-uuid";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as bodyPartService from "@/service/bodyPartService";
 import * as exerciseService from "@/service/exerciseService";
 
 export default function ExerciseAddScreen() {
@@ -37,7 +37,7 @@ export default function ExerciseAddScreen() {
   // 部位情報取得
   useEffect(() => {
     const fetchBodyParts = async () => {
-      const res = await bodyPartRepository.getBodyPartsWithExercises();
+      const res = await bodyPartService.getBodyPartsWithExercises();
       if (res) {
         setBodyPartOptions(
           res.map((part) => ({

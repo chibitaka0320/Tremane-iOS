@@ -6,7 +6,7 @@ import { CircleButton } from "@/components/common/CircleButton";
 import { Entypo } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 import { router, useFocusEffect } from "expo-router";
-import * as bodyPartRepository from "@/localDb/repository/bodyPartRepository";
+import * as bodyPartService from "@/service/bodyPartService";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 
 const Tab = createMaterialTopTabNavigator();
@@ -19,7 +19,7 @@ export default function ExerciseLayout() {
   };
 
   const fetchData = async () => {
-    const res = await bodyPartRepository.getBodyPartsWithExercises();
+    const res = await bodyPartService.getBodyPartsWithExercises();
     setDataList(res ?? []);
   };
 

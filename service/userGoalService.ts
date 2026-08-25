@@ -3,6 +3,12 @@ import * as userGoalApi from "@/api/userGoalApi";
 import { UserGoalEntity } from "@/types/db";
 import { format } from "date-fns";
 import { UserGoalRequest } from "@/types/api";
+import { UserGoal } from "@/types/dto/userDto";
+
+// ユーザー目標取得
+export async function getUserGoal(): Promise<UserGoal | null> {
+  return await userGoalRepository.getUserGoal();
+}
 
 // ユーザー目標情報追加更新
 export async function upsertUserGoal(
