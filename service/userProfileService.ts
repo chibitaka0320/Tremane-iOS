@@ -3,6 +3,12 @@ import * as userProfileApi from "@/api/userProfileApi";
 import { UserProfileEntity } from "@/types/db";
 import { format } from "date-fns";
 import { UserProfileRequest } from "@/types/api";
+import { UserProfile } from "@/types/dto/userDto";
+
+// ユーザープロフィール情報取得
+export async function getUserProfile(): Promise<UserProfile | null> {
+  return await userProfileRepository.getUserProfile();
+}
 
 // ユーザープロフィール情報追加更新
 export async function upsertUserProfile(

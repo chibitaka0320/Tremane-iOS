@@ -1,7 +1,7 @@
 import Indicator from "@/components/common/Indicator";
 import NotSetGoal from "@/components/setting/NotSetGoal";
 import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
-import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
+import * as userGoalService from "@/service/userGoalService";
 import theme from "@/styles/theme";
 import { Feather } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -26,7 +26,7 @@ export default function GoalScreen() {
       setLoading(true);
       const fetchApi = async () => {
         try {
-          const res = await userGoalRepository.getUserGoal();
+          const res = await userGoalService.getUserGoal();
           if (res) {
             if (res.weight != null) {
               setWeight(String(res.weight));
