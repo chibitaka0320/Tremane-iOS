@@ -2,6 +2,7 @@ import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
 import {
   DailyTrainingRow,
+  RecentExercise,
   TrainingAnalysisRow,
   TrainingDetail,
 } from "@/types/dto/trainingDto";
@@ -229,6 +230,45 @@ export async function getTrainingDetail(
     [trainingId]
   );
   return training;
+}
+
+// 部位別・最近使った種目取得（種目ごとの直近1件）
+export async function getRecentExercisesByPartsId(
+  partsId: number,
+  limit: number
+): Promise<RecentExercise[]> {
+  const rows = await db.getAllAsync<RecentExercise>(
+    `
+    WITH ranked AS (
+      SELECT
+        t.exercise_id,
+        t.weight,
+        t.reps,
+        t.date,
+        ROW_NUMBER() OVER (
+          PARTITION BY t.exercise_id
+          ORDER BY t.date DESC, t.created_at DESC
+        ) AS rn
+      FROM trainings t
+      LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+      WHERE t.is_deleted = 0
+        AND e.parts_id = ?
+    )
+    SELECT
+      r.exercise_id AS exerciseId,
+      e.name AS exerciseName,
+      r.weight,
+      r.reps,
+      r.date
+    FROM ranked r
+    LEFT JOIN exercises e ON r.exercise_id = e.exercise_id
+    WHERE r.rn = 1
+    ORDER BY r.date DESC
+    LIMIT ?;
+    `,
+    [partsId, limit]
+  );
+  return rows;
 }
 
 // 追加 or 更新

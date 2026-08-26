@@ -4,13 +4,25 @@ import { partsColors } from "@/styles/partsColor";
 import theme from "@/styles/theme";
 import { TrainingRequest } from "@/types/api";
 import { TrainingEntity } from "@/types/db";
-import { DailyTraining, TrainingDetail } from "@/types/dto/trainingDto";
+import {
+  DailyTraining,
+  RecentExercise,
+  TrainingDetail,
+} from "@/types/dto/trainingDto";
 import { format } from "date-fns";
 import { MarkedDates } from "react-native-calendars/src/types";
 
 // 1日のトレーニング情報取得
 export async function getTrainingByDate(date: string): Promise<DailyTraining> {
   return await trainingRepository.getTrainingByDate(date);
+}
+
+// 部位別・最近使った種目取得
+export async function getRecentExercisesByPartsId(
+  partsId: number,
+  limit: number
+): Promise<RecentExercise[]> {
+  return await trainingRepository.getRecentExercisesByPartsId(partsId, limit);
 }
 
 // トレーニング詳細情報取得
