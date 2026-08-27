@@ -7,6 +7,10 @@ import {
   BodyPart,
   DailyTraining,
   DailyTrainingRow,
+  LastTraining,
+  PastTraining,
+  RecentExercise,
+  Training,
 } from "@/types/dto/trainingDto";
 
 // リモートDBからトレーニングデータの最新情報を同期
@@ -121,6 +125,61 @@ export async function getTrainingByDate(date: string): Promise<DailyTraining> {
 // 日別トレーニング一覧情報取得
 export async function getTrainingsWithBodyPart(): Promise<DailyTrainingRow[]> {
   return await trainingDao.getTrainingWithBodyPart();
+}
+
+// 種目別・当日セット取得
+export async function getTrainingsByExerciseAndDate(
+  exerciseId: string,
+  date: string
+): Promise<Training[]> {
+  return await trainingDao.getTrainingsByExerciseAndDate(exerciseId, date);
+}
+
+// 種目別・過去の記録取得（指定日より前、直近N日分）
+export async function getPastTrainingsByExerciseId(
+  exerciseId: string,
+  beforeDate: string,
+  limit: number
+): Promise<PastTraining[]> {
+  const rows = await trainingDao.getPastTrainingsByExerciseId(
+    exerciseId,
+    beforeDate,
+    limit
+  );
+
+  const pastTrainingMap = new Map<string, PastTraining>();
+  rows.forEach((row) => {
+    if (!pastTrainingMap.has(row.date)) {
+      pastTrainingMap.set(row.date, { date: row.date, sets: [] });
+    }
+    pastTrainingMap
+      .get(row.date)!
+      .sets.push({ weight: row.weight, reps: row.reps });
+  });
+
+  return Array.from(pastTrainingMap.values());
+}
+
+// トレーニングIDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getTrainingCreatedAt(
+  trainingId: string
+): Promise<string | null> {
+  return await trainingDao.getTrainingCreatedAt(trainingId);
+}
+
+// 種目の前回の記録取得
+export async function getLastTrainingByExerciseId(
+  exerciseId: string
+): Promise<LastTraining | null> {
+  return await trainingDao.getLastTrainingByExerciseId(exerciseId);
+}
+
+// 部位別・最近使った種目取得
+export async function getRecentExercisesByPartsId(
+  partsId: number,
+  limit: number
+): Promise<RecentExercise[]> {
+  return await trainingDao.getRecentExercisesByPartsId(partsId, limit);
 }
 
 // トレーニング情報追加更新

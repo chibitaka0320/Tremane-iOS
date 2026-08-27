@@ -4,13 +4,59 @@ import { partsColors } from "@/styles/partsColor";
 import theme from "@/styles/theme";
 import { TrainingRequest } from "@/types/api";
 import { TrainingEntity } from "@/types/db";
-import { DailyTraining, TrainingDetail } from "@/types/dto/trainingDto";
+import {
+  DailyTraining,
+  LastTraining,
+  PastTraining,
+  RecentExercise,
+  Training,
+  TrainingDetail,
+} from "@/types/dto/trainingDto";
 import { format } from "date-fns";
 import { MarkedDates } from "react-native-calendars/src/types";
 
 // 1日のトレーニング情報取得
 export async function getTrainingByDate(date: string): Promise<DailyTraining> {
   return await trainingRepository.getTrainingByDate(date);
+}
+
+// 種目の前回の記録取得
+export async function getLastTrainingByExerciseId(
+  exerciseId: string
+): Promise<LastTraining | null> {
+  return await trainingRepository.getLastTrainingByExerciseId(exerciseId);
+}
+
+// 部位別・最近使った種目取得
+export async function getRecentExercisesByPartsId(
+  partsId: number,
+  limit: number
+): Promise<RecentExercise[]> {
+  return await trainingRepository.getRecentExercisesByPartsId(partsId, limit);
+}
+
+// 種目別・当日セット取得
+export async function getTrainingsByExerciseAndDate(
+  exerciseId: string,
+  date: string
+): Promise<Training[]> {
+  return await trainingRepository.getTrainingsByExerciseAndDate(
+    exerciseId,
+    date
+  );
+}
+
+// 種目別・過去の記録取得（指定日より前、直近N日分）
+export async function getPastTrainingsByExerciseId(
+  exerciseId: string,
+  beforeDate: string,
+  limit: number
+): Promise<PastTraining[]> {
+  return await trainingRepository.getPastTrainingsByExerciseId(
+    exerciseId,
+    beforeDate,
+    limit
+  );
 }
 
 // トレーニング詳細情報取得
@@ -30,6 +76,11 @@ export async function upsertTraining(
   reps: number
 ) {
   const now = new Date().toISOString();
+  // 既存レコードの場合はcreated_atを維持し、日時ソートの並び順が更新の度に変わらないようにする
+  const existingCreatedAt = await trainingRepository.getTrainingCreatedAt(
+    trainingId
+  );
+  const createdAt = existingCreatedAt ?? now;
   const trainingEntities: TrainingEntity[] = [
     {
       training_id: trainingId,
@@ -40,7 +91,7 @@ export async function upsertTraining(
       reps,
       is_synced: 0,
       is_deleted: 0,
-      created_at: now,
+      created_at: createdAt,
       updated_at: now,
     },
   ];
@@ -56,7 +107,7 @@ export async function upsertTraining(
       exerciseId,
       weight,
       reps,
-      createdAt: now,
+      createdAt,
       updatedAt: now,
     },
   ];

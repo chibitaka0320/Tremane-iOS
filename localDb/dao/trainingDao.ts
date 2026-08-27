@@ -2,9 +2,19 @@ import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
 import {
   DailyTrainingRow,
+  LastTraining,
+  RecentExercise,
+  Training,
   TrainingAnalysisRow,
   TrainingDetail,
 } from "@/types/dto/trainingDto";
+
+// 種目別・過去の記録行データ
+type PastTrainingRow = {
+  date: string;
+  weight: number;
+  reps: number;
+};
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -229,6 +239,130 @@ export async function getTrainingDetail(
     [trainingId]
   );
   return training;
+}
+
+// 部位別・最近使った種目取得（種目ごとの直近1件）
+export async function getRecentExercisesByPartsId(
+  partsId: number,
+  limit: number
+): Promise<RecentExercise[]> {
+  const rows = await db.getAllAsync<RecentExercise>(
+    `
+    WITH ranked AS (
+      SELECT
+        t.exercise_id,
+        t.weight,
+        t.reps,
+        t.date,
+        t.created_at,
+        ROW_NUMBER() OVER (
+          PARTITION BY t.exercise_id
+          ORDER BY t.date DESC, t.created_at DESC
+        ) AS rn
+      FROM trainings t
+      LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+      WHERE t.is_deleted = 0
+        AND e.parts_id = ?
+    )
+    SELECT
+      r.exercise_id AS exerciseId,
+      e.name AS exerciseName,
+      r.weight,
+      r.reps,
+      r.date,
+      r.created_at AS createdAt
+    FROM ranked r
+    LEFT JOIN exercises e ON r.exercise_id = e.exercise_id
+    WHERE r.rn = 1
+    ORDER BY r.date DESC, r.created_at DESC
+    LIMIT ?;
+    `,
+    [partsId, limit]
+  );
+  return rows;
+}
+
+// 種目別・当日セット取得
+export async function getTrainingsByExerciseAndDate(
+  exerciseId: string,
+  date: string
+): Promise<Training[]> {
+  const rows = await db.getAllAsync<Training>(
+    `
+    SELECT
+      training_id AS trainingId,
+      weight,
+      reps
+    FROM trainings
+    WHERE exercise_id = ?
+      AND date = ?
+      AND is_deleted = 0
+    ORDER BY created_at;
+    `,
+    [exerciseId, date]
+  );
+  return rows;
+}
+
+// 種目別・過去の記録取得（指定日より前、直近N日分）
+export async function getPastTrainingsByExerciseId(
+  exerciseId: string,
+  beforeDate: string,
+  limit: number
+): Promise<PastTrainingRow[]> {
+  const rows = await db.getAllAsync<PastTrainingRow>(
+    `
+    WITH recent_dates AS (
+      SELECT DISTINCT date
+      FROM trainings
+      WHERE exercise_id = ?
+        AND is_deleted = 0
+        AND date < ?
+      ORDER BY date DESC
+      LIMIT ?
+    )
+    SELECT
+      t.date,
+      t.weight,
+      t.reps
+    FROM trainings t
+    JOIN recent_dates d ON t.date = d.date
+    WHERE t.exercise_id = ?
+      AND t.is_deleted = 0
+    ORDER BY t.date DESC, t.created_at ASC;
+    `,
+    [exerciseId, beforeDate, limit, exerciseId]
+  );
+  return rows;
+}
+
+// トレーニングIDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getTrainingCreatedAt(
+  trainingId: string
+): Promise<string | null> {
+  const row = await db.getFirstAsync<{ created_at: string }>(
+    `SELECT created_at FROM trainings WHERE training_id = ?;`,
+    [trainingId]
+  );
+  return row?.created_at ?? null;
+}
+
+// 種目の前回の記録取得
+export async function getLastTrainingByExerciseId(
+  exerciseId: string
+): Promise<LastTraining | null> {
+  const row = await db.getFirstAsync<LastTraining>(
+    `
+    SELECT weight, reps, date
+    FROM trainings
+    WHERE exercise_id = ?
+      AND is_deleted = 0
+    ORDER BY date DESC, created_at DESC
+    LIMIT 1;
+    `,
+    [exerciseId]
+  );
+  return row;
 }
 
 // 追加 or 更新

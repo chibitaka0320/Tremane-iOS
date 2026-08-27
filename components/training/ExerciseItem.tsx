@@ -1,92 +1,78 @@
 import theme from "@/styles/theme";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Exercise } from "@/types/dto/trainingDto";
 
 type Props = {
   partsId: number;
+  partName: string;
+  date: string;
   exercise: Exercise;
 };
 
-export default function ExerciseItem({ partsId, exercise }: Props) {
+export default function ExerciseItem({
+  partsId,
+  partName,
+  date,
+  exercise,
+}: Props) {
   const { exerciseId, name, trainings } = exercise;
 
-  const onTraining = (trainingId: string) => {
+  const onPress = () => {
     router.push({
-      pathname: "/(main)/(edit)/training/edit",
-      params: { trainingId },
-    });
-  };
-
-  const onPlus = () => {
-    router.push({
-      pathname: "/(main)/(add)/training/addExercise",
-      params: { partsId, exerciseId },
+      pathname: "/(main)/(edit)/training/detail",
+      params: {
+        date,
+        partsId: String(partsId),
+        partName,
+        exerciseId,
+        exerciseName: name,
+      },
     });
   };
 
   return (
-    <View style={styles.exerciseContainer}>
-      <View style={styles.exerciseHeader}>
-        <Text style={styles.exerciseName}>{name}</Text>
-        <TouchableOpacity>
-          <AntDesign
-            name="plus-circle"
-            color="black"
-            style={styles.addButton}
-            onPress={onPlus}
-          />
-        </TouchableOpacity>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+        {name}
+      </Text>
+      <View style={styles.right}>
+        <Text style={styles.setCount}>{trainings.length}セット</Text>
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color={theme.colors.font.gray}
+        />
       </View>
-      {trainings.map((training, setIndex) => (
-        <TouchableOpacity
-          key={setIndex}
-          style={styles.setContainer}
-          onPress={() => onTraining(training.trainingId)}
-        >
-          <Text style={styles.setNumber}>{setIndex + 1}</Text>
-          <Text style={styles.setValue}>{training.weight} kg</Text>
-          <Text style={styles.setValue}>{training.reps} 回</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  exerciseContainer: {
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[3],
-  },
-  exerciseHeader: {
+  container: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottomWidth: 1,
+    paddingHorizontal: theme.spacing[1],
+    paddingVertical: theme.spacing[3],
+    borderBottomWidth: 0.5,
     borderBottomColor: theme.colors.lightGray,
-    paddingTop: theme.spacing[1],
-    paddingBottom: theme.spacing[2],
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
-  exerciseName: {
-    fontSize: theme.fontSizes.medium,
-  },
-  addButton: {
+  name: {
+    flex: 1,
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.dark,
     marginRight: theme.spacing[2],
-    fontSize: theme.fontSizes.large,
   },
-  setContainer: {
+  right: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[5],
+    alignItems: "center",
+    gap: theme.spacing[1],
   },
-  setNumber: {
-    fontSize: theme.fontSizes.medium,
-    fontWeight: "bold",
-  },
-  setValue: {
-    fontSize: theme.fontSizes.medium,
+  setCount: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
   },
 });

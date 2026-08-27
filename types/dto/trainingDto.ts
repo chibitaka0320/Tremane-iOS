@@ -38,6 +38,32 @@ export type DailyTraining = {
   bodyParts: BodyPart[];
 };
 
+// 最近使った種目（種目ごとの直近1件）
+export type RecentExercise = {
+  exerciseId: string;
+  exerciseName: string;
+  weight: number;
+  reps: number;
+  date: string;
+  createdAt: string;
+};
+
+// 種目の前回の記録
+export type LastTraining = {
+  weight: number;
+  reps: number;
+  date: string;
+};
+
+// 種目の過去の記録（日付ごとのセット一覧）
+export type PastTraining = {
+  date: string;
+  sets: {
+    weight: number;
+    reps: number;
+  }[];
+};
+
 // トレーニング詳細
 export type TrainingDetail = {
   trainingId: string;
