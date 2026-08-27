@@ -6,10 +6,17 @@ import { Exercise } from "@/types/dto/trainingDto";
 
 type Props = {
   partsId: number;
+  partName: string;
+  date: string;
   exercise: Exercise;
 };
 
-export default function ExerciseItem({ partsId, exercise }: Props) {
+export default function ExerciseItem({
+  partsId,
+  partName,
+  date,
+  exercise,
+}: Props) {
   const { exerciseId, name, trainings } = exercise;
 
   const onTraining = (trainingId: string) => {
@@ -21,8 +28,15 @@ export default function ExerciseItem({ partsId, exercise }: Props) {
 
   const onPlus = () => {
     router.push({
-      pathname: "/(main)/(add)/training/addExercise",
-      params: { partsId, exerciseId },
+      pathname: "/(main)/(add)/training/record",
+      params: {
+        date,
+        partsId: String(partsId),
+        partName,
+        exerciseId,
+        exerciseName: name,
+        fromRecent: "false",
+      },
     });
   };
 
@@ -30,12 +44,11 @@ export default function ExerciseItem({ partsId, exercise }: Props) {
     <View style={styles.exerciseContainer}>
       <View style={styles.exerciseHeader}>
         <Text style={styles.exerciseName}>{name}</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onPlus}>
           <AntDesign
             name="plus-circle"
             color="black"
             style={styles.addButton}
-            onPress={onPlus}
           />
         </TouchableOpacity>
       </View>

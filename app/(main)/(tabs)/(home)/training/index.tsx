@@ -103,7 +103,9 @@ export default function TrainingScreen() {
       <FlatList
         data={dailyTraining.bodyParts}
         style={styles.trainingContainer}
-        renderItem={({ item }) => <TrainingItem bodyPart={item} />}
+        renderItem={({ item }) => (
+          <TrainingItem bodyPart={item} date={selectedDate} />
+        )}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.bodyPartId.toString()}
         ListFooterComponent={<View style={styles.trainingItemFooter}></View>}
