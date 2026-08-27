@@ -6,7 +6,7 @@ import * as trainingService from "@/service/trainingService";
 import theme from "@/styles/theme";
 import { DailyTraining } from "@/types/dto/trainingDto";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
@@ -88,7 +88,15 @@ export default function TrainingScreen() {
   if (dailyTraining.bodyParts.length === 0) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.nonDataContainer}>
+        <TouchableOpacity
+          style={styles.nonDataContainer}
+          onPress={() =>
+            router.push({
+              pathname: "/(main)/(add)/training/add",
+              params: { date: selectedDate },
+            })
+          }
+        >
           <MaterialIcons name="note-add" size={60} color="#ccc" />
           <Text style={styles.text}>データがありません</Text>
           <Text style={styles.subText}>トレーニングを追加しましょう</Text>
