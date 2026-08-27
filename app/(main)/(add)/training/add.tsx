@@ -25,7 +25,10 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 // トレーニング追加画面（種目選択）
 export default function TrainingAddScreen() {
-  const { date: initialDate } = useLocalSearchParams<{ date?: string }>();
+  const { date: initialDate, partsId: initialPartsId } = useLocalSearchParams<{
+    date?: string;
+    partsId?: string;
+  }>();
 
   // 日付
   const [date, setDate] = useState(
@@ -47,7 +50,10 @@ export default function TrainingAddScreen() {
         const data = await bodyPartService.getBodyPartsWithExercises();
         setBodyPartData(data);
         if (data.length > 0) {
-          setSelectedPartsId(data[0].partsId);
+          const preselected = initialPartsId
+            ? data.find((part) => part.partsId === Number(initialPartsId))
+            : undefined;
+          setSelectedPartsId(preselected ? preselected.partsId : data[0].partsId);
         }
       } catch (e) {
         console.error(e);

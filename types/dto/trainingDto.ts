@@ -55,6 +55,15 @@ export type LastTraining = {
   date: string;
 };
 
+// 種目の過去の記録（日付ごとのセット一覧）
+export type PastTraining = {
+  date: string;
+  sets: {
+    weight: number;
+    reps: number;
+  }[];
+};
+
 // トレーニング詳細
 export type TrainingDetail = {
   trainingId: string;

@@ -74,8 +74,7 @@ export default function TrainingEditScreen() {
         parseFloat(weight),
         parseInt(reps)
       );
-      router.dismissAll();
-      router.replace("/(main)/(tabs)/(home)/training");
+      router.back();
     } catch (error) {
       console.error("トレーニング更新失敗：" + error);
       Alert.alert("トレーニングの更新に失敗しました。");
@@ -125,7 +124,7 @@ export default function TrainingEditScreen() {
               style={styles.exerciseImage}
               resizeMode="contain"
             />
-            <View>
+            <View style={styles.exerciseTextArea}>
               <Text style={styles.exerciseName}>{exerciseName}</Text>
               <Text style={styles.partName}>{partName}</Text>
             </View>
@@ -213,16 +212,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing[3],
-    backgroundColor: theme.colors.background.light,
-    borderRadius: 8,
-    padding: theme.spacing[4],
-    marginBottom: theme.spacing[4],
+    paddingVertical: theme.spacing[1],
+    marginBottom: theme.spacing[5],
   },
   exerciseImage: {
-    width: 56,
-    height: 56,
+    width: 64,
+    height: 64,
+  },
+  exerciseTextArea: {
+    flex: 1,
   },
   exerciseName: {
+    flexShrink: 1,
     fontSize: theme.fontSizes.large,
     fontWeight: "bold",
     color: theme.colors.dark,
