@@ -2,6 +2,7 @@ import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
 import {
   DailyTrainingRow,
+  LastTraining,
   RecentExercise,
   TrainingAnalysisRow,
   TrainingDetail,
@@ -245,6 +246,7 @@ export async function getRecentExercisesByPartsId(
         t.weight,
         t.reps,
         t.date,
+        t.created_at,
         ROW_NUMBER() OVER (
           PARTITION BY t.exercise_id
           ORDER BY t.date DESC, t.created_at DESC
@@ -259,16 +261,35 @@ export async function getRecentExercisesByPartsId(
       e.name AS exerciseName,
       r.weight,
       r.reps,
-      r.date
+      r.date,
+      r.created_at AS createdAt
     FROM ranked r
     LEFT JOIN exercises e ON r.exercise_id = e.exercise_id
     WHERE r.rn = 1
-    ORDER BY r.date DESC
+    ORDER BY r.date DESC, r.created_at DESC
     LIMIT ?;
     `,
     [partsId, limit]
   );
   return rows;
+}
+
+// 種目の前回の記録取得
+export async function getLastTrainingByExerciseId(
+  exerciseId: string
+): Promise<LastTraining | null> {
+  const row = await db.getFirstAsync<LastTraining>(
+    `
+    SELECT weight, reps, date
+    FROM trainings
+    WHERE exercise_id = ?
+      AND is_deleted = 0
+    ORDER BY date DESC, created_at DESC
+    LIMIT 1;
+    `,
+    [exerciseId]
+  );
+  return row;
 }
 
 // 追加 or 更新

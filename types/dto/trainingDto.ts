@@ -45,6 +45,14 @@ export type RecentExercise = {
   weight: number;
   reps: number;
   date: string;
+  createdAt: string;
+};
+
+// 種目の前回の記録
+export type LastTraining = {
+  weight: number;
+  reps: number;
+  date: string;
 };
 
 // トレーニング詳細

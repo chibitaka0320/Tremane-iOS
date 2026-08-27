@@ -5,12 +5,14 @@ import * as trainingService from "@/service/trainingService";
 import theme from "@/styles/theme";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 import { RecentExercise } from "@/types/dto/trainingDto";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Image,
+  ImageSourcePropType,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -21,18 +23,15 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-// 部位ごとのアイコン（暫定。要デザイン調整）
-const BODY_PART_ICONS: Record<
-  number,
-  React.ComponentProps<typeof MaterialCommunityIcons>["name"]
-> = {
-  1: "arm-flex",
-  2: "human-handsup",
-  3: "weight-lifter",
-  4: "dumbbell",
-  5: "arm-flex-outline",
-  6: "run",
-  7: "yoga",
+// 部位ごとの画像
+const BODY_PART_IMAGES: Record<number, ImageSourcePropType> = {
+  1: require("@/images/parts/Chest.png"),
+  2: require("@/images/parts/Back.png"),
+  3: require("@/images/parts/Shoulder.png"),
+  4: require("@/images/parts/Biceps.png"),
+  5: require("@/images/parts/Tricep.png"),
+  6: require("@/images/parts/Legs.png"),
+  7: require("@/images/parts/Abs.png"),
 };
 
 // トレーニング追加画面（種目選択）
@@ -99,11 +98,23 @@ export default function TrainingAddScreen() {
     setDatePickerVisibility(false);
   };
 
-  // 種目選択
-  // TODO: 現状は暫定でメイン画面に戻るのみ。次のステップでセット入力画面（画面2）へ遷移する
-  const onSelectExercise = () => {
-    router.dismissAll();
-    router.replace("/(main)/(tabs)/(home)/training");
+  // 種目選択（セット入力画面へ遷移）
+  const onSelectExercise = (
+    exerciseId: string,
+    exerciseName: string,
+    fromRecent: boolean
+  ) => {
+    router.push({
+      pathname: "/(main)/(add)/training/record",
+      params: {
+        date: format(date, "yyyy-MM-dd"),
+        partsId: String(selectedPartsId),
+        partName: selectedBodyPart?.partName ?? "",
+        exerciseId,
+        exerciseName,
+        fromRecent: String(fromRecent),
+      },
+    });
   };
 
   if (isLoading) {
@@ -168,12 +179,10 @@ export default function TrainingAddScreen() {
                       isSelected && styles.partIconCircleSelected,
                     ]}
                   >
-                    <MaterialCommunityIcons
-                      name={BODY_PART_ICONS[part.partsId] ?? "dumbbell"}
-                      size={22}
-                      color={
-                        isSelected ? theme.colors.white : theme.colors.font.gray
-                      }
+                    <Image
+                      source={BODY_PART_IMAGES[part.partsId]}
+                      style={styles.partIconImage}
+                      resizeMode="contain"
                     />
                   </View>
                   <Text
@@ -205,7 +214,13 @@ export default function TrainingAddScreen() {
                 <TouchableOpacity
                   key={exercise.exerciseId}
                   style={styles.exerciseRow}
-                  onPress={onSelectExercise}
+                  onPress={() =>
+                    onSelectExercise(
+                      exercise.exerciseId,
+                      exercise.exerciseName,
+                      true
+                    )
+                  }
                 >
                   <Text
                     style={styles.exerciseName}
@@ -236,7 +251,13 @@ export default function TrainingAddScreen() {
             <TouchableOpacity
               key={exercise.exerciseId}
               style={styles.exerciseRow}
-              onPress={onSelectExercise}
+              onPress={() =>
+                onSelectExercise(
+                  exercise.exerciseId,
+                  exercise.exerciseName,
+                  false
+                )
+              }
             >
               <Text
                 style={styles.exerciseName}
@@ -335,9 +356,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   partIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: theme.colors.background.light,
     justifyContent: "center",
     alignItems: "center",
@@ -345,8 +366,12 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border.light,
   },
   partIconCircleSelected: {
-    backgroundColor: theme.colors.primary,
+    borderWidth: 1.5,
     borderColor: theme.colors.primary,
+  },
+  partIconImage: {
+    width: 48,
+    height: 48,
   },
   partLabel: {
     fontSize: theme.fontSizes.small,
