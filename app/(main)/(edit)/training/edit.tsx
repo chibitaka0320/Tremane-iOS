@@ -74,8 +74,7 @@ export default function TrainingEditScreen() {
         parseFloat(weight),
         parseInt(reps)
       );
-      router.dismissAll();
-      router.replace("/(main)/(tabs)/(home)/training");
+      router.back();
     } catch (error) {
       console.error("トレーニング更新失敗：" + error);
       Alert.alert("トレーニングの更新に失敗しました。");

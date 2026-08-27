@@ -29,7 +29,7 @@ type PendingSet = {
 
 // トレーニング追加画面（セット入力）
 export default function TrainingRecordScreen() {
-  const { date, partName, exerciseId, exerciseName, fromRecent } =
+  const { date, partName, exerciseId, exerciseName, fromRecent, fromDetail } =
     useLocalSearchParams<{
       date: string;
       partsId: string;
@@ -37,6 +37,7 @@ export default function TrainingRecordScreen() {
       exerciseId: string;
       exerciseName: string;
       fromRecent: string;
+      fromDetail?: string;
     }>();
 
   const [isLoading, setLoading] = useState(true);
@@ -108,8 +109,12 @@ export default function TrainingRecordScreen() {
         );
       }
 
-      router.dismissAll();
-      router.replace("/(main)/(tabs)/(home)/training");
+      if (fromDetail === "true") {
+        router.back();
+      } else {
+        router.dismissAll();
+        router.replace("/(main)/(tabs)/(home)/training");
+      }
     } catch (error) {
       console.error("トレーニング記録失敗：" + error);
       Alert.alert("トレーニングの記録に失敗しました。");

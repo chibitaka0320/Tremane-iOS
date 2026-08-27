@@ -7,7 +7,9 @@ import { TrainingEntity } from "@/types/db";
 import {
   DailyTraining,
   LastTraining,
+  PastTraining,
   RecentExercise,
+  Training,
   TrainingDetail,
 } from "@/types/dto/trainingDto";
 import { format } from "date-fns";
@@ -31,6 +33,30 @@ export async function getRecentExercisesByPartsId(
   limit: number
 ): Promise<RecentExercise[]> {
   return await trainingRepository.getRecentExercisesByPartsId(partsId, limit);
+}
+
+// 種目別・当日セット取得
+export async function getTrainingsByExerciseAndDate(
+  exerciseId: string,
+  date: string
+): Promise<Training[]> {
+  return await trainingRepository.getTrainingsByExerciseAndDate(
+    exerciseId,
+    date
+  );
+}
+
+// 種目別・過去の記録取得（指定日より前、直近N日分）
+export async function getPastTrainingsByExerciseId(
+  exerciseId: string,
+  beforeDate: string,
+  limit: number
+): Promise<PastTraining[]> {
+  return await trainingRepository.getPastTrainingsByExerciseId(
+    exerciseId,
+    beforeDate,
+    limit
+  );
 }
 
 // トレーニング詳細情報取得
