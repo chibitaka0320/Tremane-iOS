@@ -1,160 +1,78 @@
+import Indicator from "@/components/common/Indicator";
+import { bodyPartImages } from "@/constants/bodyPartImages";
+import { auth } from "@/lib/firebaseConfig";
+import { validateReps, validateWeight } from "@/lib/validators";
+import * as trainingService from "@/service/trainingService";
+import theme from "@/styles/theme";
+import { parseISO } from "date-fns";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  Alert,
+  Image,
+  Keyboard,
+  ScrollView,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
-  Keyboard,
+  TextInput,
   TouchableOpacity,
-  Alert,
-  Modal,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import theme from "@/styles/theme";
-import { format } from "date-fns";
-import Indicator from "@/components/common/Indicator";
-import { router, useLocalSearchParams } from "expo-router";
-import { SelectLabel } from "@/types/common";
-import CustomTextInput from "@/components/common/CustomTextInput";
-import { validateReps, validateWeight } from "@/lib/validators";
-import { auth } from "@/lib/firebaseConfig";
-import { Picker } from "@react-native-picker/picker";
-import * as trainingService from "@/service/trainingService";
-import * as bodyPartService from "@/service/bodyPartService";
-import { BodyPart } from "@/types/dto/bodyPartDto";
 
 export default function TrainingEditScreen() {
-  // パスパラメーター
-  const { trainingId } = useLocalSearchParams<{ trainingId: string }>();
+  const { trainingId, setNumber, partsId, partName, exerciseName } =
+    useLocalSearchParams<{
+      trainingId: string;
+      setNumber: string;
+      partsId: string;
+      partName: string;
+      exerciseName: string;
+    }>();
 
-  // API定数
-  const API_ENDPOINTS = {
-    training: (id: string) => `/training/${id}`,
-  };
+  const [isLoading, setLoading] = useState(true);
+  const [isSubmitting, setSubmitting] = useState(false);
 
-  // 表示データ
-  const [date, setDate] = useState(new Date());
-  const [bodyParts, setBodyParts] = useState("");
-  const [exercise, setExercise] = useState("");
+  const [date, setDate] = useState<string>("");
+  const [exerciseId, setExerciseId] = useState("");
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
 
-  // ピッカーデータ
-  const [bodyPartData, setBodyPartData] = useState<BodyPart[]>([]);
-  const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
-  const [exerciseOptions, setExerciseOptions] = useState<SelectLabel[]>([]);
-
-  // フラグ
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [isLoading, setLoading] = useState(false);
-  const [isDisabled, setDisabled] = useState(true);
-  const [bodyPartsModal, setBodyPartsModal] = useState(false);
-  const [exerciseModal, setExerciseModal] = useState(false);
-
-  const selectedBodyParts =
-    bodyPartOptions.find((o) => o.value === bodyParts)?.label ||
-    "選択してください";
-
-  const selectedExercise =
-    exerciseOptions.find((o) => o.value === exercise)?.label ||
-    "選択してください";
-
-  // 部位・種目情報取得
-  const fetchBodyParts = async () => {
-    const res = await bodyPartService.getBodyPartsWithExercises();
-    if (res) {
-      setBodyPartData(res);
-      setBodyPartOptions(
-        res.map((part) => ({
-          label: part.partName,
-          value: String(part.partsId),
-        }))
-      );
-    }
-  };
-
   // トレーニング詳細取得
-  const fetchTraining = async () => {
-    if (!trainingId) return;
-    const res = await trainingService.getTrainingDetail(trainingId);
-
-    if (res) {
-      setDate(new Date(res.date));
-      setBodyParts(res.bodyPartId.toString());
-      setExercise(res.exerciseId);
-      setWeight(res.weight.toString());
-      setReps(res.reps.toString());
-    }
-  };
-
-  // 表示初期処理
   useEffect(() => {
     const init = async () => {
       try {
-        setLoading(true);
-        await fetchBodyParts();
-        await fetchTraining();
+        const detail = await trainingService.getTrainingDetail(trainingId);
+        if (detail) {
+          setDate(detail.date);
+          setExerciseId(detail.exerciseId);
+          setWeight(String(detail.weight));
+          setReps(String(detail.reps));
+        }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
     init();
-  }, []);
+  }, [trainingId]);
 
-  // 種目オプション更新
-  useEffect(() => {
-    const selected = bodyPartData.find(
-      (part) => String(part.partsId) === bodyParts
-    );
-    if (selected) {
-      setExerciseOptions(
-        selected.exercises.map((ex) => ({
-          label: ex.exerciseName,
-          value: String(ex.exerciseId),
-        }))
-      );
-    } else {
-      setExerciseOptions([]);
-      setExercise("");
-    }
-  }, [bodyParts, bodyPartData]);
-
-  // ボタン活性・非活性
-  useEffect(() => {
-    if (validateWeight(weight) && validateReps(reps) && bodyParts && exercise) {
-      setDisabled(false);
-    } else {
-      setDisabled(true);
-    }
-  }, [bodyParts, exercise, weight, reps]);
-
-  // ピッカー開閉
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
-  const handleConfirm = (date: Date) => {
-    setDate(date);
-    hideDatePicker();
-  };
+  const isInputValid = validateWeight(weight) && validateReps(reps);
 
   // トレーニング更新処理
   const onUpdateTraining = async () => {
-    setLoading(true);
-    if (auth.currentUser === null) return;
+    if (!isInputValid || auth.currentUser === null) return;
 
+    setSubmitting(true);
     try {
       await trainingService.upsertTraining(
         trainingId,
-        date,
+        parseISO(date),
         auth.currentUser.uid,
-        exercise,
+        exerciseId,
         parseFloat(weight),
-        parseFloat(reps)
+        parseInt(reps)
       );
       router.dismissAll();
       router.replace("/(main)/(tabs)/(home)/training");
@@ -162,7 +80,7 @@ export default function TrainingEditScreen() {
       console.error("トレーニング更新失敗：" + error);
       Alert.alert("トレーニングの更新に失敗しました。");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -174,7 +92,7 @@ export default function TrainingEditScreen() {
         text: "削除する",
         style: "destructive",
         onPress: async () => {
-          setLoading(true);
+          setSubmitting(true);
           try {
             await trainingService.deleteTraining(trainingId);
             router.back();
@@ -182,7 +100,7 @@ export default function TrainingEditScreen() {
             console.error("トレーニング削除失敗：" + error);
             Alert.alert("トレーニングの削除に失敗しました。");
           } finally {
-            setLoading(false);
+            setSubmitting(false);
           }
         },
       },
@@ -196,136 +114,81 @@ export default function TrainingEditScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        <View style={styles.item}>
-          <Text style={styles.label}>日付</Text>
-          <TouchableOpacity style={styles.inputValue} onPress={showDatePicker}>
-            <Text style={styles.inputValueText}>
-              {format(date, "yyyy年MM月dd日")}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.exerciseCard}>
+            <Image
+              source={bodyPartImages[Number(partsId)]}
+              style={styles.exerciseImage}
+              resizeMode="contain"
+            />
+            <View>
+              <Text style={styles.exerciseName}>{exerciseName}</Text>
+              <Text style={styles.partName}>{partName}</Text>
+            </View>
+          </View>
+
+          <View style={styles.setNumberBadgeWrapper}>
+            <Text style={styles.setNumberBadgeText}>
+              {setNumber}セット目を編集
             </Text>
-          </TouchableOpacity>
-          <DateTimePickerModal
-            date={date}
-            isVisible={isDatePickerVisible}
-            mode="date"
-            locale="ja"
-            onConfirm={handleConfirm}
-            onCancel={hideDatePicker}
-            pickerStyleIOS={{ alignSelf: "center" }}
-            confirmTextIOS="完了"
-            cancelTextIOS="キャンセル"
-          />
-        </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>部位</Text>
-          <TouchableOpacity
-            style={styles.inputValue}
-            onPress={() => setBodyPartsModal(true)}
-          >
-            <Text>{selectedBodyParts}</Text>
-          </TouchableOpacity>
-
-          <Modal visible={bodyPartsModal} transparent animationType="slide">
-            <TouchableWithoutFeedback onPress={() => setBodyPartsModal(false)}>
-              <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback>
-                  <View style={styles.modalContent}>
-                    <View style={styles.header}>
-                      <TouchableOpacity
-                        onPress={() => setBodyPartsModal(false)}
-                      >
-                        <Text style={styles.headerText}>Done</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <Picker
-                      selectedValue={bodyParts}
-                      onValueChange={(itemValue) => setBodyParts(itemValue)}
-                    >
-                      <Picker.Item
-                        label="選択してください"
-                        value=""
-                        enabled={false}
-                      />
-                      {bodyPartOptions.map(({ label, value }) => (
-                        <Picker.Item key={value} label={label} value={value} />
-                      ))}
-                    </Picker>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-        </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>種目</Text>
-          <TouchableOpacity
-            style={styles.inputValue}
-            onPress={() => setExerciseModal(true)}
-            disabled={!bodyParts}
-          >
-            <Text>{selectedExercise}</Text>
-          </TouchableOpacity>
-
-          <Modal visible={exerciseModal} transparent animationType="slide">
-            <TouchableWithoutFeedback onPress={() => setExerciseModal(false)}>
-              <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback>
-                  <View style={styles.modalContent}>
-                    <View style={styles.header}>
-                      <TouchableOpacity onPress={() => setExerciseModal(false)}>
-                        <Text style={styles.headerText}>Done</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <Picker
-                      selectedValue={exercise}
-                      onValueChange={(itemValue) => setExercise(itemValue)}
-                    >
-                      <Picker.Item
-                        label="選択してください"
-                        value=""
-                        enabled={false}
-                      />
-                      {exerciseOptions.map(({ label, value }) => (
-                        <Picker.Item key={value} label={label} value={value} />
-                      ))}
-                    </Picker>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-        </View>
-        <View style={[styles.item, styles.row]}>
-          <View style={styles.rowItem}>
-            <Text style={styles.label}>重量（kg）</Text>
-            <CustomTextInput
-              onChangeText={setWeight}
-              keyboardType="numeric"
-              value={weight}
-            />
           </View>
-          <View style={styles.rowItem}>
-            <Text style={styles.label}>回数</Text>
-            <CustomTextInput
-              onChangeText={setReps}
-              keyboardType="numeric"
-              value={reps}
-            />
-          </View>
-        </View>
-        <TouchableOpacity
-          style={[styles.button, isDisabled && styles.buttonDisabled]}
-          onPress={onUpdateTraining}
-          disabled={isDisabled}
-        >
-          <Text style={styles.buttonText}>更新</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, styles.buttonDelete]}
-          onPress={onDeleteTraining}
-        >
-          <Text style={styles.buttonText}>削除</Text>
-        </TouchableOpacity>
+          <View style={styles.inputRow}>
+            <View style={styles.inputItem}>
+              <Text style={styles.inputLabel}>重量</Text>
+              <View style={styles.inputRowWithUnit}>
+                <View style={styles.inputBox}>
+                  <TextInput
+                    value={weight}
+                    onChangeText={setWeight}
+                    keyboardType="numeric"
+                    style={styles.inputValueText}
+                  />
+                </View>
+                <Text style={styles.unitText}>kg</Text>
+              </View>
+            </View>
+            <View style={styles.inputItem}>
+              <Text style={styles.inputLabel}>回数</Text>
+              <View style={styles.inputRowWithUnit}>
+                <View style={styles.inputBox}>
+                  <TextInput
+                    value={reps}
+                    onChangeText={setReps}
+                    keyboardType="numeric"
+                    style={styles.inputValueText}
+                  />
+                </View>
+                <Text style={styles.unitText}>回</Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[
+              styles.updateButton,
+              (!isInputValid || isSubmitting) && styles.buttonDisabled,
+            ]}
+            onPress={onUpdateTraining}
+            disabled={!isInputValid || isSubmitting}
+          >
+            <Text style={styles.buttonText}>更新</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.deleteButton, isSubmitting && styles.buttonDisabled]}
+            onPress={onDeleteTraining}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>削除</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -335,77 +198,115 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.lightGray,
-    paddingTop: theme.spacing[5],
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: theme.spacing[5],
+    paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[6],
   },
 
-  // インプットアイテム
-  item: {
+  // 種目カード
+  exerciseCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[3],
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    padding: theme.spacing[4],
     marginBottom: theme.spacing[4],
   },
-  label: {
-    marginBottom: theme.spacing[1],
+  exerciseImage: {
+    width: 56,
+    height: 56,
   },
-  inputValue: {
+  exerciseName: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+  },
+  partName: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+  },
+
+  // セット番号バッジ
+  setNumberBadgeWrapper: {
+    marginTop: theme.spacing[2],
+    marginBottom: theme.spacing[4],
+  },
+  setNumberBadgeText: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    color: theme.colors.secondary,
+  },
+
+  // 重量・回数入力
+  inputRow: {
+    flexDirection: "row",
+    gap: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  inputItem: {
+    flex: 1,
+  },
+  inputLabel: {
+    fontSize: theme.fontSizes.small,
+    fontWeight: "bold",
+    marginBottom: theme.spacing[2],
+  },
+  inputRowWithUnit: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+  },
+  inputBox: {
+    flex: 1,
     justifyContent: "center",
-    paddingHorizontal: theme.spacing[3],
     borderWidth: 1,
-    borderColor: theme.colors.lightGray,
+    borderColor: theme.colors.primary,
+    borderRadius: 8,
     backgroundColor: theme.colors.background.light,
-    borderRadius: 5,
+    paddingHorizontal: theme.spacing[3],
     height: 48,
   },
   inputValueText: {
+    flex: 1,
+    padding: 0,
+    fontSize: theme.fontSize.xl,
+    fontWeight: "bold",
+  },
+  unitText: {
     fontSize: theme.fontSizes.medium,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  rowItem: {
-    width: "45%",
+    color: theme.colors.font.gray,
   },
 
-  // 通常ボタン
-  button: {
+  // 前回の記録
+  // フッターボタン
+  footer: {
+    paddingHorizontal: theme.spacing[5],
+    paddingBottom: theme.spacing[5],
+  },
+  updateButton: {
     backgroundColor: theme.colors.primary,
     borderRadius: 5,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
-    marginVertical: theme.spacing[3],
-    color: theme.colors.white,
+    marginBottom: theme.spacing[3],
+  },
+  deleteButton: {
+    backgroundColor: theme.colors.dark,
+    borderRadius: 5,
+    paddingVertical: theme.spacing[3],
+    alignItems: "center",
   },
   buttonDisabled: {
     backgroundColor: theme.colors.lightGray,
   },
-  buttonDelete: {
-    backgroundColor: theme.colors.dark,
-  },
   buttonText: {
     fontSize: theme.fontSizes.medium,
     color: theme.colors.white,
-  },
-
-  // モーダル
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    borderTopWidth: 1,
-    borderTopColor: "#d5d9da8f",
-    backgroundColor: "#d7e0e2ff",
-    paddingBottom: theme.spacing[5],
-  },
-  header: {
-    backgroundColor: theme.colors.background.light,
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  headerText: {
-    fontSize: 16,
-    color: "blue",
-    textAlign: "right",
   },
 });

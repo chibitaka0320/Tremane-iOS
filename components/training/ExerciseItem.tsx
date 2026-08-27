@@ -6,23 +6,43 @@ import { Exercise } from "@/types/dto/trainingDto";
 
 type Props = {
   partsId: number;
+  partName: string;
+  date: string;
   exercise: Exercise;
 };
 
-export default function ExerciseItem({ partsId, exercise }: Props) {
+export default function ExerciseItem({
+  partsId,
+  partName,
+  date,
+  exercise,
+}: Props) {
   const { exerciseId, name, trainings } = exercise;
 
-  const onTraining = (trainingId: string) => {
+  const onTraining = (trainingId: string, setNumber: number) => {
     router.push({
       pathname: "/(main)/(edit)/training/edit",
-      params: { trainingId },
+      params: {
+        trainingId,
+        setNumber: String(setNumber),
+        partsId: String(partsId),
+        partName,
+        exerciseName: name,
+      },
     });
   };
 
   const onPlus = () => {
     router.push({
-      pathname: "/(main)/(add)/training/addExercise",
-      params: { partsId, exerciseId },
+      pathname: "/(main)/(add)/training/record",
+      params: {
+        date,
+        partsId: String(partsId),
+        partName,
+        exerciseId,
+        exerciseName: name,
+        fromRecent: "false",
+      },
     });
   };
 
@@ -30,12 +50,11 @@ export default function ExerciseItem({ partsId, exercise }: Props) {
     <View style={styles.exerciseContainer}>
       <View style={styles.exerciseHeader}>
         <Text style={styles.exerciseName}>{name}</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onPlus}>
           <AntDesign
             name="plus-circle"
             color="black"
             style={styles.addButton}
-            onPress={onPlus}
           />
         </TouchableOpacity>
       </View>
@@ -43,7 +62,7 @@ export default function ExerciseItem({ partsId, exercise }: Props) {
         <TouchableOpacity
           key={setIndex}
           style={styles.setContainer}
-          onPress={() => onTraining(training.trainingId)}
+          onPress={() => onTraining(training.trainingId, setIndex + 1)}
         >
           <Text style={styles.setNumber}>{setIndex + 1}</Text>
           <Text style={styles.setValue}>{training.weight} kg</Text>

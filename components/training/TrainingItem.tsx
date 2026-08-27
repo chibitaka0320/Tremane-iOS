@@ -6,9 +6,10 @@ import { BodyPart } from "@/types/dto/trainingDto";
 
 type Props = {
   bodyPart: BodyPart;
+  date: string;
 };
 
-export default function TrainingItem({ bodyPart }: Props) {
+export default function TrainingItem({ bodyPart, date }: Props) {
   const { bodyPartId, name, exercises } = bodyPart;
 
   return (
@@ -22,7 +23,13 @@ export default function TrainingItem({ bodyPart }: Props) {
         <Text style={styles.categoryTitle}>{name}</Text>
       </View>
       {exercises.map((exercise, index) => (
-        <ExerciseItem exercise={exercise} key={index} partsId={bodyPartId} />
+        <ExerciseItem
+          exercise={exercise}
+          key={index}
+          partsId={bodyPartId}
+          partName={name}
+          date={date}
+        />
       ))}
     </View>
   );
