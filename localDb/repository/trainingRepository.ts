@@ -7,6 +7,8 @@ import {
   BodyPart,
   DailyTraining,
   DailyTrainingRow,
+  LastTraining,
+  RecentExercise,
 } from "@/types/dto/trainingDto";
 
 // リモートDBからトレーニングデータの最新情報を同期
@@ -121,6 +123,21 @@ export async function getTrainingByDate(date: string): Promise<DailyTraining> {
 // 日別トレーニング一覧情報取得
 export async function getTrainingsWithBodyPart(): Promise<DailyTrainingRow[]> {
   return await trainingDao.getTrainingWithBodyPart();
+}
+
+// 種目の前回の記録取得
+export async function getLastTrainingByExerciseId(
+  exerciseId: string
+): Promise<LastTraining | null> {
+  return await trainingDao.getLastTrainingByExerciseId(exerciseId);
+}
+
+// 部位別・最近使った種目取得
+export async function getRecentExercisesByPartsId(
+  partsId: number,
+  limit: number
+): Promise<RecentExercise[]> {
+  return await trainingDao.getRecentExercisesByPartsId(partsId, limit);
 }
 
 // トレーニング情報追加更新
