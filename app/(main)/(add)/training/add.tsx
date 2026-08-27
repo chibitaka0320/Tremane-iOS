@@ -7,9 +7,9 @@ import theme from "@/styles/theme";
 import { BodyPart } from "@/types/dto/bodyPartDto";
 import { RecentExercise } from "@/types/dto/trainingDto";
 import { Ionicons } from "@expo/vector-icons";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -25,8 +25,12 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 // トレーニング追加画面（種目選択）
 export default function TrainingAddScreen() {
+  const { date: initialDate } = useLocalSearchParams<{ date?: string }>();
+
   // 日付
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(
+    initialDate ? parseISO(initialDate) : new Date()
+  );
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   // 部位・種目データ
