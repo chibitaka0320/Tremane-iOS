@@ -336,6 +336,17 @@ export async function getPastTrainingsByExerciseId(
   return rows;
 }
 
+// トレーニングIDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getTrainingCreatedAt(
+  trainingId: string
+): Promise<string | null> {
+  const row = await db.getFirstAsync<{ created_at: string }>(
+    `SELECT created_at FROM trainings WHERE training_id = ?;`,
+    [trainingId]
+  );
+  return row?.created_at ?? null;
+}
+
 // 種目の前回の記録取得
 export async function getLastTrainingByExerciseId(
   exerciseId: string

@@ -76,6 +76,11 @@ export async function upsertTraining(
   reps: number
 ) {
   const now = new Date().toISOString();
+  // 既存レコードの場合はcreated_atを維持し、日時ソートの並び順が更新の度に変わらないようにする
+  const existingCreatedAt = await trainingRepository.getTrainingCreatedAt(
+    trainingId
+  );
+  const createdAt = existingCreatedAt ?? now;
   const trainingEntities: TrainingEntity[] = [
     {
       training_id: trainingId,
@@ -86,7 +91,7 @@ export async function upsertTraining(
       reps,
       is_synced: 0,
       is_deleted: 0,
-      created_at: now,
+      created_at: createdAt,
       updated_at: now,
     },
   ];
@@ -102,7 +107,7 @@ export async function upsertTraining(
       exerciseId,
       weight,
       reps,
-      createdAt: now,
+      createdAt,
       updatedAt: now,
     },
   ];
