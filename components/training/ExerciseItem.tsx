@@ -19,10 +19,16 @@ export default function ExerciseItem({
 }: Props) {
   const { exerciseId, name, trainings } = exercise;
 
-  const onTraining = (trainingId: string) => {
+  const onTraining = (trainingId: string, setNumber: number) => {
     router.push({
       pathname: "/(main)/(edit)/training/edit",
-      params: { trainingId },
+      params: {
+        trainingId,
+        setNumber: String(setNumber),
+        partsId: String(partsId),
+        partName,
+        exerciseName: name,
+      },
     });
   };
 
@@ -56,7 +62,7 @@ export default function ExerciseItem({
         <TouchableOpacity
           key={setIndex}
           style={styles.setContainer}
-          onPress={() => onTraining(training.trainingId)}
+          onPress={() => onTraining(training.trainingId, setIndex + 1)}
         >
           <Text style={styles.setNumber}>{setIndex + 1}</Text>
           <Text style={styles.setValue}>{training.weight} kg</Text>

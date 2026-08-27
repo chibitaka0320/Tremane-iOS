@@ -1,5 +1,6 @@
 import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
+import { bodyPartImages } from "@/constants/bodyPartImages";
 import * as bodyPartService from "@/service/bodyPartService";
 import * as trainingService from "@/service/trainingService";
 import theme from "@/styles/theme";
@@ -12,7 +13,6 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
-  ImageSourcePropType,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -22,17 +22,6 @@ import {
   View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
-// 部位ごとの画像
-const BODY_PART_IMAGES: Record<number, ImageSourcePropType> = {
-  1: require("@/images/parts/Chest.png"),
-  2: require("@/images/parts/Back.png"),
-  3: require("@/images/parts/Shoulder.png"),
-  4: require("@/images/parts/Biceps.png"),
-  5: require("@/images/parts/Tricep.png"),
-  6: require("@/images/parts/Legs.png"),
-  7: require("@/images/parts/Abs.png"),
-};
 
 // トレーニング追加画面（種目選択）
 export default function TrainingAddScreen() {
@@ -180,7 +169,7 @@ export default function TrainingAddScreen() {
                     ]}
                   >
                     <Image
-                      source={BODY_PART_IMAGES[part.partsId]}
+                      source={bodyPartImages[part.partsId]}
                       style={styles.partIconImage}
                       resizeMode="contain"
                     />
