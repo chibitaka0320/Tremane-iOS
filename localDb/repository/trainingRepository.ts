@@ -160,6 +160,13 @@ export async function getPastTrainingsByExerciseId(
   return Array.from(pastTrainingMap.values());
 }
 
+// トレーニングIDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getTrainingCreatedAt(
+  trainingId: string
+): Promise<string | null> {
+  return await trainingDao.getTrainingCreatedAt(trainingId);
+}
+
 // 種目の前回の記録取得
 export async function getLastTrainingByExerciseId(
   exerciseId: string
