@@ -1,25 +1,27 @@
+import Indicator from "@/components/common/Indicator";
+import CustomTextInput from "@/components/common/CustomTextInput";
+import { auth } from "@/lib/firebaseConfig";
+import { validateEatName, validatePfc } from "@/lib/validators";
+import * as eatingService from "@/service/eatingService";
+import theme from "@/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  Alert,
+  Keyboard,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import theme from "@/styles/theme";
-import { format } from "date-fns";
-import Indicator from "@/components/common/Indicator";
-import { router } from "expo-router";
-import CustomTextInput from "@/components/common/CustomTextInput";
-import { validateEatName, validatePfc } from "@/lib/validators";
-import { auth } from "@/lib/firebaseConfig";
 import uuid from "react-native-uuid";
-import * as eatingService from "@/service/eatingService";
 
 export default function EatingAddScreen() {
   const [date, setDate] = useState(new Date());
@@ -87,123 +89,149 @@ export default function EatingAddScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
-      >
-        <View style={styles.item}>
-          <Text style={styles.label}>日付</Text>
-          <TouchableOpacity style={styles.inputValue} onPress={showDatePicker}>
-            <Text style={styles.inputValueText}>
-              {format(date, "yyyy年MM月dd日")}
-            </Text>
-          </TouchableOpacity>
-          <DateTimePickerModal
-            date={date}
-            isVisible={isDatePickerVisible}
-            mode="date"
-            locale="ja"
-            onConfirm={handleConfirm}
-            onCancel={hideDatePicker}
-            pickerStyleIOS={{ alignSelf: "center" }}
-            confirmTextIOS="完了"
-            cancelTextIOS="キャンセル"
-          />
-        </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>食事名</Text>
-          <CustomTextInput onChangeText={setName} value={name} />
-        </View>
-        <View style={styles.item}>
-          <View style={styles.pfcHeader}>
-            <Text style={styles.label}>タンパク質（P）</Text>
-            <View style={styles.valuesContainer}>
-              <TextInput
-                keyboardType="numeric"
-                style={[styles.inputValue, styles.pfcValue]}
-                onChangeText={setProtein}
-                value={protein}
-                onFocus={() => {
-                  if (protein === "0") {
-                    setProtein("");
-                  }
-                }}
-                onBlur={() => {
-                  if (protein === "" || isNaN(Number(protein))) {
-                    setProtein("0");
-                  } else if (/^0\d+/.test(protein)) {
-                    const trimmed = String(Number(protein));
-                    setProtein(trimmed);
-                  }
-                }}
+      <View style={styles.container}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.item}>
+            <Text style={styles.sectionLabel}>日付</Text>
+            <TouchableOpacity style={styles.dateCard} onPress={showDatePicker}>
+              <View style={styles.dateCardLeft}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={18}
+                  color={theme.colors.font.gray}
+                />
+                <Text style={styles.dateText}>
+                  {format(date, "yyyy年M月d日（E）", { locale: ja })}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={theme.colors.font.gray}
               />
-              <Text style={styles.unit}>g</Text>
+            </TouchableOpacity>
+            <DateTimePickerModal
+              date={date}
+              isVisible={isDatePickerVisible}
+              mode="date"
+              locale="ja"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
+              pickerStyleIOS={{ alignSelf: "center" }}
+              confirmTextIOS="完了"
+              cancelTextIOS="キャンセル"
+            />
+          </View>
+
+          <View style={styles.item}>
+            <Text style={styles.sectionLabel}>食事名</Text>
+            <CustomTextInput
+              placeholder="例：鶏むね肉とご飯"
+              onChangeText={setName}
+              value={name}
+            />
+          </View>
+
+          <View style={styles.item}>
+            <Text style={styles.sectionLabel}>栄養素</Text>
+            <View style={styles.pfcRow}>
+              <View style={styles.pfcCard}>
+                <Text style={styles.pfcLetter}>P</Text>
+                <Text style={styles.pfcLabel}>タンパク質（P）</Text>
+                <View style={styles.pfcInputRow}>
+                  <View style={styles.pfcInputBox}>
+                    <TextInput
+                      keyboardType="numeric"
+                      style={styles.pfcInputText}
+                      onChangeText={setProtein}
+                      value={protein}
+                      onFocus={() => {
+                        if (protein === "0") {
+                          setProtein("");
+                        }
+                      }}
+                      onBlur={() => {
+                        if (protein === "" || isNaN(Number(protein))) {
+                          setProtein("0");
+                        } else if (/^0\d+/.test(protein)) {
+                          setProtein(String(Number(protein)));
+                        }
+                      }}
+                    />
+                  </View>
+                  <Text style={styles.pfcUnit}>g</Text>
+                </View>
+              </View>
+              <View style={styles.pfcCard}>
+                <Text style={styles.pfcLetter}>F</Text>
+                <Text style={styles.pfcLabel}>脂質（F）</Text>
+                <View style={styles.pfcInputRow}>
+                  <View style={styles.pfcInputBox}>
+                    <TextInput
+                      keyboardType="numeric"
+                      style={styles.pfcInputText}
+                      onChangeText={setFat}
+                      value={fat}
+                      onFocus={() => {
+                        if (fat === "0") {
+                          setFat("");
+                        }
+                      }}
+                      onBlur={() => {
+                        if (fat === "" || isNaN(Number(fat))) {
+                          setFat("0");
+                        } else if (/^0\d+/.test(fat)) {
+                          setFat(String(Number(fat)));
+                        }
+                      }}
+                    />
+                  </View>
+                  <Text style={styles.pfcUnit}>g</Text>
+                </View>
+              </View>
+              <View style={styles.pfcCard}>
+                <Text style={styles.pfcLetter}>C</Text>
+                <Text style={styles.pfcLabel}>糖質（C）</Text>
+                <View style={styles.pfcInputRow}>
+                  <View style={styles.pfcInputBox}>
+                    <TextInput
+                      keyboardType="numeric"
+                      style={styles.pfcInputText}
+                      onChangeText={setCarbo}
+                      value={carbo}
+                      onFocus={() => {
+                        if (carbo === "0") {
+                          setCarbo("");
+                        }
+                      }}
+                      onBlur={() => {
+                        if (carbo === "" || isNaN(Number(carbo))) {
+                          setCarbo("0");
+                        } else if (/^0\d+/.test(carbo)) {
+                          setCarbo(String(Number(carbo)));
+                        }
+                      }}
+                    />
+                  </View>
+                  <Text style={styles.pfcUnit}>g</Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styles.item}>
-          <View style={styles.pfcHeader}>
-            <Text style={styles.label}>脂質（F）</Text>
-            <View style={styles.valuesContainer}>
-              <TextInput
-                keyboardType="numeric"
-                style={[styles.inputValue, styles.pfcValue]}
-                onChangeText={setFat}
-                value={fat}
-                onFocus={() => {
-                  if (fat === "0") {
-                    setFat("");
-                  }
-                }}
-                onBlur={() => {
-                  if (fat === "" || isNaN(Number(fat))) {
-                    setFat("0");
-                  } else if (/^0\d+/.test(fat)) {
-                    const trimmed = String(Number(fat));
-                    setFat(trimmed);
-                  }
-                }}
-              />
-              <Text style={styles.unit}>g</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.item}>
-          <View style={styles.pfcHeader}>
-            <Text style={styles.label}>糖質（C）</Text>
-            <View style={styles.valuesContainer}>
-              <TextInput
-                keyboardType="numeric"
-                style={[styles.inputValue, styles.pfcValue]}
-                onChangeText={setCarbo}
-                value={carbo}
-                onFocus={() => {
-                  if (carbo === "0") {
-                    setCarbo("");
-                  }
-                }}
-                onBlur={() => {
-                  if (carbo === "" || isNaN(Number(carbo))) {
-                    setCarbo("0");
-                  } else if (/^0\d+/.test(carbo)) {
-                    const trimmed = String(Number(carbo));
-                    setCarbo(trimmed);
-                  }
-                }}
-              />
-              <Text style={styles.unit}>g</Text>
-            </View>
-          </View>
-        </View>
+        </ScrollView>
 
         <TouchableOpacity
-          style={[styles.button, isDisabled && styles.buttonDisabled]}
+          style={[styles.submitButton, isDisabled && styles.buttonDisabled]}
           onPress={onRecordEating}
           disabled={isDisabled}
         >
-          <Text style={styles.buttonText}>食事を記録</Text>
+          <Text style={styles.submitButtonText}>食事を記録</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -212,59 +240,115 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.lightGray,
-    paddingTop: theme.spacing[5],
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: theme.spacing[5],
+    paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[6],
   },
 
-  // インプットアイテム
   item: {
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[5],
   },
-  label: {
+  sectionLabel: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+    marginBottom: theme.spacing[2],
+  },
+
+  // 日付カード
+  dateCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+  },
+  dateCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+  },
+  dateText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.dark,
+  },
+
+  // 栄養素カード
+  pfcRow: {
+    flexDirection: "row",
+    gap: theme.spacing[2],
+  },
+  pfcCard: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[1],
+  },
+  pfcLetter: {
+    fontSize: theme.fontSize.xl,
+    color: theme.colors.dark,
     marginBottom: theme.spacing[1],
   },
-  inputValue: {
+  pfcLabel: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    textAlign: "center",
+    marginBottom: theme.spacing[3],
+  },
+  pfcInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[1],
+  },
+  pfcInputBox: {
     justifyContent: "center",
-    paddingHorizontal: theme.spacing[3],
+    width: 80,
+    height: 40,
     borderWidth: 1,
-    borderColor: theme.colors.lightGray,
+    borderColor: theme.colors.primary,
+    borderRadius: 8,
     backgroundColor: theme.colors.background.light,
-    borderRadius: 5,
-    height: 48,
+    paddingHorizontal: theme.spacing[1],
   },
-  inputValueText: {
-    fontSize: theme.fontSizes.medium,
+  pfcInputText: {
+    width: "100%",
+    padding: 0,
+    fontSize: theme.fontSize.lg,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+    textAlign: "center",
+  },
+  pfcUnit: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
   },
 
-  pfcValue: { width: 80 },
-
-  // 通常ボタン
-  button: {
+  // 記録ボタン
+  submitButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: theme.spacing[2],
     backgroundColor: theme.colors.primary,
     borderRadius: 5,
     paddingVertical: theme.spacing[3],
-    alignItems: "center",
-    marginVertical: theme.spacing[3],
-    color: theme.colors.white,
+    marginHorizontal: theme.spacing[5],
+    marginBottom: theme.spacing[5],
   },
   buttonDisabled: {
     backgroundColor: theme.colors.lightGray,
   },
-  buttonText: {
+  submitButtonText: {
     fontSize: theme.fontSizes.medium,
     color: theme.colors.white,
-  },
-
-  pfcHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  valuesContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  unit: {
-    marginLeft: theme.spacing[2],
   },
 });
