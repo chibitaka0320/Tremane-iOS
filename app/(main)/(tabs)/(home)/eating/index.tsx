@@ -7,9 +7,17 @@ import { useCalendar } from "@/context/CalendarContext";
 import * as eatingService from "@/service/eatingService";
 import theme from "@/styles/theme";
 import { DailyEating } from "@/types/dto/eatingDto";
-import { useFocusEffect } from "expo-router";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 // 食事一覧画面
 export default function EatingScreen() {
@@ -80,38 +88,61 @@ export default function EatingScreen() {
 
   // 3. データ取得完了
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       <Summary
         total={dailyEating.total}
         goal={dailyEating.goal}
         rate={dailyEating.rate}
       />
-      <View style={styles.eatingContainer}>
-        <View style={styles.row}>
-          <Text style={styles.eating}>食べ物</Text>
-          <Text style={styles.calories}>カロリー</Text>
-          {PFC_LABELS.map(({ key, label }) => (
-            <Text style={styles.pfc} key={key}>
-              {label}
-            </Text>
-          ))}
-        </View>
-        <View style={styles.border}></View>
-        {dailyEating.meals.length === 0 ? (
-          // データが空
-          <View style={styles.nonDataContainer}>
-            <Text style={styles.text}>データがありません</Text>
+      {dailyEating.meals.length === 0 ? (
+        // データが空
+        <View style={styles.nonDataContainer}>
+          <View style={styles.iconWrapper}>
+            <MaterialCommunityIcons
+              name="noodles"
+              size={64}
+              color={theme.colors.border.dark}
+            />
+            <View style={styles.iconBadge}>
+              <Ionicons name="add" size={16} color={theme.colors.white} />
+            </View>
           </View>
-        ) : (
-          // データあり
+          <Text style={styles.text}>まだ食事の記録がありません</Text>
+          <Text style={styles.subText}>
+            食事を記録してカロリーやPFCを管理しましょう
+          </Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.push("/(main)/(add)/eating/add")}
+          >
+            <Ionicons name="add" size={18} color={theme.colors.secondary} />
+            <Text style={styles.addButtonText}>食事を記録</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        // データあり
+        <View style={styles.eatingContainer}>
+          <View style={styles.row}>
+            <Text style={styles.eating}>食べ物</Text>
+            <Text style={styles.calories}>カロリー</Text>
+            {PFC_LABELS.map(({ key, label }) => (
+              <Text style={styles.pfc} key={key}>
+                {label}
+              </Text>
+            ))}
+          </View>
+          <View style={styles.border}></View>
           <FlatList
             data={dailyEating.meals}
             renderItem={({ item }) => <EatingRow meal={item} />}
             scrollEnabled={false}
             refreshing={isRefreshing}
           />
-        )}
-      </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -120,7 +151,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.dark,
-    paddingVertical: theme.spacing[5],
+  },
+  contentContainer: {
+    paddingTop: theme.spacing[5],
+    paddingBottom: theme.spacing[7],
   },
   eatingContainer: {
     borderRadius: 8,
@@ -155,13 +189,55 @@ const styles = StyleSheet.create({
     marginVertical: theme.spacing[3],
   },
   nonDataContainer: {
-    padding: theme.spacing[5],
+    padding: theme.spacing[4],
     borderRadius: 8,
+    width: "90%",
+    alignSelf: "center",
     backgroundColor: theme.colors.background.light,
     alignItems: "center",
   },
+  iconWrapper: {
+    marginBottom: theme.spacing[4],
+  },
+  iconBadge: {
+    position: "absolute",
+    right: -4,
+    bottom: -4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.secondary,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: theme.colors.background.light,
+  },
   text: {
-    fontSize: theme.fontSizes.large,
+    fontSize: theme.fontSize.lg,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+    marginBottom: theme.spacing[2],
+  },
+  subText: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.font.gray,
+    textAlign: "center",
+    marginBottom: theme.spacing[5],
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: theme.spacing[1],
+    borderWidth: 1,
+    borderColor: theme.colors.secondary,
+    borderRadius: 8,
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[5],
+  },
+  addButtonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.secondary,
     fontWeight: "bold",
   },
 });
