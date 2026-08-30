@@ -86,6 +86,13 @@ export async function getEating(eatingId: string): Promise<MealRecord | null> {
   return await eatingDao.getEating(eatingId);
 }
 
+// 食事IDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getEatingCreatedAt(
+  eatingId: string
+): Promise<string | null> {
+  return await eatingDao.getEatingCreatedAt(eatingId);
+}
+
 // 食事情報追加更新
 export async function upsertEatings(eatingEntities: EatingEntity[]) {
   await eatingDao.upsertEatings(eatingEntities);
