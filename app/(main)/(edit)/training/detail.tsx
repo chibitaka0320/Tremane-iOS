@@ -8,6 +8,7 @@ import { format, parseISO } from "date-fns";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -71,6 +72,25 @@ export default function TrainingDetailScreen() {
     });
   };
 
+  const onDeleteSet = (trainingId: string) => {
+    Alert.alert("", "データを削除しますか？", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "削除する",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await trainingService.deleteTraining(trainingId);
+            fetchData();
+          } catch (error) {
+            console.error("トレーニング削除失敗：" + error);
+            Alert.alert("トレーニングの削除に失敗しました。");
+          }
+        },
+      },
+    ]);
+  };
+
   const onAddSet = () => {
     router.push({
       pathname: "/(main)/(add)/training/record",
@@ -131,7 +151,7 @@ export default function TrainingDetailScreen() {
                 <Text style={[styles.tableHeaderCell, styles.valueCell]}>
                   回数(回)
                 </Text>
-                <View style={styles.chevronCell} />
+                <View style={styles.actionCell} />
               </View>
               {todaysSets.map((set, index) => (
                 <TouchableOpacity
@@ -150,13 +170,16 @@ export default function TrainingDetailScreen() {
                   <Text style={[styles.tableCell, styles.valueCell]}>
                     {set.reps}
                   </Text>
-                  <View style={styles.chevronCell}>
+                  <TouchableOpacity
+                    style={styles.actionCell}
+                    onPress={() => onDeleteSet(set.trainingId)}
+                  >
                     <Ionicons
-                      name="chevron-forward"
+                      name="trash-outline"
                       size={18}
                       color={theme.colors.font.gray}
                     />
-                  </View>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))}
             </View>
@@ -292,11 +315,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   weightCell: {
-    flex: 1.5,
+    flex: 1.2,
     textAlign: "center",
   },
-  chevronCell: {
-    width: 18,
+  actionCell: {
+    width: 36,
+    alignItems: "center",
   },
 
   // セットなし時の空状態
