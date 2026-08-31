@@ -93,3 +93,25 @@ export type TrainingAnalysisChart = {
   ];
   name: string;
 };
+
+// 今月のサマリー（分析画面・全体タブ用）
+export type MonthlySummary = {
+  trainingDays: number;
+  weeklyAverage: number;
+  totalVolume: number;
+  totalSets: number;
+};
+
+// 週別総負荷量の推移（分析画面・全体タブ用）
+export type WeeklyVolume = {
+  weekLabel: string;
+  volume: number;
+};
+
+// 部位別トレーニングバランス（分析画面・全体タブ用、セット数ベース）
+export type BodyPartSetShare = {
+  bodyPartId: number;
+  bodyPartName: string;
+  setCount: number;
+  percentage: number;
+};

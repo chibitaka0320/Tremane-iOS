@@ -133,6 +133,83 @@ export async function getTrainingCount(
   return rows?.count ?? 0;
 }
 
+// 期間内トレーニング日数・総負荷量・総セット数取得
+export async function getTrainingSummaryByDateRange(
+  started: string,
+  ended: string
+): Promise<{ trainingDays: number; totalVolume: number; totalSets: number }> {
+  const row = await db.getFirstAsync<{
+    training_days: number;
+    total_volume: number;
+    total_sets: number;
+  }>(
+    `
+    SELECT
+      COUNT(DISTINCT date) AS training_days,
+      IFNULL(SUM(weight * reps), 0) AS total_volume,
+      COUNT(*) AS total_sets
+    FROM trainings
+    WHERE date BETWEEN ? AND ?
+      AND is_deleted = 0;
+    `,
+    [started, ended]
+  );
+
+  return {
+    trainingDays: row?.training_days ?? 0,
+    totalVolume: row?.total_volume ?? 0,
+    totalSets: row?.total_sets ?? 0,
+  };
+}
+
+// 期間内・日別総負荷量取得（週別集計のもとデータ）
+export async function getDailyVolumeByDateRange(
+  started: string,
+  ended: string
+): Promise<{ date: string; volume: number }[]> {
+  const rows = await db.getAllAsync<{ date: string; volume: number }>(
+    `
+    SELECT
+      date,
+      SUM(weight * reps) AS volume
+    FROM trainings
+    WHERE date BETWEEN ? AND ?
+      AND is_deleted = 0
+    GROUP BY date;
+    `,
+    [started, ended]
+  );
+  return rows;
+}
+
+// 期間内・部位別セット数取得
+export async function getBodyPartSetCountByDateRange(
+  started: string,
+  ended: string
+): Promise<{ partsId: number; partsName: string; setCount: number }[]> {
+  const rows = await db.getAllAsync<{
+    partsId: number;
+    partsName: string;
+    setCount: number;
+  }>(
+    `
+    SELECT
+      b.parts_id AS partsId,
+      b.name AS partsName,
+      COUNT(*) AS setCount
+    FROM trainings t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
+    WHERE t.date BETWEEN ? AND ?
+      AND t.is_deleted = 0
+    GROUP BY b.parts_id, b.name
+    ORDER BY setCount DESC;
+    `,
+    [started, ended]
+  );
+  return rows;
+}
+
 // トレーニング分析データ取得(全部)
 export async function getTrainingAllDataByMaxWeight(
   limit: number
