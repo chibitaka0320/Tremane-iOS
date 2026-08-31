@@ -100,6 +100,10 @@ export type TimelineTrainingResponse = {
     partsId: number;
     bodyPartsName: string;
   }[];
+  exerciseCount: number;
+  totalVolume: number;
+  estimatedCalories: number | null;
+  lastActivityAt: string;
 };
 
 // トレーニングランキング取得API

@@ -12,6 +12,10 @@ export async function getTrainingTimeline(): Promise<TrainingTimeline[]> {
         nickname: timelineRes.nickname,
         date: timelineRes.date,
         bodyParts: timelineRes.bodyParts,
+        exerciseCount: timelineRes.exerciseCount,
+        totalVolume: timelineRes.totalVolume,
+        estimatedCalories: timelineRes.estimatedCalories,
+        lastActivityAt: timelineRes.lastActivityAt,
       };
       timelines.push(timeline);
     }
