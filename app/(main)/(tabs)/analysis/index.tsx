@@ -294,7 +294,7 @@ export default function AnalysisScreen() {
             </View>
 
             <Text style={styles.sectionTitle}>総負荷量の推移（週別）</Text>
-            <View style={styles.itemContainer}>
+            <View style={[styles.itemContainer, styles.noMarginTop]}>
               <BarChart
                 data={{
                   labels: weeklyVolume.map((w) => w.weekLabel),
@@ -316,7 +316,7 @@ export default function AnalysisScreen() {
               部位別トレーニングバランス（セット数ベース）
             </Text>
             {bodyPartShare.length === 0 ? (
-              <View style={styles.nonDataContainer}>
+              <View style={[styles.nonDataContainer, styles.noMarginTop]}>
                 <View style={styles.iconWrapper}>
                   <MaterialCommunityIcons
                     name="chart-bar"
@@ -340,7 +340,7 @@ export default function AnalysisScreen() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles.itemContainer}>
+              <View style={[styles.itemContainer, styles.noMarginTop]}>
                 <View style={styles.balanceGrid}>
                   {bodyPartShare.map((part) => (
                     <View key={part.bodyPartId} style={styles.balanceItem}>
@@ -457,6 +457,10 @@ const styles = StyleSheet.create({
     padding: theme.spacing[2],
     marginTop: theme.spacing[4],
     borderRadius: 5,
+  },
+  // セクション見出し直下に配置する場合、見出しの余白と重複しないよう相殺
+  noMarginTop: {
+    marginTop: 0,
   },
   exercise: {
     textAlign: "center",
@@ -587,6 +591,7 @@ const styles = StyleSheet.create({
   balanceGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
   },
   balanceItem: {
     width: "25%",
