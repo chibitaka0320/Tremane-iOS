@@ -68,6 +68,15 @@ export const calcDiffDays = (date1: Date, date2: Date): number => {
   return Math.abs(Math.floor((utc2 - utc1) / msPerDay));
 };
 
+// トレーニング推定消費カロリー計算（MET法、MET=5.0固定・1セット2分想定）
+export const calcTrainingCalories = (totalSets: number, weightKg: number) => {
+  const MET = 5.0;
+  const MINUTES_PER_SET = 3;
+  const durationMinutes = totalSets * MINUTES_PER_SET;
+  const calorie = ((MET * 3.5 * weightKg) / 200) * durationMinutes;
+  return Math.round(calorie);
+};
+
 // 目標摂取カロリー算出
 export const calcGoalKcal = (prof: UserProfileEntity, goal: UserGoalEntity) => {
   const age = calcAge(prof.birthday);
