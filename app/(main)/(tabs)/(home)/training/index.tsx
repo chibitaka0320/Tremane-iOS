@@ -2,7 +2,9 @@ import Indicator from "@/components/common/Indicator";
 import TrainingItem from "@/components/training/TrainingItem";
 import { useAlert } from "@/context/AlertContext";
 import { useCalendar } from "@/context/CalendarContext";
+import { calcTrainingCalories } from "@/lib/calc";
 import * as trainingService from "@/service/trainingService";
+import * as userProfileService from "@/service/userProfileService";
 import theme from "@/styles/theme";
 import { DailyTraining } from "@/types/dto/trainingDto";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -22,9 +24,20 @@ export default function TrainingScreen() {
   const { setError } = useAlert();
 
   const [dailyTraining, setDailyTraining] = useState<DailyTraining>(); // トレーニングデータ
+  const [weightKg, setWeightKg] = useState<number | null>(null); // 推定消費カロリー計算用の体重
 
   const [isLoading, setLoading] = useState(true); // ローディング判定
   const [isRefreshing, setRefreshing] = useState(false); // リフレッシュ判定
+
+  // ユーザープロフィール（体重）取得
+  const fetchWeight = async () => {
+    try {
+      const profile = await userProfileService.getUserProfile();
+      setWeightKg(profile ? profile.weight : null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // 選択された日付のトレーニングデータを取得
   const fetchDailyTraining = async (isRefresh = false) => {
@@ -70,6 +83,7 @@ export default function TrainingScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchDailyTraining(true);
+      fetchWeight();
     }, [selectedDate])
   );
 
@@ -121,6 +135,23 @@ export default function TrainingScreen() {
   }
 
   // 4. データあり
+
+  // 総負荷量・総セット数の算出
+  let totalVolume = 0;
+  let totalSets = 0;
+  dailyTraining.bodyParts.forEach((bodyPart) => {
+    bodyPart.exercises.forEach((exercise) => {
+      exercise.trainings.forEach((training) => {
+        totalVolume += training.weight * training.reps;
+        totalSets += 1;
+      });
+    });
+  });
+
+  // 推定消費カロリー（体重未設定の場合は算出しない）
+  const estimatedCalories =
+    weightKg !== null ? calcTrainingCalories(totalSets, weightKg) : null;
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -131,6 +162,40 @@ export default function TrainingScreen() {
         )}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.bodyPartId.toString()}
+        ListHeaderComponent={
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryItem}>
+              <Ionicons
+                name="barbell-outline"
+                size={28}
+                color={theme.colors.secondary}
+              />
+              <View>
+                <Text style={styles.summaryLabel}>総負荷量</Text>
+                <Text style={styles.summaryValue}>
+                  {totalVolume.toLocaleString()} kg
+                </Text>
+              </View>
+            </View>
+            <View style={styles.summaryItem}>
+              <Ionicons
+                name="flame-outline"
+                size={28}
+                color={theme.colors.secondary}
+              />
+              <View>
+                <Text style={styles.summaryLabel}>推定消費カロリー</Text>
+                {estimatedCalories !== null ? (
+                  <Text style={styles.summaryValue}>
+                    {estimatedCalories.toLocaleString()} kcal
+                  </Text>
+                ) : (
+                  <Text style={styles.summaryNotice}>体重未設定</Text>
+                )}
+              </View>
+            </View>
+          </View>
+        }
         ListFooterComponent={<View style={styles.trainingItemFooter}></View>}
         refreshing={isRefreshing}
       />
@@ -167,6 +232,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: theme.colors.background.light,
+  },
+  summaryCard: {
+    flexDirection: "row",
+    width: "90%",
+    alignSelf: "center",
+    marginBottom: theme.spacing[3],
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+  },
+  summaryItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+  },
+  summaryLabel: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginBottom: theme.spacing[1],
+  },
+  summaryValue: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+  },
+  summaryNotice: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    color: theme.colors.font.gray,
   },
   trainingContainer: {
     paddingVertical: theme.spacing[5],
