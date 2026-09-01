@@ -1,12 +1,16 @@
 import { JSX, useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { CalendarProvider, Agenda } from "react-native-calendars";
+import {
+  CalendarList,
+  CalendarProvider,
+  WeekCalendar,
+} from "react-native-calendars";
 
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import theme from "@/styles/theme";
 import {
   BottomSheetBackdrop,
@@ -39,6 +43,7 @@ export default function MainScreen() {
   const { selectedDate, setSelectedDate } = useCalendar();
 
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
+  const [isCalendarExpanded, setCalendarExpanded] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -81,22 +86,56 @@ export default function MainScreen() {
       }}
     >
       <BottomSheetModalProvider>
-        <Agenda
-          selected={selectedDate}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          items={{}}
-          renderItem={() => null}
-          markingType={"multi-dot"}
-          markedDates={markedDates}
-          theme={{
-            selectedDayBackgroundColor: theme.colors.primary,
-            todayTextColor: theme.colors.primary,
-            agendaDayTextColor: theme.colors.font.black,
-            agendaDayNumColor: theme.colors.font.black,
-            agendaTodayColor: theme.colors.primary,
-          }}
-          renderEmptyData={() => <TopTabNavigator />}
-        />
+        {isCalendarExpanded ? (
+          <CalendarList
+            current={selectedDate}
+            horizontal
+            pagingEnabled
+            hideExtraDays
+            firstDay={1}
+            calendarHeight={320}
+            style={styles.calendarList}
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+            markingType={"multi-dot"}
+            markedDates={markedDates}
+            // CalendarListは選択日のハイライトをcontext.selectedDate経由で判定するため明示的に渡す
+            context={{ selectedDate } as any}
+            theme={{
+              selectedDayBackgroundColor: theme.colors.primary,
+              todayTextColor: theme.colors.primary,
+              dayTextColor: theme.colors.font.black,
+            }}
+          />
+        ) : (
+          <View style={styles.weekCalendarWrapper}>
+            <WeekCalendar
+              firstDay={1}
+              allowShadow={false}
+              calendarHeight={40}
+              onDayPress={(day: { dateString: string }) =>
+                setSelectedDate(day.dateString)
+              }
+              markingType={"multi-dot"}
+              markedDates={markedDates}
+              theme={{
+                selectedDayBackgroundColor: theme.colors.primary,
+                todayTextColor: theme.colors.primary,
+                dayTextColor: theme.colors.font.black,
+              }}
+            />
+          </View>
+        )}
+        <TouchableOpacity
+          style={styles.knobButton}
+          onPress={() => setCalendarExpanded((prev) => !prev)}
+        >
+          <Ionicons
+            name={isCalendarExpanded ? "chevron-up" : "chevron-down"}
+            size={18}
+            color={theme.colors.font.gray}
+          />
+        </TouchableOpacity>
+        <TopTabNavigator />
 
         <CircleButton onPress={onPlusButton} style={styles.button}>
           <Entypo name="plus" size={40} color={theme.colors.white} />
@@ -124,5 +163,19 @@ const styles = StyleSheet.create({
   menu: {
     paddingHorizontal: theme.spacing[3],
     paddingTop: theme.spacing[5],
+  },
+  calendarList: {
+    height: 320,
+  },
+  weekCalendarWrapper: {
+    backgroundColor: theme.colors.white,
+  },
+  knobButton: {
+    alignItems: "center",
+    paddingTop: 1,
+    paddingBottom: 4,
+    backgroundColor: theme.colors.white,
+    borderBottomWidth: 0.5,
+    borderBottomColor: theme.colors.lightGray,
   },
 });
