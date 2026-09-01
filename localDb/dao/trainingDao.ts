@@ -94,45 +94,6 @@ export async function getTrainingByDate(
   return rows;
 }
 
-// トレーニング件数取得(全部位)
-export async function getTrainingAllCount(started: string, ended: string) {
-  const rows = await db.getFirstAsync<{ count: number }>(
-    `
-    SELECT
-      COUNT(DISTINCT(date)) AS count
-    FROM trainings
-    WHERE date BETWEEN ? AND ?
-      AND is_deleted = 0;
-    `,
-    [started, ended]
-  );
-
-  return rows?.count ?? 0;
-}
-
-// トレーニング件数取得（部位別）
-export async function getTrainingCount(
-  started: string,
-  ended: string,
-  partsId: number
-) {
-  const rows = await db.getFirstAsync<{ count: number }>(
-    `
-    SELECT
-      COUNT(DISTINCT(t.date)) AS count
-    FROM trainings t
-    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
-    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
-    WHERE t.date BETWEEN ? AND ?
-      AND b.parts_id = ?
-      AND t.is_deleted = 0;
-    `,
-    [started, ended, partsId]
-  );
-
-  return rows?.count ?? 0;
-}
-
 // 期間内トレーニング日数・総負荷量・総セット数取得
 export async function getTrainingSummaryByDateRange(
   started: string,

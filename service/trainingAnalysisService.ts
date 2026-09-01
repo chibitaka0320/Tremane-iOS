@@ -13,15 +13,6 @@ export async function getTrainingByMaxWeight(
   return await trainingAnalysisRepository.getTrainingByMaxWeight(bodyPartId);
 }
 
-// トレーニング件数集計取得（週、月、年）
-export async function getWorkoutCount(bodyPartId: number): Promise<{
-  week: number;
-  month: number;
-  year: number;
-}> {
-  return await trainingAnalysisRepository.getWorkoutCount(bodyPartId);
-}
-
 // 今月のサマリー取得（分析画面・全体タブ用）
 export async function getMonthlySummary(): Promise<MonthlySummary> {
   return await trainingAnalysisRepository.getMonthlySummary();

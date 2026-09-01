@@ -33,9 +33,6 @@ export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState(ALL_BODY_PARTS_VALUE);
   const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
   const [datas, setDatas] = useState<TrainingAnalysisChart[]>([]);
-  const [week, setWeek] = useState(0);
-  const [month, setMonth] = useState(0);
-  const [year, setYear] = useState(0);
 
   // 全体タブ用
   const [weightKg, setWeightKg] = useState<number | null>(null);
@@ -131,26 +128,6 @@ export default function AnalysisScreen() {
     fetch();
   }, [bodyParts, isAllBodyParts]);
 
-  useEffect(() => {
-    if (isAllBodyParts) return;
-
-    const fetch = async () => {
-      try {
-        const res = await trainingAnalysisService.getWorkoutCount(
-          Number(bodyParts)
-        );
-        if (res) {
-          setWeek(res.week);
-          setMonth(res.month);
-          setYear(res.year);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetch();
-  }, [bodyParts, isAllBodyParts]);
-
   // 全体タブ用サマリーデータ取得
   useEffect(() => {
     if (!isAllBodyParts) return;
@@ -189,28 +166,6 @@ export default function AnalysisScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {!isAllBodyParts && (
-        <View style={styles.totalContainer}>
-          <View>
-            <Text style={styles.sumTitle}>WEEK</Text>
-            <Text style={styles.sumResult}>
-              {week} <Text style={styles.days}> days</Text>
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.sumTitle}>MONTH</Text>
-            <Text style={styles.sumResult}>
-              {month} <Text style={styles.days}> days</Text>
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.sumTitle}>YEAR</Text>
-            <Text style={styles.sumResult}>
-              {year} <Text style={styles.days}> days</Text>
-            </Text>
-          </View>
-        </View>
-      )}
       <View style={styles.analysisContainer}>
         <View style={styles.selectContainer}>
           {bodyPartOptions.map((item) => (
@@ -425,28 +380,6 @@ export default function AnalysisScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-
-  // 合計の集計欄
-  totalContainer: {
-    backgroundColor: theme.colors.background.light,
-    paddingVertical: theme.spacing[4],
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[4],
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  sumTitle: {
-    fontSize: 24,
-    paddingBottom: theme.spacing[2],
-  },
-  sumResult: {
-    fontWeight: "bold",
-    fontSize: 24,
-  },
-  days: {
-    fontWeight: "normal",
-    fontSize: 22,
   },
 
   analysisContainer: {
