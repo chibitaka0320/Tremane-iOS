@@ -23,7 +23,7 @@ export default function Index() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user?.emailVerified || user?.isAnonymous) {
+      if (user?.emailVerified) {
         setIsAuthenticated(true);
         try {
           await masterSyncFromRemote();
