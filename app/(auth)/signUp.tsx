@@ -54,20 +54,6 @@ export default function SignUpScreen() {
     }
   };
 
-  // 匿名ユーザー登録処理
-  const anonymous = async () => {
-    setIsLoading(true);
-    try {
-      await userService.registerAnonymous();
-      router.replace("/(main)/(tabs)/(home)/training");
-    } catch (error) {
-      console.error("匿名ユーザー登録失敗：" + error);
-      Alert.alert("登録処理に失敗しました。");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (isLoading) {
     return <Indicator />;
   }
@@ -129,10 +115,6 @@ export default function SignUpScreen() {
               >
                 <Text style={styles.buttonText}>新規登録</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={anonymous} activeOpacity={0.7}>
-                <Text style={styles.link}>登録せずに使用する</Text>
-              </TouchableOpacity>
-
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
                 <Text style={styles.dividerText}>または</Text>
@@ -222,14 +204,9 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
 
-  link: {
-    marginTop: theme.spacing[2],
-    marginBottom: theme.spacing[5],
-    textAlign: "center",
-  },
-
   // 区切り線（または）
   dividerRow: {
+    marginTop: theme.spacing[3],
     flexDirection: "row",
     alignItems: "center",
     marginBottom: theme.spacing[5],
