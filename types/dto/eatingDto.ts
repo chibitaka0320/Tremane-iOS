@@ -19,7 +19,7 @@ export type MealRecord = Nutrition & {
 export type DailyEating = {
   date: string;
   total: Nutrition;
-  goal: Nutrition;
+  goal: Nutrition | null;
   rate: Nutrition;
   meals: MealRecord[];
 };
