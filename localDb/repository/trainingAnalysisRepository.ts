@@ -1,50 +1,82 @@
 import * as trainingDao from "@/localDb/dao/trainingDao";
 import {
   BodyPartSetShare,
+  ExerciseAnalysisMetric,
+  ExerciseAnalysisPeriod,
+  ExerciseMetricTrend,
   MonthlySummary,
-  TrainingAnalysisChart,
-  TrainingAnalysisRow,
   WeeklyVolume,
 } from "@/types/dto/trainingDto";
-import { format } from "date-fns";
+import { format, subMonths, subYears } from "date-fns";
 
-// トレーニングの日別最大重量取得
-export async function getTrainingByMaxWeight(
-  bodyPartId: number
-): Promise<TrainingAnalysisChart[]> {
-  const LIMIT = 6;
-  let trainingRows: TrainingAnalysisRow[]; // 行データ格納変数
+// 期間コードから開始日・終了日（today）を算出
+function getDateRangeByPeriod(period: ExerciseAnalysisPeriod): {
+  started: string;
+  ended: string;
+} {
+  const now = new Date();
+  const started =
+    period === "1M"
+      ? subMonths(now, 1)
+      : period === "3M"
+      ? subMonths(now, 3)
+      : period === "6M"
+      ? subMonths(now, 6)
+      : subYears(now, 1);
 
-  if (bodyPartId === 0) {
-    // 部位IDが0(全て)
-    trainingRows = await trainingDao.getTrainingAllDataByMaxWeight(LIMIT);
-  } else {
-    trainingRows = await trainingDao.getTrainingByMaxWeight(bodyPartId, LIMIT);
-  }
+  return {
+    started: format(started, "yyyy-MM-dd"),
+    ended: format(now, "yyyy-MM-dd"),
+  };
+}
 
-  // データの構造化
-  const analysisMap: Record<string, TrainingAnalysisChart> = {};
+// 部位別・種目別の指標推移取得（分析画面・部位別タブ用）
+export async function getExerciseMetricTrends(
+  bodyPartId: number,
+  period: ExerciseAnalysisPeriod,
+  metric: ExerciseAnalysisMetric
+): Promise<ExerciseMetricTrend[]> {
+  const { started, ended } = getDateRangeByPeriod(period);
 
-  // 1行ずつデータを作成
-  trainingRows.forEach((row) => {
-    // 対象種目の箱がなければ作成
-    if (!analysisMap[row.exerciseId]) {
-      analysisMap[row.exerciseId] = {
-        labels: [],
-        datasets: [
-          {
-            data: [],
-          },
-        ],
-        name: row.exerciseName,
-      };
+  const rows = await trainingDao.getExerciseMetricsByBodyPartAndDateRange(
+    bodyPartId,
+    started,
+    ended
+  );
+
+  // 種目ごとにグループ化（rowsはexercise_id, date ASCで整列済み）
+  const trendMap = new Map<
+    string,
+    { exerciseName: string; dates: string[]; values: number[] }
+  >();
+
+  rows.forEach((row) => {
+    if (!trendMap.has(row.exerciseId)) {
+      trendMap.set(row.exerciseId, {
+        exerciseName: row.exerciseName,
+        dates: [],
+        values: [],
+      });
     }
-    const training = analysisMap[row.exerciseId];
-    training.labels.push(format(row.date, "MM/dd"));
-    training.datasets[0].data.push(row.weight);
+    const trend = trendMap.get(row.exerciseId)!;
+    trend.dates.push(row.date);
+    trend.values.push(row[metric]);
   });
 
-  return Object.values(analysisMap);
+  return Array.from(trendMap.entries()).map(([exerciseId, trend]) => {
+    const currentValue = trend.values[trend.values.length - 1] ?? 0;
+    const changeValue =
+      trend.values.length > 1 ? currentValue - trend.values[0] : 0;
+
+    return {
+      exerciseId,
+      exerciseName: trend.exerciseName,
+      dates: trend.dates,
+      values: trend.values,
+      currentValue,
+      changeValue,
+    };
+  });
 }
 
 // 今月のサマリー取得（分析画面・全体タブ用）

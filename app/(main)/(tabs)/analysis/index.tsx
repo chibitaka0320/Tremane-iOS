@@ -1,4 +1,4 @@
-import { SelectLabel } from "@/components/common/PickerModal";
+import PickerModal, { SelectLabel } from "@/components/common/PickerModal";
 import { bodyPartImages } from "@/constants/bodyPartImages";
 import { calcTrainingCalories } from "@/lib/calc";
 import * as bodyPartService from "@/service/bodyPartService";
@@ -8,11 +8,14 @@ import { partsColors } from "@/styles/partsColor";
 import theme from "@/styles/theme";
 import {
   BodyPartSetShare,
+  ExerciseAnalysisMetric,
+  ExerciseAnalysisPeriod,
+  ExerciseMetricTrend,
   MonthlySummary,
-  TrainingAnalysisChart,
   WeeklyVolume,
 } from "@/types/dto/trainingDto";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { format, parseISO } from "date-fns";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -28,11 +31,88 @@ import { BarChart, LineChart } from "react-native-chart-kit";
 
 const ALL_BODY_PARTS_VALUE = "0";
 
+// 種目別分析：指標の選択肢
+const METRIC_OPTIONS: SelectLabel[] = [
+  { label: "最大重量", value: "maxWeight" },
+  { label: "総負荷量", value: "totalVolume" },
+  { label: "回数", value: "totalReps" },
+];
+const METRIC_LABELS: Record<ExerciseAnalysisMetric, string> = {
+  maxWeight: "最大重量",
+  totalVolume: "総負荷量",
+  totalReps: "回数",
+};
+
+// 種目別分析：期間の選択肢
+const PERIOD_OPTIONS: SelectLabel[] = [
+  { label: "1ヶ月", value: "1M" },
+  { label: "3ヶ月", value: "3M" },
+  { label: "6ヶ月", value: "6M" },
+  { label: "1年", value: "1Y" },
+];
+const PERIOD_LABELS: Record<ExerciseAnalysisPeriod, string> = {
+  "1M": "1ヶ月",
+  "3M": "3ヶ月",
+  "6M": "6ヶ月",
+  "1Y": "1年",
+};
+
+// グラフのX軸ラベルを均等にN個だけ間引いて表示（それ以外は空文字）
+function buildThinnedLabels(dates: string[], count = 5): string[] {
+  const length = dates.length;
+  const indices = new Set<number>();
+  if (length <= count) {
+    dates.forEach((_, i) => indices.add(i));
+  } else {
+    for (let i = 0; i < count; i++) {
+      indices.add(Math.round((i * (length - 1)) / (count - 1)));
+    }
+  }
+  return dates.map((date, i) =>
+    indices.has(i) ? format(parseISO(date), "MM/dd") : ""
+  );
+}
+
+// 指標に応じた数値部分の表示形式
+function formatMetricNumber(
+  metric: ExerciseAnalysisMetric,
+  value: number
+): string {
+  switch (metric) {
+    case "maxWeight":
+      return value.toFixed(1);
+    case "totalVolume":
+      return Math.round(value).toLocaleString();
+    case "totalReps":
+      return String(Math.round(value));
+  }
+}
+
+// 指標に応じた単位
+function metricUnit(metric: ExerciseAnalysisMetric): string {
+  return metric === "totalReps" ? "回" : "kg";
+}
+
+// 期間内の変化を示す矢印
+function changeArrow(change: number): string {
+  if (change > 0) return "↑";
+  if (change < 0) return "↓";
+  return "→";
+}
+
 // トレーニング分析一覧画面
 export default function AnalysisScreen() {
   const [bodyParts, setbodyParts] = useState(ALL_BODY_PARTS_VALUE);
   const [bodyPartOptions, setBodyPartOptions] = useState<SelectLabel[]>([]);
-  const [datas, setDatas] = useState<TrainingAnalysisChart[]>([]);
+
+  // 部位別タブ用
+  const [metric, setMetric] = useState<ExerciseAnalysisMetric>("maxWeight");
+  const [period, setPeriod] = useState<ExerciseAnalysisPeriod>("3M");
+  const [isMetricPickerVisible, setMetricPickerVisible] = useState(false);
+  const [isPeriodPickerVisible, setPeriodPickerVisible] = useState(false);
+  const [exerciseTrends, setExerciseTrends] = useState<ExerciseMetricTrend[]>(
+    []
+  );
 
   // 全体タブ用
   const [weightKg, setWeightKg] = useState<number | null>(null);
@@ -110,23 +190,26 @@ export default function AnalysisScreen() {
     return String(Math.round(value));
   };
 
+  // 部位別タブ用・種目別指標推移取得
   useEffect(() => {
     if (isAllBodyParts) return;
 
     const fetch = async () => {
       try {
-        const res = await trainingAnalysisService.getTrainingByMaxWeight(
-          Number(bodyParts)
+        const res = await trainingAnalysisService.getExerciseMetricTrends(
+          Number(bodyParts),
+          period,
+          metric
         );
         if (res) {
-          setDatas(res);
+          setExerciseTrends(res);
         }
       } catch (e) {
         console.error(e);
       }
     };
     fetch();
-  }, [bodyParts, isAllBodyParts]);
+  }, [bodyParts, isAllBodyParts, period, metric]);
 
   // 全体タブ用サマリーデータ取得
   useEffect(() => {
@@ -150,13 +233,9 @@ export default function AnalysisScreen() {
     fetch();
   }, [isAllBodyParts]);
 
-  const dataRange = (target: TrainingAnalysisChart) => {
-    const targetData = target.datasets[0].data;
-    if (targetData.length === 0) return 0;
-    const max = Math.max(...targetData);
-    const min = Math.min(...targetData);
-
-    return max - min;
+  const valueRange = (values: number[]) => {
+    if (values.length === 0) return 0;
+    return Math.max(...values) - Math.min(...values);
   };
 
   const estimatedCalories =
@@ -167,15 +246,17 @@ export default function AnalysisScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.analysisContainer}>
-        <View style={styles.selectContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.selectContainer}
+        >
           {bodyPartOptions.map((item) => (
             <TouchableOpacity
               key={item.value}
               style={[
                 styles.selectButton,
-                bodyParts === item.value && {
-                  backgroundColor: partsColors[Number(item.value)],
-                },
+                bodyParts === item.value && styles.selectedButton,
               ]}
               onPress={() => setbodyParts(item.value)}
             >
@@ -189,7 +270,48 @@ export default function AnalysisScreen() {
               </Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
+
+        {!isAllBodyParts && (
+          <View style={styles.filterRow}>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setMetricPickerVisible(true)}
+            >
+              <Ionicons
+                name="trending-up-outline"
+                size={13}
+                color={theme.colors.dark}
+              />
+              <Text style={styles.filterButtonText}>
+                {METRIC_LABELS[metric]}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={11}
+                color={theme.colors.font.gray}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setPeriodPickerVisible(true)}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={13}
+                color={theme.colors.dark}
+              />
+              <Text style={styles.filterButtonText}>
+                {PERIOD_LABELS[period]}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={11}
+                color={theme.colors.font.gray}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {isAllBodyParts ? (
           <>
@@ -327,7 +449,7 @@ export default function AnalysisScreen() {
               </View>
             )}
           </>
-        ) : datas.length === 0 ? (
+        ) : exerciseTrends.length === 0 ? (
           <View style={styles.nonDataContainer}>
             <View style={styles.iconWrapper}>
               <MaterialCommunityIcons
@@ -352,19 +474,50 @@ export default function AnalysisScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          datas.map((data, index) => (
-            <View style={styles.itemContainer} key={index}>
-              <Text style={styles.exercise}>{data.name}</Text>
+          exerciseTrends.map((trend) => (
+            <View style={styles.exerciseCard} key={trend.exerciseId}>
+              <View style={styles.exerciseCardHeader}>
+                <Text style={styles.exerciseCardName}>
+                  {trend.exerciseName}
+                </Text>
+              </View>
+              <View style={styles.exerciseStatsRow}>
+                <View>
+                  <Text style={styles.exerciseStatLabel}>
+                    現在の{METRIC_LABELS[metric]}
+                  </Text>
+                  <Text style={styles.exerciseStatValue}>
+                    {formatMetricNumber(metric, trend.currentValue)}
+                    <Text style={styles.unitText}> {metricUnit(metric)}</Text>
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.exerciseStatLabel}>期間内の変化</Text>
+                  <Text style={styles.exerciseStatChange}>
+                    {changeArrow(trend.changeValue)}{" "}
+                    {formatMetricNumber(metric, Math.abs(trend.changeValue))}
+                    <Text style={styles.unitText}> {metricUnit(metric)}</Text>
+                  </Text>
+                </View>
+              </View>
               <LineChart
-                data={data}
-                width={screenWidth}
-                height={200}
-                chartConfig={chartConfig}
+                data={{
+                  labels: buildThinnedLabels(trend.dates),
+                  datasets: [{ data: trend.values }],
+                }}
+                width={
+                  screenWidth - theme.spacing[3] * 2 - theme.spacing[2] * 2
+                }
+                height={180}
+                chartConfig={{
+                  ...chartConfig,
+                  decimalPlaces: metric === "maxWeight" ? 1 : 0,
+                }}
                 withVerticalLines={false}
                 withHorizontalLines={false}
                 xLabelsOffset={5}
                 yLabelsOffset={18}
-                segments={dataRange(data) == 0 ? 2 : 4}
+                segments={valueRange(trend.values) === 0 ? 2 : 4}
                 bezier
               />
             </View>
@@ -373,6 +526,23 @@ export default function AnalysisScreen() {
 
         <View style={styles.footer}></View>
       </View>
+
+      <PickerModal
+        visible={isMetricPickerVisible}
+        onClose={() => setMetricPickerVisible(false)}
+        selectedValue={metric}
+        onChange={(value) => setMetric(value as ExerciseAnalysisMetric)}
+        options={METRIC_OPTIONS}
+        title="指標を選択"
+      />
+      <PickerModal
+        visible={isPeriodPickerVisible}
+        onClose={() => setPeriodPickerVisible(false)}
+        selectedValue={period}
+        onChange={(value) => setPeriod(value as ExerciseAnalysisPeriod)}
+        options={PERIOD_OPTIONS}
+        title="期間を選択"
+      />
     </ScrollView>
   );
 }
@@ -395,12 +565,71 @@ const styles = StyleSheet.create({
   noMarginTop: {
     marginTop: 0,
   },
-  exercise: {
-    textAlign: "center",
+  // 部位別タブ：指標・期間フィルター
+  filterRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: theme.spacing[3],
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[1],
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 6,
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+  },
+  filterButtonText: {
+    fontSize: theme.fontSizes.small,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+  },
+
+  // 部位別タブ：種目カード
+  exerciseCard: {
+    backgroundColor: theme.colors.background.light,
+    padding: theme.spacing[3],
+    marginTop: theme.spacing[4],
+    borderRadius: 8,
+  },
+  exerciseCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing[3],
+  },
+  exerciseCardName: {
     fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
-    marginVertical: theme.spacing[3],
+    color: theme.colors.dark,
   },
+  exerciseStatsRow: {
+    flexDirection: "row",
+    gap: theme.spacing[6],
+    marginBottom: theme.spacing[2],
+  },
+  exerciseStatLabel: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginBottom: theme.spacing[1],
+  },
+  exerciseStatValue: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: "bold",
+    color: theme.colors.secondary,
+  },
+  exerciseStatChange: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    color: theme.colors.secondary,
+  },
+  unitText: {
+    fontSize: theme.fontSizes.small,
+    fontWeight: "normal",
+    color: theme.colors.dark,
+  },
+
   // データがない場合の空状態
   nonDataContainer: {
     padding: theme.spacing[5],
@@ -457,24 +686,24 @@ const styles = StyleSheet.create({
   // 選択肢レイアウト
   selectContainer: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-    borderRadius: 5,
-    overflow: "hidden",
-    backgroundColor: theme.colors.background.light,
-    padding: theme.spacing[2],
+    gap: theme.spacing[2],
   },
   selectButton: {
-    padding: theme.spacing[2],
-    margin: theme.spacing[2],
-    backgroundColor: "#DDDDDD",
-    width: 70,
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: 999,
+    backgroundColor: theme.colors.background.light,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
   },
   selectedButton: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.secondary,
+    borderColor: theme.colors.secondary,
   },
   selectText: {
     textAlign: "center",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
   },
   selectedText: {
     color: theme.colors.white,

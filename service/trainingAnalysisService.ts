@@ -1,16 +1,24 @@
 import * as trainingAnalysisRepository from "@/localDb/repository/trainingAnalysisRepository";
 import {
   BodyPartSetShare,
+  ExerciseAnalysisMetric,
+  ExerciseAnalysisPeriod,
+  ExerciseMetricTrend,
   MonthlySummary,
-  TrainingAnalysisChart,
   WeeklyVolume,
 } from "@/types/dto/trainingDto";
 
-// トレーニングの日別最大重量取得
-export async function getTrainingByMaxWeight(
-  bodyPartId: number
-): Promise<TrainingAnalysisChart[]> {
-  return await trainingAnalysisRepository.getTrainingByMaxWeight(bodyPartId);
+// 部位別・種目別の指標推移取得（分析画面・部位別タブ用）
+export async function getExerciseMetricTrends(
+  bodyPartId: number,
+  period: ExerciseAnalysisPeriod,
+  metric: ExerciseAnalysisMetric
+): Promise<ExerciseMetricTrend[]> {
+  return await trainingAnalysisRepository.getExerciseMetricTrends(
+    bodyPartId,
+    period,
+    metric
+  );
 }
 
 // 今月のサマリー取得（分析画面・全体タブ用）

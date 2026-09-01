@@ -2,10 +2,10 @@ import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
 import {
   DailyTrainingRow,
+  ExerciseMetricRow,
   LastTraining,
   RecentExercise,
   Training,
-  TrainingAnalysisRow,
   TrainingDetail,
 } from "@/types/dto/trainingDto";
 
@@ -171,88 +171,30 @@ export async function getBodyPartSetCountByDateRange(
   return rows;
 }
 
-// トレーニング分析データ取得(全部)
-export async function getTrainingAllDataByMaxWeight(
-  limit: number
-): Promise<TrainingAnalysisRow[]> {
-  const rows = await db.getAllAsync<TrainingAnalysisRow>(
-    `
-    WITH daily_max AS (
-      SELECT
-        date,
-        exercise_id,
-        MAX(weight) AS weight
-      FROM trainings
-      WHERE is_deleted = 0
-      GROUP BY date, exercise_id
-    ),
-    ranked AS (
-      SELECT
-        exercise_id,
-        date,
-        weight,
-        ROW_NUMBER() OVER (
-          PARTITION BY exercise_id
-          ORDER BY weight DESC, date DESC
-        ) AS rn
-      FROM daily_max
-    )
-    SELECT
-      e.parts_id AS bodyPartId,
-      t.exercise_id AS exerciseId,
-      e.name AS exerciseName,
-      t.date,
-      t.weight
-    FROM ranked t
-    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
-    WHERE t.rn <= ?
-    ORDER BY e.parts_id, t.exercise_id, t.date ASC;
-  `,
-    [limit]
-  );
-  return rows;
-}
-
-// トレーニング分析データ取得(部位別)
-export async function getTrainingByMaxWeight(
+// 部位別・種目別・日別の指標（最大重量・総負荷量・総reps数）取得
+export async function getExerciseMetricsByBodyPartAndDateRange(
   bodyPartId: number,
-  limit: number
-): Promise<TrainingAnalysisRow[]> {
-  const rows = await db.getAllAsync<TrainingAnalysisRow>(
+  started: string,
+  ended: string
+): Promise<ExerciseMetricRow[]> {
+  const rows = await db.getAllAsync<ExerciseMetricRow>(
     `
-    WITH daily_max AS (
-      SELECT
-        date,
-        exercise_id,
-        MAX(weight) AS weight
-      FROM trainings
-      WHERE is_deleted = 0
-      GROUP BY date, exercise_id
-    ),
-    ranked AS (
-      SELECT
-        exercise_id,
-        date,
-        weight,
-        ROW_NUMBER() OVER (
-          PARTITION BY exercise_id
-          ORDER BY weight DESC, date DESC
-        ) AS rn
-      FROM daily_max
-    )
     SELECT
-      e.parts_id AS bodyPartId,
-      t.exercise_id AS exerciseId,
+      e.exercise_id AS exerciseId,
       e.name AS exerciseName,
       t.date,
-      t.weight
-    FROM ranked t
+      MAX(t.weight) AS maxWeight,
+      SUM(t.weight * t.reps) AS totalVolume,
+      SUM(t.reps) AS totalReps
+    FROM trainings t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     WHERE e.parts_id = ?
-      AND t.rn <= ?
-    ORDER BY t.exercise_id, t.date ASC;
-  `,
-    [bodyPartId, limit]
+      AND t.date BETWEEN ? AND ?
+      AND t.is_deleted = 0
+    GROUP BY e.exercise_id, e.name, t.date
+    ORDER BY e.exercise_id, t.date ASC;
+    `,
+    [bodyPartId, started, ended]
   );
   return rows;
 }
