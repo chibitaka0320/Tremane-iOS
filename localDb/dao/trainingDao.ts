@@ -2,10 +2,10 @@ import { db } from "@/lib/localDbConfig";
 import { TrainingEntity } from "@/types/db";
 import {
   DailyTrainingRow,
+  ExerciseMetricRow,
   LastTraining,
   RecentExercise,
   Training,
-  TrainingAnalysisRow,
   TrainingDetail,
 } from "@/types/dto/trainingDto";
 
@@ -94,12 +94,21 @@ export async function getTrainingByDate(
   return rows;
 }
 
-// トレーニング件数取得(全部位)
-export async function getTrainingAllCount(started: string, ended: string) {
-  const rows = await db.getFirstAsync<{ count: number }>(
+// 期間内トレーニング日数・総負荷量・総セット数取得
+export async function getTrainingSummaryByDateRange(
+  started: string,
+  ended: string
+): Promise<{ trainingDays: number; totalVolume: number; totalSets: number }> {
+  const row = await db.getFirstAsync<{
+    training_days: number;
+    total_volume: number;
+    total_sets: number;
+  }>(
     `
     SELECT
-      COUNT(DISTINCT(date)) AS count
+      COUNT(DISTINCT date) AS training_days,
+      IFNULL(SUM(weight * reps), 0) AS total_volume,
+      COUNT(*) AS total_sets
     FROM trainings
     WHERE date BETWEEN ? AND ?
       AND is_deleted = 0;
@@ -107,114 +116,85 @@ export async function getTrainingAllCount(started: string, ended: string) {
     [started, ended]
   );
 
-  return rows?.count ?? 0;
+  return {
+    trainingDays: row?.training_days ?? 0,
+    totalVolume: row?.total_volume ?? 0,
+    totalSets: row?.total_sets ?? 0,
+  };
 }
 
-// トレーニング件数取得（部位別）
-export async function getTrainingCount(
+// 期間内・日別総負荷量取得（週別集計のもとデータ）
+export async function getDailyVolumeByDateRange(
   started: string,
-  ended: string,
-  partsId: number
-) {
-  const rows = await db.getFirstAsync<{ count: number }>(
+  ended: string
+): Promise<{ date: string; volume: number }[]> {
+  const rows = await db.getAllAsync<{ date: string; volume: number }>(
     `
     SELECT
-      COUNT(DISTINCT(t.date)) AS count
-    FROM trainings t
-    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
-    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
-    WHERE t.date BETWEEN ? AND ?
-      AND b.parts_id = ?
-      AND t.is_deleted = 0;
+      date,
+      SUM(weight * reps) AS volume
+    FROM trainings
+    WHERE date BETWEEN ? AND ?
+      AND is_deleted = 0
+    GROUP BY date;
     `,
-    [started, ended, partsId]
-  );
-
-  return rows?.count ?? 0;
-}
-
-// トレーニング分析データ取得(全部)
-export async function getTrainingAllDataByMaxWeight(
-  limit: number
-): Promise<TrainingAnalysisRow[]> {
-  const rows = await db.getAllAsync<TrainingAnalysisRow>(
-    `
-    WITH daily_max AS (
-      SELECT
-        date,
-        exercise_id,
-        MAX(weight) AS weight
-      FROM trainings
-      WHERE is_deleted = 0
-      GROUP BY date, exercise_id
-    ),
-    ranked AS (
-      SELECT
-        exercise_id,
-        date,
-        weight,
-        ROW_NUMBER() OVER (
-          PARTITION BY exercise_id
-          ORDER BY weight DESC, date DESC
-        ) AS rn
-      FROM daily_max
-    )
-    SELECT
-      e.parts_id AS bodyPartId,
-      t.exercise_id AS exerciseId,
-      e.name AS exerciseName,
-      t.date,
-      t.weight
-    FROM ranked t
-    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
-    WHERE t.rn <= ?
-    ORDER BY e.parts_id, t.exercise_id, t.date ASC;
-  `,
-    [limit]
+    [started, ended]
   );
   return rows;
 }
 
-// トレーニング分析データ取得(部位別)
-export async function getTrainingByMaxWeight(
-  bodyPartId: number,
-  limit: number
-): Promise<TrainingAnalysisRow[]> {
-  const rows = await db.getAllAsync<TrainingAnalysisRow>(
+// 期間内・部位別セット数取得
+export async function getBodyPartSetCountByDateRange(
+  started: string,
+  ended: string
+): Promise<{ partsId: number; partsName: string; setCount: number }[]> {
+  const rows = await db.getAllAsync<{
+    partsId: number;
+    partsName: string;
+    setCount: number;
+  }>(
     `
-    WITH daily_max AS (
-      SELECT
-        date,
-        exercise_id,
-        MAX(weight) AS weight
-      FROM trainings
-      WHERE is_deleted = 0
-      GROUP BY date, exercise_id
-    ),
-    ranked AS (
-      SELECT
-        exercise_id,
-        date,
-        weight,
-        ROW_NUMBER() OVER (
-          PARTITION BY exercise_id
-          ORDER BY weight DESC, date DESC
-        ) AS rn
-      FROM daily_max
-    )
     SELECT
-      e.parts_id AS bodyPartId,
-      t.exercise_id AS exerciseId,
+      b.parts_id AS partsId,
+      b.name AS partsName,
+      COUNT(*) AS setCount
+    FROM trainings t
+    LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
+    LEFT JOIN body_parts b ON e.parts_id = b.parts_id
+    WHERE t.date BETWEEN ? AND ?
+      AND t.is_deleted = 0
+    GROUP BY b.parts_id, b.name
+    ORDER BY setCount DESC;
+    `,
+    [started, ended]
+  );
+  return rows;
+}
+
+// 部位別・種目別・日別の指標（最大重量・総負荷量・総reps数）取得
+export async function getExerciseMetricsByBodyPartAndDateRange(
+  bodyPartId: number,
+  started: string,
+  ended: string
+): Promise<ExerciseMetricRow[]> {
+  const rows = await db.getAllAsync<ExerciseMetricRow>(
+    `
+    SELECT
+      e.exercise_id AS exerciseId,
       e.name AS exerciseName,
       t.date,
-      t.weight
-    FROM ranked t
+      MAX(t.weight) AS maxWeight,
+      SUM(t.weight * t.reps) AS totalVolume,
+      SUM(t.reps) AS totalReps
+    FROM trainings t
     LEFT JOIN exercises e ON t.exercise_id = e.exercise_id
     WHERE e.parts_id = ?
-      AND t.rn <= ?
-    ORDER BY t.exercise_id, t.date ASC;
-  `,
-    [bodyPartId, limit]
+      AND t.date BETWEEN ? AND ?
+      AND t.is_deleted = 0
+    GROUP BY e.exercise_id, e.name, t.date
+    ORDER BY e.exercise_id, t.date ASC;
+    `,
+    [bodyPartId, started, ended]
   );
   return rows;
 }

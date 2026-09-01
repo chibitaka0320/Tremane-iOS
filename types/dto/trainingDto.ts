@@ -74,22 +74,50 @@ export type TrainingDetail = {
   reps: number;
 };
 
-// トレーニング分析グラフ用（行データ）
-export type TrainingAnalysisRow = {
-  bodyPartId: number;
+// 種目別分析の指標（分析画面・部位別タブ用）
+export type ExerciseAnalysisMetric = "maxWeight" | "totalVolume" | "totalReps";
+
+// 種目別分析の期間（分析画面・部位別タブ用）
+export type ExerciseAnalysisPeriod = "1M" | "3M" | "6M" | "1Y";
+
+// 種目別・日別の指標行データ（分析画面・部位別タブ用）
+export type ExerciseMetricRow = {
   exerciseId: string;
   exerciseName: string;
   date: string;
-  weight: number;
+  maxWeight: number;
+  totalVolume: number;
+  totalReps: number;
 };
 
-// トレーニング分析グラフ用
-export type TrainingAnalysisChart = {
-  labels: string[];
-  datasets: [
-    {
-      data: number[];
-    }
-  ];
-  name: string;
+// 種目別の指標推移（分析画面・部位別タブ用）
+export type ExerciseMetricTrend = {
+  exerciseId: string;
+  exerciseName: string;
+  dates: string[];
+  values: number[];
+  currentValue: number;
+  changeValue: number;
+};
+
+// 今月のサマリー（分析画面・全体タブ用）
+export type MonthlySummary = {
+  trainingDays: number;
+  weeklyAverage: number;
+  totalVolume: number;
+  totalSets: number;
+};
+
+// 週別総負荷量の推移（分析画面・全体タブ用）
+export type WeeklyVolume = {
+  weekLabel: string;
+  volume: number;
+};
+
+// 部位別トレーニングバランス（分析画面・全体タブ用、セット数ベース）
+export type BodyPartSetShare = {
+  bodyPartId: number;
+  bodyPartName: string;
+  setCount: number;
+  percentage: number;
 };
