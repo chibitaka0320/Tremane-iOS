@@ -1,9 +1,11 @@
 import Indicator from "@/components/common/Indicator";
 import NotSetGoal from "@/components/setting/NotSetGoal";
-import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
+import { pfcOptions } from "@/constants/pfcOptions";
+import { pfcPlanDetails } from "@/constants/pfcPlanDetails";
 import * as userGoalService from "@/service/userGoalService";
 import theme from "@/styles/theme";
-import { Feather } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { format } from "date-fns";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -15,11 +17,12 @@ export default function GoalScreen() {
   const [start, setStart] = useState<Date>();
   const [finish, setFinish] = useState<Date>();
   const [pfc, setPfc] = useState("");
-  const [isNotSet, setIsNotSet] = useState<Boolean>();
+  const [isNotSet, setIsNotSet] = useState<boolean>();
 
   const [isLoading, setLoading] = useState(false);
 
-  const pfcBalanceExplain = getPfcBalanceExplanation(pfc);
+  const pfcLabel = pfcOptions.find((option) => option.value === pfc)?.label;
+  const pfcCompactRatio = pfcPlanDetails[pfc]?.compactRatio;
 
   useFocusEffect(
     useCallback(() => {
@@ -81,72 +84,141 @@ export default function GoalScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.item}>
-        <Text style={styles.title}>目標設定</Text>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Ionicons name="flag" size={16} color={theme.colors.primary} />
+          <Text style={styles.headerTitle}>目標</Text>
+        </View>
         <TouchableOpacity onPress={onEdit}>
-          <Feather name="edit" size={24} />
+          <Ionicons name="create-outline" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>目標体重</Text>
-        <View style={styles.weight}>
-          <Text style={styles.value}>{weight}</Text>
-          <Text style={styles.value}> → </Text>
-          <Text style={styles.value}>{goalWeight} kg</Text>
+
+      <Row label="目標体重" value={`${weight} kg → ${goalWeight} kg`} />
+      <Row label="開始日" value={start ? format(start, "yyyy/MM/dd") : ""} />
+      <Row label="終了日" value={finish ? format(finish, "yyyy/MM/dd") : ""} />
+      <Row
+        label="PFCバランス"
+        value={
+          pfcLabel && pfcCompactRatio
+            ? `${pfcLabel}（${pfcCompactRatio}）`
+            : ""
+        }
+      />
+
+      <View style={styles.calorieCard}>
+        <View style={styles.calorieHeader}>
+          <Ionicons name="flame" size={18} color={theme.colors.primary} />
+          <Text style={styles.calorieTitle}>目標摂取カロリー（自動計算）</Text>
         </View>
-      </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>目標摂取カロリー</Text>
-        <Text style={styles.value}>
-          {goalCalorie !== "0" ? goalCalorie + " kcal" : "未設定項目あり"}
+        <View style={styles.calorieRow}>
+          <Text style={styles.calorieLabel}>1日の摂取カロリー目安</Text>
+          <Text style={styles.calorieValue}>
+            {goalCalorie && goalCalorie !== "0"
+              ? Number(goalCalorie).toLocaleString()
+              : "-"}
+            <Text style={styles.calorieUnit}>  kcal</Text>
+          </Text>
+        </View>
+        <Text style={styles.calorieCaption}>
+          ※ 目標体重・期間・PFCバランスから自動で計算されます
         </Text>
       </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>開始日</Text>
-        <Text style={styles.value}>
-          {start ? start.toLocaleDateString() : ""}
-        </Text>
-      </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>終了</Text>
-        <Text style={styles.value}>
-          {finish ? finish.toLocaleDateString() : ""}
-        </Text>
-      </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>PFCバランス</Text>
-        <Text style={styles.value}>{pfcBalanceExplain}</Text>
-      </View>
+    </View>
+  );
+}
+
+type RowProps = {
+  label: string;
+  value: string;
+};
+
+function Row({ label, value }: RowProps) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowValue}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.background.light,
     flex: 1,
-    padding: theme.spacing[5],
+    backgroundColor: theme.colors.background.light,
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[6],
   },
-  item: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    margin: theme.spacing[3],
+    marginHorizontal: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
-  title: {
-    fontSize: theme.fontSizes.medium,
-    fontWeight: "bold",
-    color: theme.colors.primary,
-  },
-  label: {
-    fontSize: theme.fontSizes.medium,
-  },
-  value: {
-    fontSize: theme.fontSizes.medium,
-    color: theme.colors.font.gray,
-  },
-  weight: {
+  headerLeft: {
     flexDirection: "row",
     alignItems: "center",
+    gap: theme.spacing[2],
+  },
+  headerTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "500",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
+  },
+  rowLabel: {
+    color: theme.colors.font.black,
+  },
+  rowValue: {
+    color: theme.colors.font.gray,
+  },
+  calorieCard: {
+    backgroundColor: theme.colors.background.lightGray,
+    borderRadius: 8,
+    marginHorizontal: theme.spacing[4],
+    marginTop: theme.spacing[5],
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[3],
+  },
+  calorieHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[3],
+  },
+  calorieTitle: {
+    fontWeight: "500",
+    color: theme.colors.font.black,
+  },
+  calorieRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.spacing[2],
+  },
+  calorieLabel: {
+    color: theme.colors.font.black,
+  },
+  calorieValue: {
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  calorieUnit: {
+    fontSize: theme.fontSizes.small,
+    fontWeight: "400",
+    color: theme.colors.font.gray,
+  },
+  calorieCaption: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginTop: theme.spacing[2],
   },
 });

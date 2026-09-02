@@ -1,12 +1,12 @@
 import Indicator from "@/components/common/Indicator";
-import { getPfcBalanceExplanation } from "@/constants/pfcBalanceExplain";
 import { pfcOptions } from "@/constants/pfcOptions";
+import { pfcPlanDetails } from "@/constants/pfcPlanDetails";
 import { auth } from "@/lib/firebaseConfig";
 import { validateWeight } from "@/lib/validators";
 import * as userGoalService from "@/service/userGoalService";
 import theme from "@/styles/theme";
-import { FontAwesome6 } from "@expo/vector-icons";
-import { format } from "date-fns";
+import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { addMonths, format } from "date-fns";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -27,7 +27,8 @@ export default function GoalEditScreen() {
   const [weight, setWeight] = useState("");
   const [goalWeight, setGoalWeight] = useState("");
   const [start, setStart] = useState<Date>(new Date());
-  const [finish, setFinish] = useState<Date>(new Date());
+  // 終了日の初期値は現在日の3ヶ月後（date-fnsのaddMonthsは月末日数の差を自動調整する）
+  const [finish, setFinish] = useState<Date>(addMonths(new Date(), 3));
   const [pfc, setPfc] = useState("0");
 
   const [isLoading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ export default function GoalEditScreen() {
   const [isStart, setIsStart] = useState(false);
   const [isFinish, setIsFinish] = useState(false);
 
-  const pfcBalanceExplanation = getPfcBalanceExplanation(pfc);
+  const pfcPlanDetail = pfcPlanDetails[pfc];
 
   // ボタン活性・非活性
   useEffect(() => {
@@ -100,8 +101,6 @@ export default function GoalEditScreen() {
 
   useEffect(() => {
     const fetchApi = async () => {
-      const URL = "/users/goal";
-
       const res = await userGoalService.getUserGoal();
       if (res) {
         if (res.weight != null) {
@@ -136,84 +135,111 @@ export default function GoalEditScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: theme.spacing[6] }}
+        contentContainerStyle={styles.content}
       >
-        <View style={styles.item}>
-          <Text style={styles.label}>目標体重（kg）</Text>
-          <View style={styles.row}>
-            <TextInput
-              onChangeText={setWeight}
-              style={[styles.inputValue, styles.smallInput]}
-              keyboardType="numeric"
-              value={weight}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>目標体重</Text>
+          <View style={styles.weightRow}>
+            <View style={styles.weightInputWrap}>
+              <TextInput
+                onChangeText={setWeight}
+                style={styles.weightInput}
+                keyboardType="numeric"
+                value={weight}
+              />
+              <Text style={styles.weightUnit}>kg</Text>
+            </View>
+            <FontAwesome6
+              name="arrow-right"
+              size={18}
+              color={theme.colors.font.gray}
             />
-            <FontAwesome6 name="arrow-right" size={30} />
-            <TextInput
-              onChangeText={setGoalWeight}
-              style={[styles.inputValue, styles.smallInput]}
-              keyboardType="numeric"
-              value={goalWeight}
+            <View style={styles.weightInputWrap}>
+              <TextInput
+                onChangeText={setGoalWeight}
+                style={styles.weightInput}
+                keyboardType="numeric"
+                value={goalWeight}
+              />
+              <Text style={styles.weightUnit}>kg</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>期間</Text>
+          <View style={styles.dateItem}>
+            <Text style={styles.dateLabel}>開始日</Text>
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={showStartPicker}
+            >
+              <Text style={styles.dateButtonText}>
+                {format(start, "yyyy年M月d日")}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={theme.colors.font.gray}
+              />
+            </TouchableOpacity>
+            <DateTimePickerModal
+              date={start}
+              isVisible={isStart}
+              mode="date"
+              locale="ja"
+              onConfirm={startConfirm}
+              onCancel={hideStartPicker}
+              pickerStyleIOS={{ alignSelf: "center" }}
+              confirmTextIOS="完了"
+              cancelTextIOS="キャンセル"
+            />
+          </View>
+          <View style={styles.dateItem}>
+            <Text style={styles.dateLabel}>終了日</Text>
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={showFinishPicker}
+            >
+              <Text style={styles.dateButtonText}>
+                {format(finish, "yyyy年M月d日")}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={theme.colors.font.gray}
+              />
+            </TouchableOpacity>
+            <DateTimePickerModal
+              date={finish}
+              isVisible={isFinish}
+              mode="date"
+              locale="ja"
+              onConfirm={finishConfirm}
+              onCancel={hideFinishPicker}
+              pickerStyleIOS={{ alignSelf: "center" }}
+              confirmTextIOS="完了"
+              cancelTextIOS="キャンセル"
             />
           </View>
         </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>開始日</Text>
-          <TouchableOpacity style={styles.inputValue} onPress={showStartPicker}>
-            <Text style={styles.inputValueText}>
-              {format(start, "yyyy年MM月dd日")}
-            </Text>
-          </TouchableOpacity>
-          <DateTimePickerModal
-            date={start}
-            isVisible={isStart}
-            mode="date"
-            locale="ja"
-            onConfirm={startConfirm}
-            onCancel={hideStartPicker}
-            pickerStyleIOS={{ alignSelf: "center" }}
-            confirmTextIOS="完了"
-            cancelTextIOS="キャンセル"
-          />
-        </View>
-        <View style={styles.item}>
-          <Text style={styles.label}>終了日</Text>
-          <TouchableOpacity
-            style={styles.inputValue}
-            onPress={showFinishPicker}
-          >
-            <Text style={styles.inputValueText}>
-              {format(finish, "yyyy年MM月dd日")}
-            </Text>
-          </TouchableOpacity>
-          <DateTimePickerModal
-            date={finish}
-            isVisible={isFinish}
-            mode="date"
-            locale="ja"
-            onConfirm={finishConfirm}
-            onCancel={hideFinishPicker}
-            pickerStyleIOS={{ alignSelf: "center" }}
-            confirmTextIOS="完了"
-            cancelTextIOS="キャンセル"
-          />
-        </View>
 
-        <View style={styles.item}>
-          <Text style={styles.label}>PFCバランス</Text>
-          <View style={styles.selectContainer}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>PFCバランス</Text>
+          <View style={styles.segmentedControl}>
             {pfcOptions.map((option) => (
               <TouchableOpacity
                 key={option.value}
                 style={[
-                  styles.selectButton,
-                  pfc === option.value && styles.selectedButton,
+                  styles.segment,
+                  pfc === option.value && styles.segmentSelected,
                 ]}
                 onPress={() => setPfc(option.value)}
               >
                 <Text
                   style={[
-                    styles.selectText,
-                    pfc === option.value && styles.selectedText,
+                    styles.segmentText,
+                    pfc === option.value && styles.segmentTextSelected,
                   ]}
                 >
                   {option.label}
@@ -221,10 +247,30 @@ export default function GoalEditScreen() {
               </TouchableOpacity>
             ))}
           </View>
-          {pfcBalanceExplanation ? (
-            <Text style={styles.explanation}>{pfcBalanceExplanation}</Text>
+
+          {pfcPlanDetail ? (
+            <View style={styles.infoCard}>
+              <View style={styles.infoHeader}>
+                <Ionicons
+                  name="information-circle"
+                  size={18}
+                  color={theme.colors.secondary}
+                />
+                <Text style={styles.infoTitle}>プランの特徴</Text>
+              </View>
+              <Text style={styles.infoDescription}>
+                {pfcPlanDetail.description}
+              </Text>
+              <Text style={styles.infoRatio}>{pfcPlanDetail.ratio}</Text>
+            </View>
           ) : null}
         </View>
+
+        <Text style={styles.footnote}>
+          ※
+          目標摂取カロリーは、目標体重・期間・PFCバランスから自動で計算されます。
+        </Text>
+
         <TouchableOpacity
           style={[styles.button, isDisabled && styles.buttonDisabled]}
           onPress={onUpdate}
@@ -241,46 +287,142 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.lightGray,
-    paddingTop: theme.spacing[5],
-    paddingHorizontal: theme.spacing[5],
+  },
+  content: {
+    paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[6],
   },
 
-  // インプットアイテム
-  item: {
-    marginBottom: theme.spacing[4],
+  section: {
+    marginBottom: theme.spacing[5],
   },
-  label: {
+  sectionTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "700",
+    color: theme.colors.font.black,
+    marginBottom: theme.spacing[2],
+  },
+
+  // 目標体重
+  weightRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[3],
+  },
+  weightInputWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    borderRadius: 4,
+    backgroundColor: theme.colors.background.light,
+    paddingHorizontal: theme.spacing[3],
+  },
+  weightInput: {
+    flex: 1,
+    fontSize: theme.fontSizes.large,
+    fontWeight: "600",
+    color: theme.colors.font.black,
+    paddingVertical: 12,
+  },
+  weightUnit: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginLeft: theme.spacing[2],
+  },
+
+  // 期間
+  dateItem: {
+    marginBottom: theme.spacing[3],
+  },
+  dateLabel: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
     marginBottom: theme.spacing[1],
   },
-  inputValue: {
-    justifyContent: "center",
-    paddingHorizontal: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: theme.colors.lightGray,
-    backgroundColor: theme.colors.background.light,
-    borderRadius: 5,
-    height: 48,
-    fontSize: theme.fontSizes.medium,
-  },
-  inputValueText: {
-    fontSize: theme.fontSizes.medium,
-  },
-  row: {
+  dateButton: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    borderRadius: 4,
+    backgroundColor: theme.colors.background.light,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: 12,
   },
-  smallInput: {
-    width: "35%",
+  dateButtonText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.font.black,
+  },
+
+  // PFCバランス
+  segmentedControl: {
+    flexDirection: "row",
+    backgroundColor: theme.colors.background.dark,
+    borderRadius: 4,
+    marginBottom: theme.spacing[3],
+  },
+  segment: {
+    flex: 1,
+    paddingVertical: theme.spacing[2],
+    borderRadius: 4,
+    alignItems: "center",
+  },
+  segmentSelected: {
+    backgroundColor: theme.colors.secondary,
+  },
+  segmentText: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "600",
+    color: theme.colors.font.gray,
+  },
+  segmentTextSelected: {
+    color: theme.colors.white,
+  },
+  infoCard: {
+    backgroundColor: "rgba(66, 169, 230, 0.08)",
+    borderRadius: 12,
+    padding: theme.spacing[4],
+  },
+  infoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[2],
+  },
+  infoTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "700",
+    color: theme.colors.secondary,
+  },
+  infoDescription: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.black,
+    lineHeight: 20,
+    marginBottom: theme.spacing[2],
+  },
+  infoRatio: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "600",
+    color: theme.colors.secondary,
+  },
+
+  footnote: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    lineHeight: 18,
+    marginBottom: theme.spacing[4],
   },
 
   // 通常ボタン
   button: {
     backgroundColor: theme.colors.primary,
-    borderRadius: 5,
+    borderRadius: 10,
     paddingVertical: theme.spacing[3],
     alignItems: "center",
-    marginVertical: theme.spacing[3],
     color: theme.colors.white,
   },
   buttonDisabled: {
@@ -289,40 +431,5 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: theme.fontSizes.medium,
     color: theme.colors.white,
-  },
-
-  explanation: {
-    margin: theme.spacing[2],
-  },
-
-  // 選択肢レイアウト
-  selectContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderRadius: 5,
-    overflow: "hidden",
-  },
-  selectButton: {
-    padding: theme.spacing[2],
-    backgroundColor: "#DDDDDD",
-    flex: 1,
-  },
-  selectedButton: {
-    flex: 1,
-    backgroundColor: theme.colors.primary,
-  },
-  selectText: {
-    textAlign: "center",
-  },
-  selectedText: {
-    color: theme.colors.white,
-    fontWeight: "bold",
-  },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: styles.inputValue,
-  inputIOSContainer: {
-    pointerEvents: "none",
   },
 });
