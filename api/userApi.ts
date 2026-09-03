@@ -15,6 +15,11 @@ export async function updateUser(
   await apiRequestAuth<void>("/users", "PUT", { nickname, updatedAt });
 }
 
+// PUT /users/handle
+export async function updateHandle(handle: string): Promise<void> {
+  await apiRequestAuth<void>("/users/handle", "PUT", { handle });
+}
+
 // DELETE /users
 export async function deleteUser() {
   await apiRequestAuth<void>("/users", "DELETE", null);

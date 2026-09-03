@@ -13,8 +13,8 @@ import theme from "@/styles/theme";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
-import { useFocusEffect, useNavigation } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect, useNavigation } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -26,7 +26,12 @@ import {
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 type ModalKey =
-  "nickname" | "height" | "weight" | "gender" | "activeLevel" | null;
+  | "nickname"
+  | "height"
+  | "weight"
+  | "gender"
+  | "activeLevel"
+  | null;
 
 const DEFAULT_BIRTHDAY = new Date("2000-01-01");
 
@@ -34,6 +39,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
 
   const [nickname, setNickname] = useState("");
+  const [handle, setHandle] = useState<string | null>(null);
   const [height, setHeight] = useState("160");
   const [weight, setWeight] = useState("60");
   const [birthday, setBirthday] = useState<Date>(DEFAULT_BIRTHDAY);
@@ -50,12 +56,19 @@ export default function ProfileScreen() {
     navigation.setOptions({ headerTitle: "プロフィール" });
   }, [navigation]);
 
+  // 初回マウント時のみフルスクリーンローディングを表示する（以降のフォーカス復帰時はサイレントに再取得し、画面のちらつきを防ぐ）
+  const isFirstLoad = useRef(true);
+
   useFocusEffect(
     useCallback(() => {
-      setLoading(true);
+      const showLoading = isFirstLoad.current;
+      if (showLoading) setLoading(true);
       const fetchApi = async () => {
         try {
           setNickname(auth.currentUser?.displayName ?? "");
+
+          const user = await userService.getUser();
+          setHandle(user?.handle ?? null);
 
           const res = await userProfileService.getUserProfile();
           if (res) {
@@ -67,7 +80,8 @@ export default function ProfileScreen() {
               setActiveLevel(String(res.activeLevel));
           }
         } finally {
-          setLoading(false);
+          if (showLoading) setLoading(false);
+          isFirstLoad.current = false;
         }
       };
       fetchApi();
@@ -183,7 +197,19 @@ export default function ProfileScreen() {
             value={nickname || "未設定"}
             onPress={() => setActiveModal("nickname")}
           />
-          <Row label="ID" value="未設定" />
+          {handle ? (
+            <Row
+              label="ID"
+              value={handle}
+              onPress={() => router.push("/(main)/(menu)/profile/handle")}
+            />
+          ) : (
+            <Row
+              label="ID"
+              warning="要登録"
+              onPress={() => router.push("/(main)/(menu)/profile/handle")}
+            />
+          )}
         </View>
 
         <SectionTitle icon="fitness" label="身体情報" />
@@ -306,16 +332,28 @@ export default function ProfileScreen() {
 
 type RowProps = {
   label: string;
-  value: string;
+  value?: string;
+  warning?: string;
   onPress?: () => void;
 };
 
-function Row({ label, value, onPress }: RowProps) {
+function Row({ label, value, warning, onPress }: RowProps) {
   const content = (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
       <View style={styles.rowRight}>
-        <Text style={styles.rowValue}>{value}</Text>
+        {warning ? (
+          <>
+            <Ionicons
+              name="alert-circle"
+              size={16}
+              color={theme.colors.error}
+            />
+            <Text style={styles.rowWarningValue}>{warning}</Text>
+          </>
+        ) : (
+          <Text style={styles.rowValue}>{value}</Text>
+        )}
         <MaterialIcons
           name="arrow-forward-ios"
           size={14}
@@ -389,6 +427,10 @@ const styles = StyleSheet.create({
   },
   rowValue: {
     color: theme.colors.font.gray,
+  },
+  rowWarningValue: {
+    color: theme.colors.error,
+    fontWeight: "600",
   },
   calorieCard: {
     backgroundColor: theme.colors.background.light,

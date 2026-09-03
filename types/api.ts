@@ -3,6 +3,7 @@
 export type UserResponse = {
   userId: string;
   nickname: string;
+  handle: string | null;
   createdAt: string;
   updatedAt: string;
 };
