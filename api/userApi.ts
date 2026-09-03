@@ -26,11 +26,11 @@ export async function deleteUser() {
 }
 
 // GET /users/search
-export async function searchUserByEmail(
-  email: string
+export async function searchUserByHandle(
+  handle: string
 ): Promise<UserSearchResponse | null> {
   const res = await apiRequestAuth<UserSearchResponse>(
-    `/users/search?email=${email}`,
+    `/users/search?handle=${encodeURIComponent(handle)}`,
     "GET",
     null
   );
