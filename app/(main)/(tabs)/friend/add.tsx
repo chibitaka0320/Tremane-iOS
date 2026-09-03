@@ -1,10 +1,10 @@
 import CustomTextInput from "@/components/common/CustomTextInput";
 import Indicator from "@/components/common/Indicator";
 import { auth } from "@/lib/firebaseConfig";
-import { validateEmail } from "@/lib/validators";
+import { validateHandle } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { UserSearchResponse } from "@/types/api";
-import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -18,22 +18,42 @@ import {
   Alert,
 } from "react-native";
 import * as friendService from "@/service/friendService";
+import * as userService from "@/service/userService";
 import { ApiError } from "@/lib/error";
+import * as Clipboard from "expo-clipboard";
 
 interface Props {
   onClose: () => void;
 }
 
 export default function FriendAddScreen({ onClose }: Props) {
-  const [email, setEmail] = useState(""); // メールアドレス
+  const [handle, setHandle] = useState(""); // ID（検索用ハンドル）
   const [resultText, setResultText] = useState("検索してください"); // 結果テキスト
   const [user, setUser] = useState<UserSearchResponse | null>(); // 検索ユーザー情報
   const [status, setStatus] = useState<string | null>(); // 友達ステータス
   const [requestId, setRequestId] = useState<string | null>(); // 友達リクエストID
+  const [selfId, setSelfId] = useState<string | null>(null); // 自身のID（未設定の場合はuser_id）
+  const [hasSearched, setHasSearched] = useState(false); // 検索実行済みフラグ
 
   const [isLoading, setLoading] = useState(false); // ローディングフラグ
   const [isStatusLoading, setStatusLoading] = useState(false); // ステータスローディングフラグ
   const [isDisabled, setDisabled] = useState(true); // 検索ボタン活性非活性
+
+  // 自身のID取得（未設定の場合はuser_idを表示）
+  useEffect(() => {
+    const fetchSelfId = async () => {
+      const currentUser = await userService.getUser();
+      setSelfId(currentUser?.handle ?? currentUser?.userId ?? null);
+    };
+    fetchSelfId();
+  }, []);
+
+  // 自身のIDをコピー
+  const onCopySelfId = async () => {
+    if (!selfId) return;
+    await Clipboard.setStringAsync(selfId);
+    Alert.alert("コピーしました");
+  };
 
   // エラーハンドリング
   const errorHandle = (error: any, process: string) => {
@@ -46,21 +66,22 @@ export default function FriendAddScreen({ onClose }: Props) {
 
   // ボタン活性非活性
   useEffect(() => {
-    if (validateEmail(email)) {
+    if (validateHandle(handle)) {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [email]);
+  }, [handle]);
 
   // ユーザー検索
   const search = async () => {
     setLoading(true);
     setUser(null);
+    setHasSearched(true);
     if (auth.currentUser === null) return;
 
     try {
-      const data = await friendService.searchUserByEmail(email);
+      const data = await friendService.searchUserByHandle(handle);
 
       if (data) {
         setUser(data);
@@ -249,17 +270,36 @@ export default function FriendAddScreen({ onClose }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <FontAwesome6 name="xmark" size={30} onPress={onClose} />
+          <Ionicons name="close-outline" size={30} onPress={onClose} />
         </View>
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchText}>メールアドレスで友達を探す</Text>
+        <View style={styles.selfIdCard}>
+          <Text style={styles.selfIdLabel}>あなたのID</Text>
+          <View style={styles.selfIdRight}>
+            <Text
+              style={styles.selfIdValue}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {selfId ?? "-"}
+            </Text>
+            <TouchableOpacity onPress={onCopySelfId}>
+              <Ionicons
+                name="copy-outline"
+                size={20}
+                color={theme.colors.secondary}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.searchCard}>
+          <Text style={styles.searchText}>IDで友達を探す</Text>
           <View style={styles.searchParts}>
             <View style={styles.textInput}>
               <CustomTextInput
-                onChangeText={setEmail}
-                value={email}
+                onChangeText={setHandle}
+                value={handle}
                 autoCapitalize="none"
-                keyboardType="email-address"
+                placeholder="IDを入力してください"
               />
             </View>
             <TouchableOpacity
@@ -273,6 +313,9 @@ export default function FriendAddScreen({ onClose }: Props) {
               <Text style={styles.buttonText}>検索</Text>
             </TouchableOpacity>
           </View>
+          <Text style={styles.searchHint}>
+            半角英数字と「_」「-」「.」のみ、8〜16文字で入力してください
+          </Text>
         </View>
         <View style={styles.searchResultContainer}>
           {user ? (
@@ -331,7 +374,21 @@ export default function FriendAddScreen({ onClose }: Props) {
               {isLoading ? (
                 <Indicator />
               ) : (
-                <Text style={styles.resultText}>{resultText}</Text>
+                <>
+                  <View style={styles.searchIconCircle}>
+                    <Ionicons
+                      name="search"
+                      size={40}
+                      color={theme.colors.secondary}
+                    />
+                  </View>
+                  <Text style={styles.resultText}>{resultText}</Text>
+                  {!hasSearched && (
+                    <Text style={styles.resultCaption}>
+                      IDを入力して検索すると、友達を見つけることができます。
+                    </Text>
+                  )}
+                </>
               )}
             </View>
           )}
@@ -344,35 +401,74 @@ export default function FriendAddScreen({ onClose }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: theme.colors.background.lightGray,
   },
   header: {
     paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[2],
   },
 
-  searchContainer: {
-    padding: theme.spacing[4],
-  },
-  searchText: {
-    marginVertical: theme.spacing[2],
-    fontWeight: "bold",
-    fontSize: theme.fontSizes.medium,
-  },
-  searchParts: {
+  selfIdCard: {
+    marginHorizontal: theme.spacing[4],
+    marginTop: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    backgroundColor: theme.colors.background.light,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
+  selfIdLabel: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.font.gray,
+    flexShrink: 0,
+  },
+  selfIdRight: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: theme.spacing[2],
+    marginLeft: theme.spacing[2],
+  },
+  selfIdValue: {
+    flexShrink: 1,
+    fontSize: theme.fontSize.md,
+    fontWeight: "600",
+  },
+
+  searchCard: {
+    marginHorizontal: theme.spacing[4],
+    marginTop: theme.spacing[4],
+    padding: theme.spacing[3],
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    backgroundColor: theme.colors.background.light,
+  },
+  searchText: {
+    marginBottom: theme.spacing[3],
+    fontWeight: "bold",
+    fontSize: theme.fontSize.sm,
+  },
+  searchParts: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[2],
+  },
   textInput: {
-    width: "70%",
+    flex: 1,
   },
   button: {
     height: 48,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.black,
-    width: "25%",
-    borderRadius: 4,
+    backgroundColor: theme.colors.secondary,
+    paddingHorizontal: theme.spacing[4],
+    borderRadius: 5,
   },
   buttonDisabled: {
     backgroundColor: theme.colors.lightGray,
@@ -382,6 +478,11 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
     fontWeight: "bold",
   },
+  searchHint: {
+    marginTop: theme.spacing[2],
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+  },
 
   searchResultContainer: {
     padding: theme.spacing[4],
@@ -390,9 +491,24 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[6],
     alignItems: "center",
   },
+  searchIconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "rgba(66, 169, 230, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: theme.spacing[3],
+  },
   resultText: {
-    fontSize: theme.fontSizes.medium,
+    fontSize: theme.fontSizes.large,
     fontWeight: "bold",
+  },
+  resultCaption: {
+    marginTop: theme.spacing[1],
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    textAlign: "center",
   },
 
   resultUserContainer: {

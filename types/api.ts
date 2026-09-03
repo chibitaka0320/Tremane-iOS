@@ -3,6 +3,7 @@
 export type UserResponse = {
   userId: string;
   nickname: string;
+  handle: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -75,10 +76,10 @@ export type BodyPartResponse = {
   updatedAt: string;
 };
 
-// ユーザーメールアドレス検索API
+// ユーザーID検索API
 export type UserSearchResponse = {
   userId: string;
-  email: string;
+  handle: string;
   nickname: string;
   status: string;
   requestId: string;

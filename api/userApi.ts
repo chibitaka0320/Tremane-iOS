@@ -15,17 +15,22 @@ export async function updateUser(
   await apiRequestAuth<void>("/users", "PUT", { nickname, updatedAt });
 }
 
+// PUT /users/handle
+export async function updateHandle(handle: string): Promise<void> {
+  await apiRequestAuth<void>("/users/handle", "PUT", { handle });
+}
+
 // DELETE /users
 export async function deleteUser() {
   await apiRequestAuth<void>("/users", "DELETE", null);
 }
 
 // GET /users/search
-export async function searchUserByEmail(
-  email: string
+export async function searchUserByHandle(
+  handle: string
 ): Promise<UserSearchResponse | null> {
   const res = await apiRequestAuth<UserSearchResponse>(
-    `/users/search?email=${email}`,
+    `/users/search?handle=${encodeURIComponent(handle)}`,
     "GET",
     null
   );

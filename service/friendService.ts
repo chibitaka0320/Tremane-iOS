@@ -3,11 +3,11 @@ import * as friendApi from "@/api/friendApi";
 import { UserSearchResponse } from "@/types/api";
 import { FriendRequest } from "@/types/dto/friendDto";
 
-// ユーザーメールアドレス検索
-export async function searchUserByEmail(
-  email: string
+// ユーザーID検索
+export async function searchUserByHandle(
+  handle: string
 ): Promise<UserSearchResponse | null> {
-  return userApi.searchUserByEmail(email);
+  return userApi.searchUserByHandle(handle);
 }
 
 // 友達申請

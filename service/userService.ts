@@ -3,8 +3,14 @@ import * as userApi from "@/api/userApi";
 import { auth } from "@/lib/firebaseConfig";
 import * as userRepository from "@/localDb/repository/userRepository";
 import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
+import { UserResponse } from "@/types/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as firebaseAuth from "firebase/auth";
+
+// ユーザー情報取得
+export async function getUser(): Promise<UserResponse | null> {
+  return await userApi.getUser();
+}
 
 // ユーザー情報の登録
 export async function registerUser(
@@ -60,6 +66,11 @@ export async function updateUser(user: firebaseAuth.User, nickname: string) {
   userApi
     .updateUser(nickname, now)
     .catch((error) => console.error("APIエラー(ユーザー情報更新)：" + error));
+}
+
+// ID（検索用ハンドル）の更新
+export async function updateHandle(handle: string): Promise<void> {
+  await userApi.updateHandle(handle);
 }
 
 // ユーザー削除（退会）
