@@ -16,6 +16,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { CircleButton } from "@/components/common/CircleButton";
+import MonthCalendarModal from "@/components/common/MonthCalendarModal";
 import { RecordMenu } from "@/components/menu/RecordMenu";
 import { MarkedDates } from "react-native-calendars/src/types";
 import * as trainingService from "@/service/trainingService";
@@ -26,7 +27,12 @@ const TopTab = createMaterialTopTabNavigator();
 // トップタブナビゲーター（トレーニングと食事）
 function TopTabNavigator() {
   return (
-    <TopTab.Navigator>
+    <TopTab.Navigator
+      screenOptions={{
+        tabBarStyle: { backgroundColor: theme.colors.background.light },
+        sceneStyle: { backgroundColor: theme.colors.background.light },
+      }}
+    >
       <TopTab.Screen name="トレーニング">
         {() => <TrainingScreen />}
       </TopTab.Screen>
@@ -36,7 +42,7 @@ function TopTabNavigator() {
 }
 
 export default function MainScreen() {
-  const { selectedDate, setSelectedDate } = useCalendar();
+  const { selectedDate, setSelectedDate, monthCalendarRef } = useCalendar();
 
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
 
@@ -90,6 +96,7 @@ export default function MainScreen() {
             markingType="multi-dot"
             markedDates={markedDates}
             theme={{
+              calendarBackground: theme.colors.background.light,
               selectedDayBackgroundColor: theme.colors.primary,
               selectedDayTextColor: theme.colors.white,
               todayTextColor: theme.colors.primary,
@@ -113,6 +120,16 @@ export default function MainScreen() {
             <RecordMenu bottomSheetRef={bottomSheetModalRef} />
           </BottomSheetView>
         </BottomSheetModal>
+
+        <MonthCalendarModal
+          ref={monthCalendarRef}
+          selected={selectedDate}
+          markedDates={markedDates}
+          onConfirm={(date) => {
+            setSelectedDate(date);
+            monthCalendarRef.current?.dismiss();
+          }}
+        />
       </BottomSheetModalProvider>
     </CalendarProvider>
   );
@@ -125,6 +142,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    backgroundColor: theme.colors.background.light,
   },
   button: {
     position: "absolute",
