@@ -60,5 +60,8 @@
     "eslint-config-expo": "~57.0.2",
     "typescript": "~6.0.3"
   },
+  "overrides": {
+    "react-native-safe-area-context": "$react-native-safe-area-context"
+  },
   "private": true
 }
