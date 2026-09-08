@@ -1,8 +1,8 @@
 import { JSX, useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { createMaterialTopTabNavigator } from "expo-router/js-top-tabs";
-import { CalendarProvider, Agenda } from "react-native-calendars";
+import { CalendarProvider, WeekCalendar } from "react-native-calendars";
 
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
@@ -81,22 +81,25 @@ export default function MainScreen() {
       }}
     >
       <BottomSheetModalProvider>
-        <Agenda
-          selected={selectedDate}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          items={{}}
-          renderItem={() => null}
-          markingType={"multi-dot"}
-          markedDates={markedDates}
-          theme={{
-            selectedDayBackgroundColor: theme.colors.primary,
-            todayTextColor: theme.colors.primary,
-            agendaDayTextColor: theme.colors.font.black,
-            agendaDayNumColor: theme.colors.font.black,
-            agendaTodayColor: theme.colors.primary,
-          }}
-          renderEmptyData={() => <TopTabNavigator />}
-        />
+        <View style={styles.container}>
+          <WeekCalendar
+            current={selectedDate}
+            firstDay={0}
+            allowShadow={false}
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+            markingType="multi-dot"
+            markedDates={markedDates}
+            theme={{
+              selectedDayBackgroundColor: theme.colors.primary,
+              selectedDayTextColor: theme.colors.white,
+              todayTextColor: theme.colors.primary,
+              dayTextColor: theme.colors.font.black,
+            }}
+          />
+          <View style={styles.content}>
+            <TopTabNavigator />
+          </View>
+        </View>
 
         <CircleButton onPress={onPlusButton} style={styles.button}>
           <Entypo name="plus" size={40} color={theme.colors.white} />
@@ -116,6 +119,13 @@ export default function MainScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background.light,
+  },
+  content: {
+    flex: 1,
+  },
   button: {
     position: "absolute",
     right: 40,
