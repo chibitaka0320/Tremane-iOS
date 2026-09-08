@@ -9,11 +9,11 @@ export type UserEntity = {
 // ユーザープロフィールテーブル
 export type UserProfileEntity = {
   user_id: string;
-  height: number;
-  weight: number;
-  birthday: string;
-  gender: number;
-  active_level: number;
+  height: number | null;
+  weight: number | null;
+  birthday: string | null;
+  gender: number | null;
+  active_level: number | null;
   is_synced: number;
   created_at: string;
   updated_at: string;

@@ -33,6 +33,10 @@ type ModalKey =
   | "activeLevel"
   | null;
 
+const DEFAULT_HEIGHT = "160";
+const DEFAULT_WEIGHT = "60";
+const DEFAULT_GENDER = "0";
+const DEFAULT_ACTIVE_LEVEL = "0";
 const DEFAULT_BIRTHDAY = new Date("2000-01-01");
 
 export default function ProfileScreen() {
@@ -40,13 +44,13 @@ export default function ProfileScreen() {
 
   const [nickname, setNickname] = useState("");
   const [handle, setHandle] = useState<string | null>(null);
-  const [height, setHeight] = useState("160");
-  const [weight, setWeight] = useState("60");
-  const [birthday, setBirthday] = useState<Date>(DEFAULT_BIRTHDAY);
-  const [gender, setGender] = useState("0");
-  const [activeLevel, setActiveLevel] = useState("0");
-  const [bmr, setBmr] = useState("");
-  const [totalCalorie, setTotalCalorie] = useState("");
+  const [height, setHeight] = useState<string | null>(null);
+  const [weight, setWeight] = useState<string | null>(null);
+  const [birthday, setBirthday] = useState<Date | null>(null);
+  const [gender, setGender] = useState<string | null>(null);
+  const [activeLevel, setActiveLevel] = useState<string | null>(null);
+  const [bmr, setBmr] = useState<string | null>(null);
+  const [totalCalorie, setTotalCalorie] = useState<string | null>(null);
 
   const [isLoading, setLoading] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
@@ -89,7 +93,20 @@ export default function ProfileScreen() {
   );
 
   // 基礎代謝・総消費カロリーの再計算（身長・体重・生年月日・性別・活動レベルのいずれかが変わるたびに再計算）
+  // いずれか未設定の場合は算出しない
   useEffect(() => {
+    if (
+      height == null ||
+      weight == null ||
+      birthday == null ||
+      gender == null ||
+      activeLevel == null
+    ) {
+      setBmr(null);
+      setTotalCalorie(null);
+      return;
+    }
+
     const age = calcAge(format(birthday, "yyyy-MM-dd"));
     const nextBmr = calcBmr(
       parseInt(gender),
@@ -101,7 +118,9 @@ export default function ProfileScreen() {
     setTotalCalorie(String(calcTotalCalorie(nextBmr, parseInt(activeLevel))));
   }, [height, weight, birthday, gender, activeLevel]);
 
-  // 身長・体重・性別・活動レベル・生年月日の更新（全項目まとめて送信するAPI仕様のため、変更分だけ差し替えて送信する）
+  // 身長・体重・性別・活動レベル・生年月日の更新
+  // （全項目まとめて送信するAPI仕様のため、変更分だけ差し替えて送信する。
+  // 　未設定の項目はデフォルト値で埋めず、nullのまま送信する）
   const saveProfile = async (overrides: {
     height?: string;
     weight?: string;
@@ -121,11 +140,11 @@ export default function ProfileScreen() {
     try {
       await userProfileService.upsertUserProfile(
         user.uid,
-        parseFloat(nextHeight),
-        parseFloat(nextWeight),
+        nextHeight ? parseFloat(nextHeight) : null,
+        nextWeight ? parseFloat(nextWeight) : null,
         nextBirthday,
-        parseInt(nextGender),
-        parseInt(nextActiveLevel),
+        nextGender ? parseInt(nextGender) : null,
+        nextActiveLevel ? parseInt(nextActiveLevel) : null,
       );
       setHeight(nextHeight);
       setWeight(nextWeight);
@@ -216,12 +235,12 @@ export default function ProfileScreen() {
         <View>
           <Row
             label="身長"
-            value={`${height} cm`}
+            value={height ? `${height} cm` : "未設定"}
             onPress={() => setActiveModal("height")}
           />
           <Row
             label="体重"
-            value={`${weight} kg`}
+            value={weight ? `${weight} kg` : "未設定"}
             onPress={() => setActiveModal("weight")}
           />
           <Row
@@ -241,7 +260,7 @@ export default function ProfileScreen() {
           />
           <Row
             label="生年月日"
-            value={format(birthday, "yyyy年M月d日")}
+            value={birthday ? format(birthday, "yyyy年M月d日") : "未設定"}
             onPress={() => setDatePickerVisibility(true)}
           />
         </View>
@@ -251,24 +270,35 @@ export default function ProfileScreen() {
             <Ionicons name="flame" size={18} color={theme.colors.primary} />
             <Text style={styles.calorieTitle}>1日のカロリー目安</Text>
           </View>
-          <View style={styles.calorieRow}>
-            <Text style={styles.calorieLabel}>基礎代謝</Text>
-            <Text style={styles.calorieValue}>
-              {bmr ? Number(bmr).toLocaleString() : "-"}
-              <Text style={styles.calorieUnit}>  kcal</Text>
-            </Text>
-          </View>
-          <View style={styles.calorieDivider} />
-          <View style={styles.calorieRow}>
-            <Text style={styles.calorieLabel}>1日の消費カロリー</Text>
-            <Text style={styles.calorieValue}>
-              {totalCalorie ? Number(totalCalorie).toLocaleString() : "-"}
-              <Text style={styles.calorieUnit}>  kcal</Text>
-            </Text>
-          </View>
-          <Text style={styles.calorieCaption}>
-            身体情報・活動レベルから算出しています
-          </Text>
+          {bmr != null && totalCalorie != null ? (
+            <>
+              <View style={styles.calorieRow}>
+                <Text style={styles.calorieLabel}>基礎代謝</Text>
+                <Text style={styles.calorieValue}>
+                  {Number(bmr).toLocaleString()}
+                  <Text style={styles.calorieUnit}>  kcal</Text>
+                </Text>
+              </View>
+              <View style={styles.calorieDivider} />
+              <View style={styles.calorieRow}>
+                <Text style={styles.calorieLabel}>1日の消費カロリー</Text>
+                <Text style={styles.calorieValue}>
+                  {Number(totalCalorie).toLocaleString()}
+                  <Text style={styles.calorieUnit}>  kcal</Text>
+                </Text>
+              </View>
+              <Text style={styles.calorieCaption}>
+                身体情報・活動レベルから算出しています
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.calorieEmptyText}>未設定</Text>
+              <Text style={styles.calorieCaption}>
+                身長・体重・性別・活動レベル・生年月日をすべて設定すると算出されます
+              </Text>
+            </>
+          )}
         </View>
 
         <TextInputModal
@@ -281,7 +311,7 @@ export default function ProfileScreen() {
         <NumberPickerModal
           visible={activeModal === "height"}
           title="身長を選択してください"
-          value={parseInt(height, 10)}
+          value={height ? parseInt(height, 10) : parseInt(DEFAULT_HEIGHT, 10)}
           min={50}
           max={250}
           unit="cm"
@@ -291,7 +321,7 @@ export default function ProfileScreen() {
         <NumberPickerModal
           visible={activeModal === "weight"}
           title="体重を選択してください"
-          value={parseInt(weight, 10)}
+          value={weight ? parseInt(weight, 10) : parseInt(DEFAULT_WEIGHT, 10)}
           min={1}
           max={300}
           unit="kg"
@@ -301,7 +331,7 @@ export default function ProfileScreen() {
         <SelectModal
           visible={activeModal === "gender"}
           title="性別を教えてください"
-          value={gender}
+          value={gender ?? DEFAULT_GENDER}
           options={genderOptions}
           onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmGender}
@@ -309,13 +339,13 @@ export default function ProfileScreen() {
         <SelectModal
           visible={activeModal === "activeLevel"}
           title="活動レベルを教えてください"
-          value={activeLevel}
+          value={activeLevel ?? DEFAULT_ACTIVE_LEVEL}
           options={activeOptions}
           onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmActiveLevel}
         />
         <DateTimePickerModal
-          date={birthday}
+          date={birthday ?? DEFAULT_BIRTHDAY}
           isVisible={isDatePickerVisible}
           mode="date"
           locale="ja"
@@ -477,5 +507,10 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.small,
     color: theme.colors.font.gray,
     marginTop: theme.spacing[2],
+  },
+  calorieEmptyText: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "700",
+    color: theme.colors.font.gray,
   },
 });

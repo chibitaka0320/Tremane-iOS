@@ -1,5 +1,5 @@
 import * as eatingApi from "@/api/eatingApi";
-import { calcGoalKcal } from "@/lib/calc";
+import { calcGoalKcal, isUserProfileComplete } from "@/lib/calc";
 import * as eatingDao from "@/localDb/dao/eatingDao";
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
 import * as userProfileDao from "@/localDb/dao/userProfileDao";
@@ -155,7 +155,7 @@ function getGoalNutrition(
   userProfile: UserProfileEntity | null,
   userGoal: UserGoalEntity | null
 ): Nutrition | null {
-  if (!userProfile || !userGoal) {
+  if (!userProfile || !userGoal || !isUserProfileComplete(userProfile)) {
     return null;
   }
 

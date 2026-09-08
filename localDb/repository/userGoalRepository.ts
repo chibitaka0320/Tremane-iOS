@@ -4,7 +4,7 @@ import * as userGoalApi from "@/api/userGoalApi";
 import { format } from "date-fns";
 import { UserGoalRequest, UserGoalResponse } from "@/types/api";
 import { UserGoalEntity } from "@/types/db";
-import { calcGoalKcal } from "@/lib/calc";
+import { calcGoalKcal, isUserProfileComplete } from "@/lib/calc";
 import { UserGoal } from "@/types/dto/userDto";
 
 // リモートDBからユーザー目標データの最新情報を同期
@@ -48,7 +48,7 @@ export async function getUserGoal(): Promise<UserGoal | null> {
 
   let goalCalorie = 0;
 
-  if (userProf && userGoal) {
+  if (userProf && userGoal && isUserProfileComplete(userProf)) {
     goalCalorie = calcGoalKcal(userProf, userGoal);
   }
 

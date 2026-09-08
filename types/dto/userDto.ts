@@ -10,12 +10,12 @@ export type UserGoal = {
 
 // ユーザープロフィールDTO
 export type UserProfile = {
-  height: number;
-  weight: number;
-  birthday: string;
-  age: number;
-  gender: number;
-  activeLevel: number;
-  bmr: number;
-  totalCalorie: number;
+  height: number | null;
+  weight: number | null;
+  birthday: string | null;
+  age: number | null;
+  gender: number | null;
+  activeLevel: number | null;
+  bmr: number | null;
+  totalCalorie: number | null;
 };

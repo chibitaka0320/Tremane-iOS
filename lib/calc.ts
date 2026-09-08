@@ -77,8 +77,33 @@ export const calcTrainingCalories = (totalSets: number, weightKg: number) => {
   return Math.round(calorie);
 };
 
+// 完全に設定済み（未設定項目がない）プロフィール
+export type CompleteUserProfileEntity = UserProfileEntity & {
+  height: number;
+  weight: number;
+  birthday: string;
+  gender: number;
+  active_level: number;
+};
+
+// プロフィールが算出に必要な項目をすべて満たしているか判定
+export const isUserProfileComplete = (
+  prof: UserProfileEntity
+): prof is CompleteUserProfileEntity => {
+  return (
+    prof.height != null &&
+    prof.weight != null &&
+    prof.birthday != null &&
+    prof.gender != null &&
+    prof.active_level != null
+  );
+};
+
 // 目標摂取カロリー算出
-export const calcGoalKcal = (prof: UserProfileEntity, goal: UserGoalEntity) => {
+export const calcGoalKcal = (
+  prof: CompleteUserProfileEntity,
+  goal: UserGoalEntity
+) => {
   const age = calcAge(prof.birthday);
   const bmr = calcBmr(prof.gender, prof.height, prof.weight, age);
   const totalCalorie = calcTotalCalorie(bmr, prof.active_level);
