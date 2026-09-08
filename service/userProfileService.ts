@@ -10,21 +10,22 @@ export async function getUserProfile(): Promise<UserProfile | null> {
   return await userProfileRepository.getUserProfile();
 }
 
-// ユーザープロフィール情報追加更新
+// ユーザープロフィール情報追加更新（未設定の項目はnullのまま送信する）
 export async function upsertUserProfile(
   userId: string,
-  height: number,
-  weight: number,
-  birthday: Date,
-  gender: number,
-  activeLevel: number
+  height: number | null,
+  weight: number | null,
+  birthday: Date | null,
+  gender: number | null,
+  activeLevel: number | null
 ) {
   const now = new Date().toISOString();
+  const formattedBirthday = birthday ? format(birthday, "yyyy-MM-dd") : null;
   const userProfileEntity: UserProfileEntity = {
     user_id: userId,
     height,
     weight,
-    birthday: format(birthday, "yyyy-MM-dd"),
+    birthday: formattedBirthday,
     gender,
     active_level: activeLevel,
     is_synced: 0,
@@ -40,7 +41,7 @@ export async function upsertUserProfile(
     userId,
     height,
     weight,
-    birthday: format(birthday, "yyyy-MM-dd"),
+    birthday: formattedBirthday,
     gender,
     activeLevel,
     createdAt: now,
