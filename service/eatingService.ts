@@ -27,6 +27,11 @@ export async function upsertEating(
   carbo: number
 ) {
   const now = new Date().toISOString();
+  // 既存レコードの場合はcreated_atを維持し、日時ソートの並び順が更新の度に変わらないようにする
+  const existingCreatedAt = await eatingRepository.getEatingCreatedAt(
+    eatingId
+  );
+  const createdAt = existingCreatedAt ?? now;
   const eatingEntities: EatingEntity[] = [
     {
       eating_id: eatingId,
@@ -39,7 +44,7 @@ export async function upsertEating(
       carbo,
       is_synced: 0,
       is_deleted: 0,
-      created_at: now,
+      created_at: createdAt,
       updated_at: now,
     },
   ];
@@ -58,7 +63,7 @@ export async function upsertEating(
       protein,
       fat,
       carbo,
-      createdAt: now,
+      createdAt,
       updatedAt: now,
     },
   ];

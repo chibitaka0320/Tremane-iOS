@@ -8,6 +8,7 @@ import { format, parseISO } from "date-fns";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -71,6 +72,25 @@ export default function TrainingDetailScreen() {
     });
   };
 
+  const onDeleteSet = (trainingId: string) => {
+    Alert.alert("", "データを削除しますか？", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "削除する",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await trainingService.deleteTraining(trainingId);
+            fetchData();
+          } catch (error) {
+            console.error("トレーニング削除失敗：" + error);
+            Alert.alert("トレーニングの削除に失敗しました。");
+          }
+        },
+      },
+    ]);
+  };
+
   const onAddSet = () => {
     router.push({
       pathname: "/(main)/(add)/training/record",
@@ -89,6 +109,13 @@ export default function TrainingDetailScreen() {
   if (isLoading) {
     return <Indicator />;
   }
+
+  const addSetButton = (
+    <TouchableOpacity style={styles.addSetButton} onPress={onAddSet}>
+      <Ionicons name="add" size={18} color={theme.colors.secondary} />
+      <Text style={styles.addSetButtonText}>セットを追加</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -111,53 +138,69 @@ export default function TrainingDetailScreen() {
         <Text style={styles.sectionLabel}>
           今回の記録（{format(parseISO(date), "yyyy/MM/dd")}）
         </Text>
-        {todaysSets.length > 0 && (
-          <View style={styles.table}>
-            <View style={styles.tableHeaderRow}>
-              <View style={styles.setCell}>
-                <Text style={styles.tableHeaderCell}>SET</Text>
-              </View>
-              <Text style={[styles.tableHeaderCell, styles.weightCell]}>
-                重量(kg)
-              </Text>
-              <Text style={[styles.tableHeaderCell, styles.valueCell]}>
-                回数(回)
-              </Text>
-              <View style={styles.chevronCell} />
-            </View>
-            {todaysSets.map((set, index) => (
-              <TouchableOpacity
-                key={set.trainingId}
-                style={styles.tableRow}
-                onPress={() => onPressSet(set.trainingId, index + 1)}
-              >
+        {todaysSets.length > 0 ? (
+          <>
+            <View style={styles.table}>
+              <View style={styles.tableHeaderRow}>
                 <View style={styles.setCell}>
-                  <Text style={[styles.tableCell, styles.setNumberText]}>
-                    {index + 1}
+                  <Text style={styles.tableHeaderCell}>SET</Text>
+                </View>
+                <Text style={[styles.tableHeaderCell, styles.weightCell]}>
+                  重量(kg)
+                </Text>
+                <Text style={[styles.tableHeaderCell, styles.valueCell]}>
+                  回数(回)
+                </Text>
+                <View style={styles.actionCell} />
+              </View>
+              {todaysSets.map((set, index) => (
+                <TouchableOpacity
+                  key={set.trainingId}
+                  style={styles.tableRow}
+                  onPress={() => onPressSet(set.trainingId, index + 1)}
+                >
+                  <View style={styles.setCell}>
+                    <Text style={[styles.tableCell, styles.setNumberText]}>
+                      {index + 1}
+                    </Text>
+                  </View>
+                  <Text style={[styles.tableCell, styles.weightCell]}>
+                    {set.weight}
                   </Text>
-                </View>
-                <Text style={[styles.tableCell, styles.weightCell]}>
-                  {set.weight}
-                </Text>
-                <Text style={[styles.tableCell, styles.valueCell]}>
-                  {set.reps}
-                </Text>
-                <View style={styles.chevronCell}>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.font.gray}
-                  />
-                </View>
-              </TouchableOpacity>
-            ))}
+                  <Text style={[styles.tableCell, styles.valueCell]}>
+                    {set.reps}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.actionCell}
+                    onPress={() => onDeleteSet(set.trainingId)}
+                  >
+                    <Ionicons
+                      name="trash-outline"
+                      size={18}
+                      color={theme.colors.font.gray}
+                    />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {addSetButton}
+          </>
+        ) : (
+          <View style={styles.emptySetsCard}>
+            <View style={styles.emptySetsIconCircle}>
+              <Ionicons
+                name="clipboard-outline"
+                size={32}
+                color={theme.colors.secondary}
+              />
+            </View>
+            <Text style={styles.emptySetsText}>まだセットがありません</Text>
+            <Text style={styles.emptySetsSubText}>
+              セットを追加して記録を始めましょう
+            </Text>
+            {addSetButton}
           </View>
         )}
-
-        <TouchableOpacity style={styles.addSetButton} onPress={onAddSet}>
-          <Ionicons name="add" size={18} color={theme.colors.secondary} />
-          <Text style={styles.addSetButtonText}>セットを追加</Text>
-        </TouchableOpacity>
 
         <Text style={styles.sectionLabel}>過去の記録（5回）</Text>
         {pastTrainings.length === 0 ? (
@@ -272,15 +315,49 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   weightCell: {
-    flex: 1.5,
+    flex: 1.2,
     textAlign: "center",
   },
-  chevronCell: {
-    width: 18,
+  actionCell: {
+    width: 36,
+    alignItems: "center",
+  },
+
+  // セットなし時の空状態
+  emptySetsCard: {
+    alignItems: "center",
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    borderWidth: 0.5,
+    borderColor: theme.colors.lightGray,
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  emptySetsIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.background.lightGray,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: theme.spacing[3],
+  },
+  emptySetsText: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    color: theme.colors.dark,
+    marginBottom: theme.spacing[1],
+  },
+  emptySetsSubText: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginBottom: theme.spacing[4],
   },
 
   // セット追加ボタン
   addSetButton: {
+    alignSelf: "stretch",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",

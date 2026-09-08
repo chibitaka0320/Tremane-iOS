@@ -1,6 +1,5 @@
 import Indicator from "@/components/common/Indicator";
 import { ApiError } from "@/lib/error";
-import { auth } from "@/lib/firebaseConfig";
 import * as authSercice from "@/service/authService";
 import theme from "@/styles/theme";
 import { Feather, MaterialIcons, SimpleLineIcons } from "@expo/vector-icons";
@@ -27,15 +26,8 @@ export default function MenuScreen() {
     router.push("/(main)/(menu)/goal");
   };
 
-  // TODO: 画面ができ次第の実装
   const onAccount = () => {
-    const user = auth.currentUser;
-
-    if (user?.isAnonymous) {
-      router.push("/(main)/(menu)/account/anonymous");
-    } else {
-      router.push("/(main)/(menu)/account/menu");
-    }
+    router.push("/(main)/(menu)/account/menu");
   };
 
   // ローディング時にヘッダーボタンを非表示

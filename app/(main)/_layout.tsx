@@ -5,6 +5,7 @@ export default function MainLayout() {
     <Stack
       screenOptions={{
         headerTitle: "",
+        headerBackTitle: "",
         headerShown: true,
       }}
     >

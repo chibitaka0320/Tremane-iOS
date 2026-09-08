@@ -1,6 +1,7 @@
 import * as authApi from "@/api/authApi";
 import theme from "@/styles/theme";
 import { Link, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -142,16 +143,30 @@ export default function SignInScreen() {
             >
               <Text style={styles.buttonText}>ログイン</Text>
             </TouchableOpacity>
-            <Link href={"/(auth)/resetPassword"} style={styles.link}>
-              パスワードを忘れた場合
+            <Link href={"/(auth)/resetPassword"} style={styles.forgotPasswordLink}>
+              パスワードを忘れた方
             </Link>
-            <TouchableOpacity
-              onPress={() => {
-                router.navigate("/(auth)/signUp");
-              }}
-            >
-              <Text style={styles.link}>アカウントをお持ちでない場合</Text>
-            </TouchableOpacity>
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>または</Text>
+              <View style={styles.dividerLine} />
+            </View>
+            <View style={styles.signUpRow}>
+              <Text style={styles.signUpText}>アカウントをお持ちでない方</Text>
+              <TouchableOpacity
+                style={styles.signUpButton}
+                onPress={() => {
+                  router.navigate("/(auth)/signUp");
+                }}
+              >
+                <Text style={styles.signUpLink}>新規登録</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={theme.colors.secondary}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -212,14 +227,48 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
 
-  linksContainer: {
-    marginTop: theme.spacing[6],
+  // パスワードを忘れた場合リンク
+  forgotPasswordLink: {
+    marginTop: theme.spacing[2],
+    textAlign: "center",
+    color: theme.colors.secondary,
+    fontWeight: "bold",
+  },
+
+  // 区切り線（または）
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: theme.spacing[5],
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.lightGray,
+  },
+  dividerText: {
+    marginHorizontal: theme.spacing[3],
+    color: theme.colors.font.gray,
+    fontSize: theme.fontSizes.small,
+  },
+
+  // 新規登録
+  signUpRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: theme.spacing[2],
+  },
+  signUpText: {
+    color: theme.colors.font.gray,
+  },
+  signUpButton: {
+    flexDirection: "row",
     alignItems: "center",
   },
-  link: {
-    marginTop: theme.spacing[2],
-    marginBottom: theme.spacing[5],
-    textAlign: "center",
+  signUpLink: {
+    color: theme.colors.secondary,
+    fontWeight: "bold",
   },
   loading: {
     flex: 1,

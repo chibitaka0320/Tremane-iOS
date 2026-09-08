@@ -38,3 +38,9 @@ export function validatePfc(pfc: string): boolean {
 export function validateReps(reps: string): boolean {
   return reps != "" && !isNaN(parseInt(reps));
 }
+
+// ID（検索用ハンドル）：半角英数字と _ . - のみ、8〜16文字
+export function validateHandle(handle: string): boolean {
+  const regex = /^[A-Za-z0-9_.-]{8,16}$/;
+  return regex.test(handle);
+}

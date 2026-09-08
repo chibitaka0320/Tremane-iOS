@@ -3,6 +3,7 @@
 export type UserResponse = {
   userId: string;
   nickname: string;
+  handle: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -10,11 +11,11 @@ export type UserResponse = {
 // ユーザープロフィール情報取得API
 export type UserProfileResponse = {
   userId: string;
-  height: number;
-  weight: number;
-  birthday: string;
-  gender: number;
-  activeLevel: number;
+  height: number | null;
+  weight: number | null;
+  birthday: string | null;
+  gender: number | null;
+  activeLevel: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -75,10 +76,10 @@ export type BodyPartResponse = {
   updatedAt: string;
 };
 
-// ユーザーメールアドレス検索API
+// ユーザーID検索API
 export type UserSearchResponse = {
   userId: string;
-  email: string;
+  handle: string;
   nickname: string;
   status: string;
   requestId: string;
@@ -100,6 +101,10 @@ export type TimelineTrainingResponse = {
     partsId: number;
     bodyPartsName: string;
   }[];
+  exerciseCount: number;
+  totalVolume: number;
+  estimatedCalories: number | null;
+  lastActivityAt: string;
 };
 
 // トレーニングランキング取得API
@@ -131,11 +136,11 @@ export type FriendRequestResponse = {
 // ユーザープロフィール情報追加更新API
 export type UserProfileRequest = {
   userId: string;
-  height: number;
-  weight: number;
-  birthday: string;
-  gender: number;
-  activeLevel: number;
+  height: number | null;
+  weight: number | null;
+  birthday: string | null;
+  gender: number | null;
+  activeLevel: number | null;
   createdAt: string;
   updatedAt: string;
 };

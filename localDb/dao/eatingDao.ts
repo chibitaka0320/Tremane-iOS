@@ -69,6 +69,17 @@ export async function getNutritionTotalByDate(
   return nutrition;
 }
 
+// 食事IDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getEatingCreatedAt(
+  eatingId: string
+): Promise<string | null> {
+  const row = await db.getFirstAsync<{ created_at: string }>(
+    `SELECT created_at FROM eatings WHERE eating_id = ?;`,
+    [eatingId]
+  );
+  return row?.created_at ?? null;
+}
+
 // 食事詳細取得
 export async function getEating(eatingId: string): Promise<MealRecord | null> {
   const eating = await db.getFirstAsync<MealRecord>(

@@ -3,8 +3,14 @@ import * as userApi from "@/api/userApi";
 import { auth } from "@/lib/firebaseConfig";
 import * as userRepository from "@/localDb/repository/userRepository";
 import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
+import { UserResponse } from "@/types/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as firebaseAuth from "firebase/auth";
+
+// ユーザー情報取得
+export async function getUser(): Promise<UserResponse | null> {
+  return await userApi.getUser();
+}
 
 // ユーザー情報の登録
 export async function registerUser(
@@ -45,50 +51,6 @@ export async function registerUser(
   }
 }
 
-// 匿名ユーザーの登録
-export async function registerAnonymous() {
-  // Firebaseに匿名登録
-  const userCredential = await firebaseAuth.signInAnonymously(auth);
-  const user = userCredential.user;
-
-  // リモートDB追加
-  try {
-    // ニックネームは空文字
-    await authApi.signupUser(user.uid, "");
-  } catch (error) {
-    // エラーの場合はFirebaseのユーザー削除。
-    console.error("APIエラー（匿名ユーザー登録）：" + error);
-    await firebaseAuth.deleteUser(user);
-    throw new Error("登録処理に失敗しました。");
-  }
-}
-
-// 匿名ユーザーのパスワード認証登録
-export async function registerAnonymousToUser(
-  user: firebaseAuth.User,
-  email: string,
-  password: string,
-  nickname: string
-) {
-  const now = new Date().toISOString();
-
-  // Firebaseの認証方法をパスワード認証に変更
-  const userCredential = firebaseAuth.EmailAuthProvider.credential(
-    email,
-    password
-  );
-  await firebaseAuth.updateProfile(user, { displayName: nickname });
-  await firebaseAuth.linkWithCredential(user, userCredential);
-
-  // LocalDB更新
-  await userRepository.updateUser(nickname, now);
-
-  // リモートDB更新（非同期）
-  userApi
-    .updateUser(nickname, now)
-    .catch((error) => console.error("APIエラー(ユーザー情報更新)：" + error));
-}
-
 // ユーザー情報の更新
 export async function updateUser(user: firebaseAuth.User, nickname: string) {
   const now = new Date().toISOString();
@@ -104,6 +66,11 @@ export async function updateUser(user: firebaseAuth.User, nickname: string) {
   userApi
     .updateUser(nickname, now)
     .catch((error) => console.error("APIエラー(ユーザー情報更新)：" + error));
+}
+
+// ID（検索用ハンドル）の更新
+export async function updateHandle(handle: string): Promise<void> {
+  await userApi.updateHandle(handle);
 }
 
 // ユーザー削除（退会）

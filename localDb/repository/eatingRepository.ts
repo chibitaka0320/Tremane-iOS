@@ -1,5 +1,5 @@
 import * as eatingApi from "@/api/eatingApi";
-import { calcGoalKcal } from "@/lib/calc";
+import { calcGoalKcal, isUserProfileComplete } from "@/lib/calc";
 import * as eatingDao from "@/localDb/dao/eatingDao";
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
 import * as userProfileDao from "@/localDb/dao/userProfileDao";
@@ -69,11 +69,11 @@ export async function getEatingByDate(date: string): Promise<DailyEating> {
     total = { calories: 0, protein: 0, fat: 0, carbo: 0 };
   }
 
-  // 目標摂取栄養素
+  // 目標摂取栄養素（未設定の場合はnull）
   const goal = getGoalNutrition(userProfile, userGoal);
 
   // 目標達成比率
-  const rate = getRateNutrition(total, goal);
+  const rate = getRateNutrition(total, goal ?? EMPTY_NUTRITION);
 
   // 食事内容
   const meals = await eatingDao.getEatingsByDate(date);
@@ -84,6 +84,13 @@ export async function getEatingByDate(date: string): Promise<DailyEating> {
 // 食事詳細情報取得
 export async function getEating(eatingId: string): Promise<MealRecord | null> {
   return await eatingDao.getEating(eatingId);
+}
+
+// 食事IDから登録日時を取得（既存レコードかどうかの判定に使用）
+export async function getEatingCreatedAt(
+  eatingId: string
+): Promise<string | null> {
+  return await eatingDao.getEatingCreatedAt(eatingId);
 }
 
 // 食事情報追加更新
@@ -140,41 +147,43 @@ function toRequest(eatingEntity: EatingEntity): EatingResponse {
   };
 }
 
-// ユーザーの目標摂取栄養素を取得
+// 未設定時の栄養素（達成比率算出用のフォールバック）
+const EMPTY_NUTRITION: Nutrition = { calories: 0, protein: 0, fat: 0, carbo: 0 };
+
+// ユーザーの目標摂取栄養素を取得（プロフィールまたは目標が未設定の場合はnull）
 function getGoalNutrition(
   userProfile: UserProfileEntity | null,
   userGoal: UserGoalEntity | null
-): Nutrition {
-  // 栄養素初期化
-  let calories = 0;
+): Nutrition | null {
+  if (!userProfile || !userGoal || !isUserProfileComplete(userProfile)) {
+    return null;
+  }
+
+  // 目標摂取カロリー算出
+  const calories = calcGoalKcal(userProfile, userGoal);
+
+  // 目標PFC栄養素算出
+  // TODO: 比率の保持については改善
   let protein = 0;
   let fat = 0;
   let carbo = 0;
-
-  if (userProfile && userGoal) {
-    // 目標摂取カロリー算出
-    calories = calcGoalKcal(userProfile, userGoal);
-
-    // 目標PFC栄養素算出
-    // TODO: 比率の保持については改善
-    if (calories > 0) {
-      switch (Number(userGoal.pfc)) {
-        case 0:
-          protein = Math.round((calories * 0.4) / 4);
-          fat = Math.round((calories * 0.2) / 9);
-          carbo = Math.round((calories * 0.4) / 4);
-          break;
-        case 1:
-          protein = Math.round((calories * 0.3) / 4);
-          fat = Math.round((calories * 0.2) / 9);
-          carbo = Math.round((calories * 0.5) / 4);
-          break;
-        case 2:
-          protein = Math.round((calories * 0.55) / 4);
-          fat = Math.round((calories * 0.25) / 9);
-          carbo = Math.round((calories * 0.5) / 4);
-          break;
-      }
+  if (calories > 0) {
+    switch (Number(userGoal.pfc)) {
+      case 0:
+        protein = Math.round((calories * 0.4) / 4);
+        fat = Math.round((calories * 0.2) / 9);
+        carbo = Math.round((calories * 0.4) / 4);
+        break;
+      case 1:
+        protein = Math.round((calories * 0.3) / 4);
+        fat = Math.round((calories * 0.2) / 9);
+        carbo = Math.round((calories * 0.5) / 4);
+        break;
+      case 2:
+        protein = Math.round((calories * 0.55) / 4);
+        fat = Math.round((calories * 0.25) / 9);
+        carbo = Math.round((calories * 0.5) / 4);
+        break;
     }
   }
   return { calories, protein, fat, carbo };

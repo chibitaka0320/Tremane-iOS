@@ -1,5 +1,6 @@
 import theme from "@/styles/theme";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -48,20 +49,6 @@ export default function SignUpScreen() {
       } else {
         Alert.alert("登録処理に失敗しました。");
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 匿名ユーザー登録処理
-  const anonymous = async () => {
-    setIsLoading(true);
-    try {
-      await userService.registerAnonymous();
-      router.replace("/(main)/(tabs)/(home)/training");
-    } catch (error) {
-      console.error("匿名ユーザー登録失敗：" + error);
-      Alert.alert("登録処理に失敗しました。");
     } finally {
       setIsLoading(false);
     }
@@ -128,17 +115,27 @@ export default function SignUpScreen() {
               >
                 <Text style={styles.buttonText}>新規登録</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={anonymous} activeOpacity={0.7}>
-                <Text style={styles.link}>登録せずに使用する</Text>
-              </TouchableOpacity>
-
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>または</Text>
+                <View style={styles.dividerLine} />
+              </View>
+              <Text style={styles.backToLoginText}>
+                すでにアカウントをお持ちの方
+              </Text>
               <TouchableOpacity
+                style={styles.backToLoginButton}
                 onPress={() => {
                   router.navigate("/(auth)/signIn");
                 }}
                 activeOpacity={0.7}
               >
-                <Text style={styles.link}>すでにアカウントをお持ちの場合</Text>
+                <Text style={styles.backToLoginLink}>ログインに戻る</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={theme.colors.secondary}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -154,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.lightGray,
     paddingTop: theme.spacing[5],
     paddingHorizontal: theme.spacing[5],
-    paddingBottom: theme.spacing[5],
+    paddingBottom: theme.spacing[7],
   },
   // タイトル
   titleContainer: {
@@ -207,14 +204,39 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
 
-  linksContainer: {
-    marginTop: theme.spacing[6],
+  // 区切り線（または）
+  dividerRow: {
+    marginTop: theme.spacing[3],
+    flexDirection: "row",
     alignItems: "center",
-  },
-  link: {
-    marginTop: theme.spacing[2],
     marginBottom: theme.spacing[5],
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.lightGray,
+  },
+  dividerText: {
+    marginHorizontal: theme.spacing[3],
+    color: theme.colors.font.gray,
+    fontSize: theme.fontSizes.small,
+  },
+
+  // ログインに戻る
+  backToLoginText: {
     textAlign: "center",
+    color: theme.colors.font.gray,
+    marginBottom: theme.spacing[1],
+  },
+  backToLoginButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: theme.spacing[1],
+  },
+  backToLoginLink: {
+    color: theme.colors.secondary,
+    fontWeight: "bold",
   },
   loading: {
     flex: 1,

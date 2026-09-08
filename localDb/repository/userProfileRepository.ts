@@ -3,7 +3,7 @@ import * as userProfileApi from "@/api/userProfileApi";
 import { format } from "date-fns";
 import { UserProfileRequest, UserProfileResponse } from "@/types/api";
 import { UserProfileEntity } from "@/types/db";
-import { calcAge, calcBmr, calcTotalCalorie } from "@/lib/calc";
+import { calcAge, calcBmr, calcTotalCalorie, isUserProfileComplete } from "@/lib/calc";
 import { UserProfile } from "@/types/dto/userDto";
 
 // リモートDBからユーザープロフィールデータの最新情報を同期
@@ -45,14 +45,20 @@ export async function getUserProfile(): Promise<UserProfile | null> {
   const userProfile = await userProfileDao.getUserProfile();
 
   if (userProfile) {
-    const age = calcAge(userProfile.birthday);
-    const bmr = calcBmr(
-      userProfile.gender,
-      userProfile.height,
-      userProfile.weight,
-      age
-    );
-    const totalCalorie = calcTotalCalorie(bmr, userProfile.active_level);
+    let age = null;
+    let bmr = null;
+    let totalCalorie = null;
+
+    if (isUserProfileComplete(userProfile)) {
+      age = calcAge(userProfile.birthday);
+      bmr = calcBmr(
+        userProfile.gender,
+        userProfile.height,
+        userProfile.weight,
+        age
+      );
+      totalCalorie = calcTotalCalorie(bmr, userProfile.active_level);
+    }
 
     return {
       height: userProfile.height,

@@ -83,27 +83,9 @@ export default function TrainingEditScreen() {
     }
   };
 
-  // トレーニング削除処理
-  const onDeleteTraining = async () => {
-    Alert.alert("", "データを削除しますか？", [
-      { text: "キャンセル", style: "cancel" },
-      {
-        text: "削除する",
-        style: "destructive",
-        onPress: async () => {
-          setSubmitting(true);
-          try {
-            await trainingService.deleteTraining(trainingId);
-            router.back();
-          } catch (error) {
-            console.error("トレーニング削除失敗：" + error);
-            Alert.alert("トレーニングの削除に失敗しました。");
-          } finally {
-            setSubmitting(false);
-          }
-        },
-      },
-    ]);
+  // キャンセル処理
+  const onCancel = () => {
+    router.back();
   };
 
   if (isLoading) {
@@ -181,11 +163,11 @@ export default function TrainingEditScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.deleteButton, isSubmitting && styles.buttonDisabled]}
-            onPress={onDeleteTraining}
+            style={[styles.cancelButton, isSubmitting && styles.buttonDisabled]}
+            onPress={onCancel}
             disabled={isSubmitting}
           >
-            <Text style={styles.buttonText}>削除</Text>
+            <Text style={styles.buttonText}>キャンセル</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -297,7 +279,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: theme.spacing[3],
   },
-  deleteButton: {
+  cancelButton: {
     backgroundColor: theme.colors.dark,
     borderRadius: 5,
     paddingVertical: theme.spacing[3],

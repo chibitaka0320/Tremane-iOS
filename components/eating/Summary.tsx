@@ -9,7 +9,7 @@ const screenWidth = Dimensions.get("window").width / 2.4;
 
 type Props = {
   total?: Nutrition;
-  goal?: Nutrition;
+  goal?: Nutrition | null;
   rate?: Nutrition;
 };
 

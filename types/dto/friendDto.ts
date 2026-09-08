@@ -20,4 +20,8 @@ export type TrainingTimeline = {
     partsId: number;
     bodyPartsName: string;
   }[];
+  exerciseCount: number;
+  totalVolume: number;
+  estimatedCalories: number | null;
+  lastActivityAt: string;
 };
