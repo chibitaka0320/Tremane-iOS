@@ -1,7 +1,7 @@
 import { JSX, useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { createMaterialTopTabNavigator } from "expo-router/js-top-tabs";
 import { CalendarProvider, Agenda } from "react-native-calendars";
 
 import TrainingScreen from "./training";

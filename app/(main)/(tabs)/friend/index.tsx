@@ -1,4 +1,4 @@
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { createMaterialTopTabNavigator } from "expo-router/js-top-tabs";
 import FriendScreen from "./timeline";
 import { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
