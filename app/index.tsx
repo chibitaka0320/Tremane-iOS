@@ -55,7 +55,7 @@ export default function Index() {
   return (
     <Redirect
       href={
-        isAuthenticated ? "/(main)/(tabs)/(home)/training" : "/(auth)/signIn"
+        isAuthenticated ? "/(main)/(tabs)/(home)" : "/(auth)/signIn"
       }
     />
   );

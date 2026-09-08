@@ -113,7 +113,6 @@ export default function TrainingRecordScreen() {
         router.back();
       } else {
         router.dismissAll();
-        router.replace("/(main)/(tabs)/(home)/training");
       }
     } catch (error) {
       console.error("トレーニング記録失敗：" + error);
