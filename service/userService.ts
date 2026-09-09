@@ -87,6 +87,38 @@ export async function loginWithApple(
   await userSyncFromRemote();
 }
 
+// Googleサインイン（初回のみリモートDBにユーザー登録を行う）
+export async function loginWithGoogle(
+  idToken: string,
+  nickname: string | null
+): Promise<void> {
+  const credential = firebaseAuth.GoogleAuthProvider.credential(idToken);
+
+  const userCredential = await firebaseAuth.signInWithCredential(
+    auth,
+    credential
+  );
+  const user = userCredential.user;
+  const isNewUser =
+    firebaseAuth.getAdditionalUserInfo(userCredential)?.isNewUser ?? false;
+
+  if (isNewUser) {
+    const displayName = nickname ?? "名称未設定";
+    await firebaseAuth.updateProfile(user, { displayName });
+
+    try {
+      await authApi.signupUser(user.uid, displayName);
+    } catch (error) {
+      // エラーの場合はFirebaseのユーザー削除。
+      console.error("APIエラー（Google認証ユーザー登録）：" + error);
+      await firebaseAuth.deleteUser(user);
+      throw new Error("登録処理に失敗しました。");
+    }
+  }
+
+  await userSyncFromRemote();
+}
+
 // ユーザー情報の更新
 export async function updateUser(user: firebaseAuth.User, nickname: string) {
   const now = new Date().toISOString();

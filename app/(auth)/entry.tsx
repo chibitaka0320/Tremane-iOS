@@ -4,11 +4,21 @@ import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
 import * as userService from "@/service/userService";
 import theme from "@/styles/theme";
 import { AntDesign } from "@expo/vector-icons";
+import {
+  GoogleSignin,
+  isSuccessResponse,
+  type User as GoogleUser,
+} from "@react-native-google-signin/google-signin";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+GoogleSignin.configure({
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+});
 
 // Apple提供の氏名からニックネームを組み立てる（氏名は初回認証時のみ取得可能）
 function buildNicknameFromAppleFullName(
@@ -16,6 +26,15 @@ function buildNicknameFromAppleFullName(
 ): string | null {
   if (!fullName) return null;
   const name = [fullName.familyName, fullName.givenName]
+    .filter((part): part is string => !!part)
+    .join(" ");
+  return name || null;
+}
+
+// Google提供のプロフィールからニックネームを組み立てる
+function buildNicknameFromGoogleUser(user: GoogleUser["user"]): string | null {
+  if (user.name) return user.name;
+  const name = [user.familyName, user.givenName]
     .filter((part): part is string => !!part)
     .join(" ");
   return name || null;
@@ -78,8 +97,35 @@ export default function AuthEntryScreen() {
     }
   };
 
-  // TODO: Googleサインインを実装する
-  const onGooglePress = () => {};
+  const onGooglePress = async () => {
+    try {
+      const response = await GoogleSignin.signIn();
+      if (!isSuccessResponse(response)) {
+        // ユーザーによるキャンセルは何もしない
+        return;
+      }
+
+      const { idToken, user } = response.data;
+      if (!idToken) {
+        throw new Error("idTokenを取得できませんでした。");
+      }
+
+      setIsLoading(true);
+
+      const nickname = buildNicknameFromGoogleUser(user);
+      await userService.loginWithGoogle(idToken, nickname);
+
+      // TODO: 通知機能はpennding
+      await registerPushTokenIfNeeded();
+
+      router.replace("/training");
+    } catch (error: any) {
+      console.error("Google認証失敗：" + error);
+      Alert.alert("Googleサインインに失敗しました");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onEmailPress = () => {
     router.navigate("/signIn");
