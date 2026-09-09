@@ -41,11 +41,14 @@ export default function SignUpScreen() {
     setIsLoading(true);
     try {
       await userService.registerUser(email, password, nickname);
-      router.replace("/(auth)/authMail");
+      router.replace("/authMail");
     } catch (error: any) {
       console.error("ユーザー登録失敗：" + error);
       if (error.code === "auth/email-already-in-use") {
-        Alert.alert("すでに登録されているメールアドレスです。");
+        Alert.alert(
+          "すでに登録されているメールアドレスです",
+          "Apple認証などで登録済みの可能性があります。該当する方法でログインしてください。"
+        );
       } else {
         Alert.alert("登録処理に失敗しました。");
       }
@@ -126,7 +129,7 @@ export default function SignUpScreen() {
               <TouchableOpacity
                 style={styles.backToLoginButton}
                 onPress={() => {
-                  router.navigate("/(auth)/signIn");
+                  router.back();
                 }}
                 activeOpacity={0.7}
               >

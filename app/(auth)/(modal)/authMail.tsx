@@ -20,7 +20,7 @@ export default function AuthMailScreen() {
   const currentUser = auth.currentUser;
 
   if (!currentUser) {
-    return <Redirect href={"/(auth)/signUp"} />;
+    return <Redirect href={"/signUp"} />;
   }
 
   // メール認証ボタン
@@ -67,7 +67,7 @@ export default function AuthMailScreen() {
     } catch (error) {
       console.error("メール認証画面から戻る時にエラー：", error);
     } finally {
-      router.replace("/(auth)/signUp");
+      router.replace("/signUp");
     }
   };
 

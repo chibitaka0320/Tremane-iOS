@@ -41,7 +41,7 @@ export default function MenuScreen() {
       await authSercice.signout();
 
       router.dismissAll();
-      router.replace("/(auth)/signIn");
+      router.replace("/(auth)/entry");
     } catch (error) {
       Alert.alert("ログアウトに失敗しました");
       if (error instanceof ApiError) {

@@ -18,7 +18,7 @@ export async function handleUnauthorized() {
     await clearLocalDb();
 
     router.dismissAll();
-    router.replace("/(auth)/signIn");
+    router.replace("/(auth)/entry");
   } finally {
     isHandling = false;
   }
