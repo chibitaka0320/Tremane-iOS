@@ -1,12 +1,18 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { MaterialIcons, Feather } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { auth } from "@/lib/firebaseConfig";
 import theme from "@/styles/theme";
 
-const COLOR = "#8C8C88";
-const FONTSIZE = 16;
+const PASSWORD_MASK = "••••••••";
 
 export default function AccountMenuScreen() {
+  const currentUser = auth.currentUser;
+  const isAppleUser =
+    currentUser?.providerData.some(
+      (provider) => provider.providerId === "apple.com"
+    ) ?? false;
+
   const onChangeMail = () => {
     router.push("/(main)/(menu)/account/email");
   };
@@ -21,30 +27,57 @@ export default function AccountMenuScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.item} onPress={onChangeMail}>
-        <View style={styles.itemLeft}>
-          <Feather name="mail" size={20} style={styles.itemIcon} />
-          <Text style={styles.itemName}>メールアドレスを変更</Text>
-        </View>
-        <MaterialIcons name="arrow-forward-ios" size={20} color={COLOR} />
-      </TouchableOpacity>
+      <Row
+        label="メールアドレス"
+        value={currentUser?.email ?? ""}
+        onPress={isAppleUser ? undefined : onChangeMail}
+      />
+      <Row
+        label="パスワード"
+        value={PASSWORD_MASK}
+        onPress={isAppleUser ? undefined : onChangePassword}
+      />
 
-      <TouchableOpacity style={styles.item} onPress={onChangePassword}>
-        <View style={styles.itemLeft}>
-          <Feather name="lock" size={20} style={styles.itemIcon} />
-          <Text style={styles.itemName}>パスワードを変更</Text>
-        </View>
-        <MaterialIcons name="arrow-forward-ios" size={20} color={COLOR} />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.item} onPress={onDeleteAccount}>
-        <View style={styles.itemLeft}>
-          <Text style={[styles.itemName, { color: "red" }]}>
-            アカウントを削除する
-          </Text>
-        </View>
+      <TouchableOpacity style={styles.deleteItem} onPress={onDeleteAccount}>
+        <Text style={[styles.itemLabel, { color: "red" }]}>
+          アカウントを削除する
+        </Text>
       </TouchableOpacity>
     </View>
+  );
+}
+
+type RowProps = {
+  label: string;
+  value: string;
+  onPress?: () => void;
+};
+
+function Row({ label, value, onPress }: RowProps) {
+  const content = (
+    <View style={styles.item}>
+      <Text style={styles.itemLabel}>{label}</Text>
+      <View style={styles.itemRight}>
+        <Text style={styles.itemValue}>{value}</Text>
+        {onPress ? (
+          <MaterialIcons
+            name="arrow-forward-ios"
+            size={14}
+            color={theme.colors.font.gray}
+          />
+        ) : null}
+      </View>
+    </View>
+  );
+
+  if (!onPress) {
+    return content;
+  }
+
+  return (
+    <TouchableOpacity activeOpacity={0.6} onPress={onPress}>
+      {content}
+    </TouchableOpacity>
   );
 }
 
@@ -56,19 +89,30 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.light,
   },
   item: {
-    paddingVertical: theme.spacing[3],
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: theme.spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
   },
-  itemLeft: {
+  deleteItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.spacing[4],
+  },
+  itemLabel: {
+    fontSize: 16,
+    color: theme.colors.font.black,
+  },
+  itemRight: {
     flexDirection: "row",
     alignItems: "center",
+    gap: theme.spacing[2],
   },
-  itemIcon: {
-    marginRight: theme.spacing[3],
-  },
-  itemName: {
-    fontSize: FONTSIZE,
+  itemValue: {
+    fontSize: 16,
+    color: theme.colors.font.gray,
   },
 });
