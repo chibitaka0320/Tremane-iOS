@@ -41,7 +41,7 @@ export default function SignUpScreen() {
     setIsLoading(true);
     try {
       await userService.registerUser(email, password, nickname);
-      router.replace("/(auth)/authMail");
+      router.replace("/authMail");
     } catch (error: any) {
       console.error("ユーザー登録失敗：" + error);
       if (error.code === "auth/email-already-in-use") {
@@ -126,7 +126,7 @@ export default function SignUpScreen() {
               <TouchableOpacity
                 style={styles.backToLoginButton}
                 onPress={() => {
-                  router.navigate("/(auth)/signIn");
+                  router.back();
                 }}
                 activeOpacity={0.7}
               >

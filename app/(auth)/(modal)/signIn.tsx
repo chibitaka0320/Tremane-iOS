@@ -21,9 +21,12 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import Indicator from "@/components/common/Indicator";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /** ログイン画面 */
 export default function SignInScreen() {
+  const insets = useSafeAreaInsets();
+
   // 表示項目
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -110,6 +113,13 @@ export default function SignInScreen() {
         <View style={{ flex: 1 }}>
           <View style={styles.headerContainer}>
             <Header />
+            <TouchableOpacity
+              style={[styles.closeButton, { top: insets.top - theme.spacing[4] }]}
+              onPress={() => router.dismissAll()}
+              hitSlop={8}
+            >
+              <Ionicons name="close" size={28} color={theme.colors.black} />
+            </TouchableOpacity>
           </View>
           <View style={styles.contentContainer}>
             <View style={styles.titleContainer}>
@@ -143,7 +153,7 @@ export default function SignInScreen() {
             >
               <Text style={styles.buttonText}>ログイン</Text>
             </TouchableOpacity>
-            <Link href={"/(auth)/resetPassword"} style={styles.forgotPasswordLink}>
+            <Link href={"/resetPassword"} style={styles.forgotPasswordLink}>
               パスワードを忘れた方
             </Link>
             <View style={styles.dividerRow}>
@@ -156,7 +166,7 @@ export default function SignInScreen() {
               <TouchableOpacity
                 style={styles.signUpButton}
                 onPress={() => {
-                  router.navigate("/(auth)/signUp");
+                  router.navigate("/signUp");
                 }}
               >
                 <Text style={styles.signUpLink}>新規登録</Text>
@@ -177,6 +187,10 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   headerContainer: {
     height: "25%",
+  },
+  closeButton: {
+    position: "absolute",
+    right: theme.spacing[3],
   },
   contentContainer: {
     flex: 1,

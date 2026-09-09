@@ -66,7 +66,7 @@ export default function EmailEditScreen() {
                 await signOut(auth);
                 await clearLocalDb();
                 router.dismissAll();
-                router.replace("/(auth)/signIn");
+                router.replace("/(auth)/entry");
               } catch (error) {
                 Alert.alert("エラー");
               }
