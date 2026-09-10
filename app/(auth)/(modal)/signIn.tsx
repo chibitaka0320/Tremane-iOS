@@ -111,16 +111,6 @@ export default function SignInScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-          <View style={styles.headerContainer}>
-            <Header />
-            <TouchableOpacity
-              style={[styles.closeButton, { top: insets.top - theme.spacing[4] }]}
-              onPress={() => router.dismissAll()}
-              hitSlop={8}
-            >
-              <Ionicons name="close" size={28} color={theme.colors.black} />
-            </TouchableOpacity>
-          </View>
           <View style={styles.contentContainer}>
             <View style={styles.titleContainer}>
               <View style={styles.line} />
@@ -186,7 +176,8 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    height: "25%",
+    height: "8%",
+    backgroundColor: theme.colors.background.lightGray,
   },
   closeButton: {
     position: "absolute",

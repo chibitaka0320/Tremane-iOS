@@ -70,11 +70,6 @@ export default function SignUpScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ flexGrow: 1 }}>
-            <View
-              style={[styles.headerContainer, { height: windowHeight * 0.25 }]}
-            >
-              <Header />
-            </View>
             <View style={styles.contentContainer}>
               <View style={styles.titleContainer}>
                 <View style={styles.line} />
