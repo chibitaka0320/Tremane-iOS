@@ -8,6 +8,21 @@ function toGoogleIosUrlScheme(clientId: string | undefined): string | undefined 
   return `com.googleusercontent.apps.${prefix}`;
 }
 
+const googleIosUrlScheme = toGoogleIosUrlScheme(
+  process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
+);
+
+// EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID未設定時（`eas env:pull`の内部評価など、
+// 本来の環境変数がまだロードされていないタイミング）にconfig plugin側の
+// 必須チェックでconfig評価自体が失敗してしまうため、値がある場合のみ登録する
+const googleSignInPlugin: readonly [string, Record<string, unknown>] | null =
+  googleIosUrlScheme
+    ? [
+        "@react-native-google-signin/google-signin",
+        { iosUrlScheme: googleIosUrlScheme },
+      ]
+    : null;
+
 const config: ExpoConfig = {
   name: "Tremane",
   slug: "Tremane",
@@ -52,14 +67,7 @@ const config: ExpoConfig = {
     "expo-image",
     "expo-status-bar",
     "expo-apple-authentication",
-    [
-      "@react-native-google-signin/google-signin",
-      {
-        iosUrlScheme: toGoogleIosUrlScheme(
-          process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
-        ),
-      },
-    ],
+    ...(googleSignInPlugin ? [googleSignInPlugin] : []),
   ],
   experiments: {
     typedRoutes: true,
