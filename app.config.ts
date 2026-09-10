@@ -37,6 +37,10 @@ const config: ExpoConfig = {
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
+    associatedDomains: [
+      "applinks:tremane-0320.web.app",
+      "applinks:tremane-dev.web.app",
+    ],
   },
   android: {
     adaptiveIcon: {
