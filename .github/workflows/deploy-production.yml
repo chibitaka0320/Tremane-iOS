@@ -24,6 +24,11 @@ jobs:
       - name: Write App Store Connect API key
         run: echo "${{ secrets.ASC_API_KEY }}" > AuthKey.p8
 
+      - name: Pull EAS environment variables
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: npx eas-cli env:pull --environment production
+
       - name: Build and auto-submit to TestFlight
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
