@@ -24,6 +24,14 @@ export default function AuthModalLayout() {
         }}
       />
       <Stack.Screen
+        name="resetPasswordConfirm"
+        options={{
+          headerShown: true,
+          headerBackVisible: false,
+          headerTitle: "パスワード再設定",
+        }}
+      />
+      <Stack.Screen
         name="authMail"
         options={{
           headerShown: true,
