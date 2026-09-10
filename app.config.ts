@@ -26,7 +26,7 @@ const googleSignInPlugin: readonly [string, Record<string, unknown>] | null =
 const config: ExpoConfig = {
   name: "Tremane",
   slug: "Tremane",
-  version: "1.0.4",
+  version: "1.0.5",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "tremane",
