@@ -34,3 +34,10 @@ export async function sendChangeEmailVerification(
     newEmail,
   });
 }
+
+// POST /auth/verify-email-change-code
+export async function verifyEmailChangeCode(code: string): Promise<void> {
+  await apiRequestAuth<void>("/auth/verify-email-change-code", "POST", {
+    code,
+  });
+}
