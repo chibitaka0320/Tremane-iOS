@@ -3,6 +3,7 @@ import * as userApi from "@/api/userApi";
 import { auth } from "@/lib/firebaseConfig";
 import * as userRepository from "@/localDb/repository/userRepository";
 import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
+import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import { UserResponse } from "@/types/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as firebaseAuth from "firebase/auth";
@@ -49,6 +50,73 @@ export async function registerUser(
     await firebaseAuth.deleteUser(user);
     throw new Error("登録処理に失敗しました。");
   }
+}
+
+// Appleサインイン（初回のみリモートDBにユーザー登録を行う）
+export async function loginWithApple(
+  identityToken: string,
+  rawNonce: string,
+  nickname: string | null
+): Promise<void> {
+  const provider = new firebaseAuth.OAuthProvider("apple.com");
+  const credential = provider.credential({ idToken: identityToken, rawNonce });
+
+  const userCredential = await firebaseAuth.signInWithCredential(
+    auth,
+    credential
+  );
+  const user = userCredential.user;
+  const isNewUser =
+    firebaseAuth.getAdditionalUserInfo(userCredential)?.isNewUser ?? false;
+
+  if (isNewUser) {
+    // Appleは初回認証時のみ氏名を返す（以降はnull）ため、取得できなかった場合は仮の名前を設定する
+    const displayName = nickname ?? "名称未設定";
+    await firebaseAuth.updateProfile(user, { displayName });
+
+    try {
+      await authApi.signupUser(user.uid, displayName);
+    } catch (error) {
+      // エラーの場合はFirebaseのユーザー削除。
+      console.error("APIエラー（Apple認証ユーザー登録）：" + error);
+      await firebaseAuth.deleteUser(user);
+      throw new Error("登録処理に失敗しました。");
+    }
+  }
+
+  await userSyncFromRemote();
+}
+
+// Googleサインイン（初回のみリモートDBにユーザー登録を行う）
+export async function loginWithGoogle(
+  idToken: string,
+  nickname: string | null
+): Promise<void> {
+  const credential = firebaseAuth.GoogleAuthProvider.credential(idToken);
+
+  const userCredential = await firebaseAuth.signInWithCredential(
+    auth,
+    credential
+  );
+  const user = userCredential.user;
+  const isNewUser =
+    firebaseAuth.getAdditionalUserInfo(userCredential)?.isNewUser ?? false;
+
+  if (isNewUser) {
+    const displayName = nickname ?? "名称未設定";
+    await firebaseAuth.updateProfile(user, { displayName });
+
+    try {
+      await authApi.signupUser(user.uid, displayName);
+    } catch (error) {
+      // エラーの場合はFirebaseのユーザー削除。
+      console.error("APIエラー（Google認証ユーザー登録）：" + error);
+      await firebaseAuth.deleteUser(user);
+      throw new Error("登録処理に失敗しました。");
+    }
+  }
+
+  await userSyncFromRemote();
 }
 
 // ユーザー情報の更新

@@ -11,19 +11,14 @@ import {
 import { router } from "expo-router";
 
 // firebase
-import {
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  signOut,
-} from "firebase/auth";
+import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import * as authApi from "@/api/authApi";
 import { auth } from "@/lib/firebaseConfig";
+import { setPendingEmailChangePassword } from "@/lib/pendingEmailChangeAuth";
 import theme from "@/styles/theme";
 import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
 import { validateEmail, validatePassword } from "@/lib/validators";
-import { clearLocalDb } from "@/localDb/sync/clearLocalDb";
-import { syncLocalDb } from "@/localDb/sync/syncLocalDb";
 
 export default function EmailEditScreen() {
   const currentEmail = auth.currentUser?.email;
@@ -49,36 +44,22 @@ export default function EmailEditScreen() {
 
     try {
       const credential = EmailAuthProvider.credential(currentEmail, password);
-
       await reauthenticateWithCredential(user, credential);
 
       await authApi.sendChangeEmailVerification(newEmail);
 
-      Alert.alert(
-        "新しいメールアドレスにメールを送信しました",
-        "24時間以内にメールを認証し、再ログインしてください。\nメールが届かない場合は変更前のメールアドレスでログインし、再実行してください。",
-        [
-          {
-            text: "OK",
-            onPress: async () => {
-              try {
-                await syncLocalDb();
-                await signOut(auth);
-                await clearLocalDb();
-                router.dismissAll();
-                router.replace("/(auth)/signIn");
-              } catch (error) {
-                Alert.alert("エラー");
-              }
-            },
-          },
-        ]
-      );
+      // 認証コード確認後、新メールアドレスで再サインインするためにパスワードを一時的に引き継ぐ
+      setPendingEmailChangePassword(password);
+
+      router.push({
+        pathname: "/(main)/(menu)/account/emailVerify",
+        params: { newEmail },
+      });
     } catch (error: any) {
-      if (error.code == "auth/invalid-credential") {
+      if (error.code === "auth/invalid-credential") {
         Alert.alert("パスワードが違います");
       } else {
-        Alert.alert("エラーが発生しました");
+        Alert.alert(error?.message ?? "エラーが発生しました");
       }
     } finally {
       setLoading(false);
@@ -114,7 +95,7 @@ export default function EmailEditScreen() {
           />
         </View>
         <View style={styles.item}>
-          <Text>認証用パスワード</Text>
+          <Text>現在のパスワード</Text>
           <CustomTextInput
             autoCapitalize="none"
             value={password}
@@ -125,12 +106,16 @@ export default function EmailEditScreen() {
           />
         </View>
 
+        <Text style={styles.hintText}>
+          新しいメールアドレスに認証コードを送信します。
+        </Text>
+
         <TouchableOpacity
           onPress={handlePress}
           style={[styles.button, isDisabled && styles.buttonDisabled]}
           disabled={isDisabled}
         >
-          <Text style={styles.buttonText}>変更</Text>
+          <Text style={styles.buttonText}>認証コードを送信する</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -156,6 +141,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSizes.medium,
     paddingHorizontal: theme.spacing[3],
     paddingVertical: theme.spacing[2],
+  },
+  hintText: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginBottom: theme.spacing[2],
   },
 
   // 通常ボタン

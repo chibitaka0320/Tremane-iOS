@@ -21,9 +21,12 @@ import CustomTextInput from "@/components/common/CustomTextInput";
 import { userSyncFromRemote } from "@/localDb/sync/userSyncFromRemote";
 import Indicator from "@/components/common/Indicator";
 import { registerPushTokenIfNeeded } from "@/lib/notifications/register";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /** ログイン画面 */
 export default function SignInScreen() {
+  const insets = useSafeAreaInsets();
+
   // 表示項目
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -108,9 +111,6 @@ export default function SignInScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={"padding"}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-          <View style={styles.headerContainer}>
-            <Header />
-          </View>
           <View style={styles.contentContainer}>
             <View style={styles.titleContainer}>
               <View style={styles.line} />
@@ -143,7 +143,7 @@ export default function SignInScreen() {
             >
               <Text style={styles.buttonText}>ログイン</Text>
             </TouchableOpacity>
-            <Link href={"/(auth)/resetPassword"} style={styles.forgotPasswordLink}>
+            <Link href={"/resetPassword"} style={styles.forgotPasswordLink}>
               パスワードを忘れた方
             </Link>
             <View style={styles.dividerRow}>
@@ -156,7 +156,7 @@ export default function SignInScreen() {
               <TouchableOpacity
                 style={styles.signUpButton}
                 onPress={() => {
-                  router.navigate("/(auth)/signUp");
+                  router.navigate("/signUp");
                 }}
               >
                 <Text style={styles.signUpLink}>新規登録</Text>
@@ -176,7 +176,12 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    height: "25%",
+    height: "8%",
+    backgroundColor: theme.colors.background.lightGray,
+  },
+  closeButton: {
+    position: "absolute",
+    right: theme.spacing[3],
   },
   contentContainer: {
     flex: 1,

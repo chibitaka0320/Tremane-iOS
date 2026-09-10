@@ -1,8 +1,8 @@
 import { JSX, useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { CalendarProvider, Agenda } from "react-native-calendars";
+import { createMaterialTopTabNavigator } from "expo-router/js-top-tabs";
+import { CalendarProvider, WeekCalendar } from "react-native-calendars";
 
 import TrainingScreen from "./training";
 import EatingScreen from "./eating";
@@ -16,6 +16,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { CircleButton } from "@/components/common/CircleButton";
+import MonthCalendarModal from "@/components/common/MonthCalendarModal";
 import { RecordMenu } from "@/components/menu/RecordMenu";
 import { MarkedDates } from "react-native-calendars/src/types";
 import * as trainingService from "@/service/trainingService";
@@ -26,7 +27,12 @@ const TopTab = createMaterialTopTabNavigator();
 // トップタブナビゲーター（トレーニングと食事）
 function TopTabNavigator() {
   return (
-    <TopTab.Navigator>
+    <TopTab.Navigator
+      screenOptions={{
+        tabBarStyle: { backgroundColor: theme.colors.background.light },
+        sceneStyle: { backgroundColor: theme.colors.background.light },
+      }}
+    >
       <TopTab.Screen name="トレーニング">
         {() => <TrainingScreen />}
       </TopTab.Screen>
@@ -36,7 +42,7 @@ function TopTabNavigator() {
 }
 
 export default function MainScreen() {
-  const { selectedDate, setSelectedDate } = useCalendar();
+  const { selectedDate, setSelectedDate, monthCalendarRef } = useCalendar();
 
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
 
@@ -81,22 +87,26 @@ export default function MainScreen() {
       }}
     >
       <BottomSheetModalProvider>
-        <Agenda
-          selected={selectedDate}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          items={{}}
-          renderItem={() => null}
-          markingType={"multi-dot"}
-          markedDates={markedDates}
-          theme={{
-            selectedDayBackgroundColor: theme.colors.primary,
-            todayTextColor: theme.colors.primary,
-            agendaDayTextColor: theme.colors.font.black,
-            agendaDayNumColor: theme.colors.font.black,
-            agendaTodayColor: theme.colors.primary,
-          }}
-          renderEmptyData={() => <TopTabNavigator />}
-        />
+        <View style={styles.container}>
+          <WeekCalendar
+            current={selectedDate}
+            firstDay={0}
+            allowShadow={false}
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+            markingType="multi-dot"
+            markedDates={markedDates}
+            theme={{
+              calendarBackground: theme.colors.background.light,
+              selectedDayBackgroundColor: theme.colors.primary,
+              selectedDayTextColor: theme.colors.white,
+              todayTextColor: theme.colors.primary,
+              dayTextColor: theme.colors.font.black,
+            }}
+          />
+          <View style={styles.content}>
+            <TopTabNavigator />
+          </View>
+        </View>
 
         <CircleButton onPress={onPlusButton} style={styles.button}>
           <Entypo name="plus" size={40} color={theme.colors.white} />
@@ -110,12 +120,30 @@ export default function MainScreen() {
             <RecordMenu bottomSheetRef={bottomSheetModalRef} />
           </BottomSheetView>
         </BottomSheetModal>
+
+        <MonthCalendarModal
+          ref={monthCalendarRef}
+          selected={selectedDate}
+          markedDates={markedDates}
+          onConfirm={(date) => {
+            setSelectedDate(date);
+            monthCalendarRef.current?.dismiss();
+          }}
+        />
       </BottomSheetModalProvider>
     </CalendarProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background.light,
+  },
+  content: {
+    flex: 1,
+    backgroundColor: theme.colors.background.light,
+  },
   button: {
     position: "absolute",
     right: 40,

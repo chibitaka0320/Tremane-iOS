@@ -16,6 +16,11 @@ export async function sendVerificationEmail(): Promise<void> {
   await apiRequestAuth<void>("/auth/send-verification-email", "POST", null);
 }
 
+// POST /auth/verify-email-code
+export async function verifyEmailCode(code: string): Promise<void> {
+  await apiRequestAuth<void>("/auth/verify-email-code", "POST", { code });
+}
+
 // POST /auth/send-password-reset-email
 export async function sendPasswordResetEmail(email: string): Promise<void> {
   await apiRequest<void>("/auth/send-password-reset-email", "POST", { email });
@@ -27,5 +32,12 @@ export async function sendChangeEmailVerification(
 ): Promise<void> {
   await apiRequestAuth<void>("/auth/send-change-email-verification", "POST", {
     newEmail,
+  });
+}
+
+// POST /auth/verify-email-change-code
+export async function verifyEmailChangeCode(code: string): Promise<void> {
+  await apiRequestAuth<void>("/auth/verify-email-change-code", "POST", {
+    code,
   });
 }

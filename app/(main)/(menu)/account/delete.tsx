@@ -29,7 +29,7 @@ export default function DeleteAccountScreen() {
             try {
               await userService.deleteUser();
               router.dismissAll();
-              router.replace("/(auth)/signIn");
+              router.replace("/(auth)/entry");
             } catch (error) {
               Alert.alert("アカウントの削除に失敗しました。");
               if (error instanceof ApiError) {

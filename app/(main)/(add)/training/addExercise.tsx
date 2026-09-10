@@ -141,7 +141,6 @@ export default function TrainingWithExerciseScreen() {
         parseInt(reps)
       );
       router.dismissAll();
-      router.replace("/(main)/(tabs)/(home)/training");
     } catch (error) {
       console.error("トレーニング追加失敗：" + error);
       Alert.alert("トレーニングの追加に失敗しました。");
