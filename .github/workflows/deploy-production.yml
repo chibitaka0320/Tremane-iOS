@@ -32,6 +32,9 @@ jobs:
       - name: Build and auto-submit to TestFlight
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_ASC_API_KEY_PATH: ./AuthKey.p8
+          EXPO_ASC_KEY_ID: G2SL583263
+          EXPO_ASC_ISSUER_ID: 8013efec-6050-4717-8166-a4e54d8a068e
         run: npx eas-cli build --platform ios --profile production --non-interactive --auto-submit
 
       - name: Notify Slack on success
