@@ -6,142 +6,101 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Keyboard,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-// iOSはキーボードが閉じ始めるタイミングでkeyboardWillHideが発火するため、
-// それに合わせてシートを閉じることでキーボードとシートが同時に動くようにする。
-// Androidはwill系イベントが存在しないためkeyboardDidHideを使う。
-const KEYBOARD_HIDE_EVENT = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  visible: boolean;
-  title: string;
+  label: string;
   value: string;
-  suffix?: string;
-  keyboardType?: "default" | "numeric";
-  onCancel: () => void;
   onConfirm: (value: string) => void;
 };
 
-export default function TextInputModal({
-  visible,
-  title,
-  value,
-  suffix,
-  keyboardType = "default",
-  onCancel,
-  onConfirm,
-}: Props) {
-  const sheetRef = useRef<BottomSheetModal>(null);
-  // 日本語IMEの未確定文字（濁点・半濁点・小文字変換など）を壊さないよう、
-  // 入力中の値はReactのstate（＝TextInputのvalueプロパティ）ではなくrefで保持する。
-  // valueを毎レンダーTextInputへ書き戻すと、ネイティブ側の未確定状態がリセットされてしまうため。
-  const textRef = useRef(value);
-  // シートを開くたびに変え、TextInputをその時点のvalueで作り直すためのkey。
-  // setNativePropsはFabric（newArchEnabled）下でTextInputに対して正しく機能しないため使わない。
-  // タイピング中はこのkeyを変更しないので、入力中に再マウントされることはない。
-  const [openToken, setOpenToken] = useState(0);
+export type TextInputModalHandle = {
+  present: () => void;
+  dismiss: () => void;
+};
 
-  useEffect(() => {
-    if (visible) {
-      textRef.current = value;
-      setOpenToken((prev) => prev + 1);
-      sheetRef.current?.present();
-      return;
-    }
+const TextInputModal = forwardRef<TextInputModalHandle, Props>(
+  function TextInputModal({ label, value, onConfirm }, ref) {
+    const sheetRef = useRef<BottomSheetModal>(null);
+    // 日本語IMEの未確定文字（濁点・半濁点・小文字変換など）を壊さないよう、
+    // 入力中の値はReactのstate（＝TextInputのvalueプロパティ）ではなくrefで保持する。
+    // valueを毎レンダーTextInputへ書き戻すと、ネイティブ側の未確定状態がリセットされてしまうため。
+    const textRef = useRef(value);
+    // シートを開くたびに変え、TextInputをその時点のvalueで作り直すためのkey。
+    const [openToken, setOpenToken] = useState(0);
 
-    // キーボードが表示されていなければ即座に閉じるだけでよい
-    if (!Keyboard.isVisible()) {
-      sheetRef.current?.dismiss();
-      return;
-    }
-
-    // キーボードが閉じ始めるイベントに合わせてシートを閉じることで、
-    // 「シートが先に閉じてキーボードだけ残る」ズレをなくす
-    let dismissed = false;
-    const dismissSheet = () => {
-      if (dismissed) return;
-      dismissed = true;
-      sheetRef.current?.dismiss();
-    };
-    const subscription = Keyboard.addListener(
-      KEYBOARD_HIDE_EVENT,
-      dismissSheet
+    useImperativeHandle(
+      ref,
+      () => ({
+        present: () => {
+          textRef.current = value;
+          setOpenToken((prev) => prev + 1);
+          sheetRef.current?.present();
+        },
+        dismiss: () => sheetRef.current?.dismiss(),
+      }),
+      [value]
     );
-    // イベントが発火しない環境向けの保険（通常はイベントの方が先に発火する）
-    const fallbackTimer = setTimeout(dismissSheet, 300);
 
-    Keyboard.dismiss();
+    const renderBackdrop = useCallback(
+      (props: BottomSheetDefaultBackdropProps) => (
+        <BottomSheetBackdrop
+          {...props}
+          disappearsOnIndex={-1}
+          appearsOnIndex={0}
+          pressBehavior="close"
+        />
+      ),
+      []
+    );
 
-    return () => {
-      subscription.remove();
-      clearTimeout(fallbackTimer);
-    };
-  }, [visible, value]);
+    return (
+      <BottomSheetModal
+        ref={sheetRef}
+        backdropComponent={renderBackdrop}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+      >
+        <BottomSheetView style={styles.content}>
+          <Text style={styles.title}>{label}</Text>
+          <View style={styles.inputRow}>
+            <BottomSheetTextInput
+              key={openToken}
+              style={styles.input}
+              defaultValue={value}
+              onChangeText={(t) => {
+                textRef.current = t;
+              }}
+            />
+          </View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => sheetRef.current?.dismiss()}
+            >
+                <Text style={styles.cancelText}>キャンセル</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.button, styles.confirmButton]}
+                onPress={() => onConfirm(textRef.current)}
+            >
+                <Text style={styles.confirmText}>確認</Text>
+            </TouchableOpacity>
+          </View>
+        </BottomSheetView>
+      </BottomSheetModal>
+    );
+  }
+);
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetDefaultBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
-  return (
-    <BottomSheetModal
-      ref={sheetRef}
-      backdropComponent={renderBackdrop}
-      onDismiss={onCancel}
-      enablePanDownToClose
-      keyboardBehavior="interactive"
-      keyboardBlurBehavior="none"
-    >
-      <BottomSheetView style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <View style={styles.inputRow}>
-          <BottomSheetTextInput
-            key={openToken}
-            style={styles.input}
-            defaultValue={value}
-            onChangeText={(t) => {
-              textRef.current = t;
-            }}
-            keyboardType={keyboardType}
-            autoFocus
-          />
-          {suffix ? <Text style={styles.suffix}>{suffix}</Text> : null}
-        </View>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={onCancel}
-          >
-            <Text style={styles.cancelText}>キャンセル</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.confirmButton]}
-            onPress={() => onConfirm(textRef.current)}
-          >
-            <Text style={styles.confirmText}>確認</Text>
-          </TouchableOpacity>
-        </View>
-      </BottomSheetView>
-    </BottomSheetModal>
-  );
-}
+export default TextInputModal;
 
 const styles = StyleSheet.create({
   content: {

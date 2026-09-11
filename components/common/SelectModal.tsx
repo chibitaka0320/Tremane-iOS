@@ -6,7 +6,14 @@ import {
 } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { Picker } from "@react-native-picker/picker";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export type SelectOption = {
@@ -15,77 +22,81 @@ export type SelectOption = {
 };
 
 type Props = {
-  visible: boolean;
   title: string;
   value: string;
   options: SelectOption[];
-  onCancel: () => void;
   onConfirm: (value: string) => void;
+};
+
+export type SelectModalHandle = {
+  present: () => void;
+  dismiss: () => void;
 };
 
 // タイトル・ピッカー・ボタン列がちょうど収まる固定の高さ（動的サイジングだとピッカーのスクロールごとに
 // onLayoutが発火してシートが毎回再アニメーションし、画面がガタつくため固定値にしている）
 const SNAP_POINTS = [480];
 
-export default function SelectModal({
-  visible,
-  title,
-  value,
-  options,
-  onCancel,
-  onConfirm,
-}: Props) {
-  const sheetRef = useRef<BottomSheetModal>(null);
+const SelectModal = forwardRef<SelectModalHandle, Props>(
+  function SelectModal({ title, value, options, onConfirm }, ref) {
+    const sheetRef = useRef<BottomSheetModal>(null);
+    // シートを開くたびに変え、SelectPickerBodyをその時点のvalueで作り直すためのkey。
+    const [openToken, setOpenToken] = useState(0);
 
-  useEffect(() => {
-    if (visible) {
-      sheetRef.current?.present();
-    } else {
-      sheetRef.current?.dismiss();
-    }
-  }, [visible]);
+    useImperativeHandle(
+      ref,
+      () => ({
+        present: () => {
+          setOpenToken((prev) => prev + 1);
+          sheetRef.current?.present();
+        },
+        dismiss: () => sheetRef.current?.dismiss(),
+      }),
+      []
+    );
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetDefaultBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
-  return (
-    <BottomSheetModal
-      ref={sheetRef}
-      backdropComponent={renderBackdrop}
-      onDismiss={onCancel}
-      enablePanDownToClose
-      // ピッカーの内部スクロールジェスチャーとシートのドラッグジェスチャーが競合し、
-      // スクロール中にシート位置が動いて見える問題を避けるため、コンテンツ領域のドラッグは無効化する
-      // （閉じる操作はハンドルのドラッグ・背景タップ・キャンセル/確認ボタンから可能）
-      enableContentPanningGesture={false}
-      enableDynamicSizing={false}
-      snapPoints={SNAP_POINTS}
-    >
-      <BottomSheetView style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <SelectPickerBody
-          visible={visible}
-          initialValue={value}
-          options={options}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
+    const renderBackdrop = useCallback(
+      (props: BottomSheetDefaultBackdropProps) => (
+        <BottomSheetBackdrop
+          {...props}
+          disappearsOnIndex={-1}
+          appearsOnIndex={0}
+          pressBehavior="close"
         />
-      </BottomSheetView>
-    </BottomSheetModal>
-  );
-}
+      ),
+      []
+    );
+
+    return (
+      <BottomSheetModal
+        ref={sheetRef}
+        backdropComponent={renderBackdrop}
+        enablePanDownToClose
+        // ピッカーの内部スクロールジェスチャーとシートのドラッグジェスチャーが競合し、
+        // スクロール中にシート位置が動いて見える問題を避けるため、コンテンツ領域のドラッグは無効化する
+        // （閉じる操作はハンドルのドラッグ・背景タップ・キャンセル/確認ボタンから可能）
+        enableContentPanningGesture={false}
+        enableDynamicSizing={false}
+        snapPoints={SNAP_POINTS}
+      >
+        <BottomSheetView style={styles.content}>
+          <Text style={styles.title}>{title}</Text>
+          <SelectPickerBody
+            key={openToken}
+            initialValue={value}
+            options={options}
+            onCancel={() => sheetRef.current?.dismiss()}
+            onConfirm={onConfirm}
+          />
+        </BottomSheetView>
+      </BottomSheetModal>
+    );
+  }
+);
+
+export default SelectModal;
 
 type BodyProps = {
-  visible: boolean;
   initialValue: string;
   options: SelectOption[];
   onCancel: () => void;
@@ -95,20 +106,12 @@ type BodyProps = {
 // ピッカー操作中の一時的な選択値をここに閉じ込める。
 // memo化することで、選択値が変わってもBottomSheetModal本体（親）は再レンダリングされない。
 const SelectPickerBody = memo(function SelectPickerBody({
-  visible,
   initialValue,
   options,
   onCancel,
   onConfirm,
 }: BodyProps) {
   const [selected, setSelected] = useState(initialValue);
-
-  // シートが開かれるたびに、保存済みの値（または前回値）を選択位置の初期値として反映する
-  useEffect(() => {
-    if (visible) {
-      setSelected(initialValue);
-    }
-  }, [visible, initialValue]);
 
   return (
     <>
