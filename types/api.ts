@@ -4,6 +4,7 @@ export type UserResponse = {
   userId: string;
   nickname: string;
   handle: string | null;
+  iconUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };
