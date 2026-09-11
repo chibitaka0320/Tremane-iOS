@@ -1,7 +1,13 @@
 import Indicator from "@/components/common/Indicator";
-import NumberPickerModal from "@/components/common/NumberPickerModal";
-import SelectModal from "@/components/common/SelectModal";
-import TextInputModal from "@/components/common/TextInputModal";
+import NumberPickerModal, {
+  NumberPickerModalHandle,
+} from "@/components/common/NumberPickerModal";
+import SelectModal, {
+  SelectModalHandle,
+} from "@/components/common/SelectModal";
+import TextInputModal, {
+  TextInputModalHandle,
+} from "@/components/common/TextInputModal";
 import { activeOptions } from "@/constants/activeOptions";
 import { genderOptions } from "@/constants/genderOptions";
 import { auth } from "@/lib/firebaseConfig";
@@ -25,14 +31,6 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-type ModalKey =
-  | "nickname"
-  | "height"
-  | "weight"
-  | "gender"
-  | "activeLevel"
-  | null;
-
 const DEFAULT_HEIGHT = "160";
 const DEFAULT_WEIGHT = "60";
 const DEFAULT_GENDER = "0";
@@ -53,7 +51,6 @@ export default function ProfileScreen() {
   const [totalCalorie, setTotalCalorie] = useState<string | null>(null);
 
   const [isLoading, setLoading] = useState(false);
-  const [activeModal, setActiveModal] = useState<ModalKey>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   useEffect(() => {
@@ -62,6 +59,12 @@ export default function ProfileScreen() {
 
   // 初回マウント時のみフルスクリーンローディングを表示する（以降のフォーカス復帰時はサイレントに再取得し、画面のちらつきを防ぐ）
   const isFirstLoad = useRef(true);
+
+  const nickNameRef = useRef<TextInputModalHandle>(null);
+  const heightRef = useRef<NumberPickerModalHandle>(null);
+  const weightRef = useRef<NumberPickerModalHandle>(null);
+  const genderRef = useRef<SelectModalHandle>(null);
+  const activeLevelRef = useRef<SelectModalHandle>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -166,7 +169,7 @@ export default function ProfileScreen() {
     if (user == null) return;
 
     // 保存の完了を待たずに即座に閉じ、保存はバックグラウンドで行う（失敗時のみAlertで通知）
-    setActiveModal(null);
+    nickNameRef.current?.dismiss();
     setNickname(value);
     userService.updateUser(user, value).catch((error) => {
       console.error("ニックネーム更新失敗：" + error);
@@ -175,22 +178,22 @@ export default function ProfileScreen() {
   };
 
   const onConfirmHeight = (value: number) => {
-    setActiveModal(null);
+    heightRef.current?.dismiss();
     saveProfile({ height: String(value) });
   };
 
   const onConfirmWeight = (value: number) => {
-    setActiveModal(null);
+    weightRef.current?.dismiss();
     saveProfile({ weight: String(value) });
   };
 
   const onConfirmGender = (value: string) => {
-    setActiveModal(null);
+    genderRef.current?.dismiss();
     saveProfile({ gender: value });
   };
 
   const onConfirmActiveLevel = (value: string) => {
-    setActiveModal(null);
+    activeLevelRef.current?.dismiss();
     saveProfile({ activeLevel: value });
   };
 
@@ -214,7 +217,7 @@ export default function ProfileScreen() {
           <Row
             label="ニックネーム"
             value={nickname || "未設定"}
-            onPress={() => setActiveModal("nickname")}
+            onPress={() => nickNameRef.current?.present()}
           />
           {handle ? (
             <Row
@@ -236,12 +239,12 @@ export default function ProfileScreen() {
           <Row
             label="身長"
             value={height ? `${height} cm` : "未設定"}
-            onPress={() => setActiveModal("height")}
+            onPress={() => heightRef.current?.present()}
           />
           <Row
             label="体重"
             value={weight ? `${weight} kg` : "未設定"}
-            onPress={() => setActiveModal("weight")}
+            onPress={() => weightRef.current?.present()}
           />
           <Row
             label="活動レベル"
@@ -249,14 +252,14 @@ export default function ProfileScreen() {
               activeOptions.find((o) => o.value === activeLevel)?.label ??
               "未設定"
             }
-            onPress={() => setActiveModal("activeLevel")}
+            onPress={() => activeLevelRef.current?.present()}
           />
           <Row
             label="性別"
             value={
               genderOptions.find((o) => o.value === gender)?.label ?? "未設定"
             }
-            onPress={() => setActiveModal("gender")}
+            onPress={() => genderRef.current?.present()}
           />
           <Row
             label="生年月日"
@@ -302,46 +305,41 @@ export default function ProfileScreen() {
         </View>
 
         <TextInputModal
-          visible={activeModal === "nickname"}
-          title="ニックネームを入力してください"
+          ref={nickNameRef}
+          label="ニックネーム"
           value={nickname}
-          onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmNickname}
         />
         <NumberPickerModal
-          visible={activeModal === "height"}
+          ref={heightRef}
           title="身長を選択してください"
           value={height ? parseInt(height, 10) : parseInt(DEFAULT_HEIGHT, 10)}
           min={50}
           max={250}
           unit="cm"
-          onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmHeight}
         />
         <NumberPickerModal
-          visible={activeModal === "weight"}
+          ref={weightRef}
           title="体重を選択してください"
           value={weight ? parseInt(weight, 10) : parseInt(DEFAULT_WEIGHT, 10)}
           min={1}
           max={300}
           unit="kg"
-          onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmWeight}
         />
         <SelectModal
-          visible={activeModal === "gender"}
+          ref={genderRef}
           title="性別を教えてください"
           value={gender ?? DEFAULT_GENDER}
           options={genderOptions}
-          onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmGender}
         />
         <SelectModal
-          visible={activeModal === "activeLevel"}
+          ref={activeLevelRef}
           title="活動レベルを教えてください"
           value={activeLevel ?? DEFAULT_ACTIVE_LEVEL}
           options={activeOptions}
-          onCancel={() => setActiveModal(null)}
           onConfirm={onConfirmActiveLevel}
         />
         <DateTimePickerModal

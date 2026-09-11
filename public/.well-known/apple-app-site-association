@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "CJDYZLQ653.com.chibitaka0320.Tremane",
+        "paths": ["/resetPasswordConfirm*"]
+      }
+    ]
+  }
+}
