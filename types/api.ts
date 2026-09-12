@@ -99,6 +99,7 @@ export type TrainingDateRankingResponse = {
 export type TimelineTrainingResponse = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   date: string;
   bodyParts: {
     partsId: number;

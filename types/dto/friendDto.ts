@@ -16,6 +16,7 @@ export type TrainingRanking = {
 export type TrainingTimeline = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   date: string;
   bodyParts: {
     partsId: number;
