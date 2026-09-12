@@ -68,6 +68,8 @@ export async function uploadIconImage(
   const blob = await response.blob();
 
   const iconRef = ref(storage, `avatars/${userId}.jpg`);
-  await uploadBytes(iconRef, blob);
+  // React NativeのfetchによるBlobはtype（MIMEタイプ）が正しく設定されないことがあり、
+  // Storage Security RulesのcontentType検証に失敗するため明示的に指定する
+  await uploadBytes(iconRef, blob, { contentType: "image/jpeg" });
   return getDownloadURL(iconRef);
 }

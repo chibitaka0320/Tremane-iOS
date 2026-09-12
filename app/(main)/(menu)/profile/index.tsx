@@ -1,4 +1,7 @@
 import Indicator from "@/components/common/Indicator";
+import IconActionSheet, {
+  IconActionSheetHandle,
+} from "@/components/common/IconActionSheet";
 import NumberPickerModal, {
   NumberPickerModalHandle,
 } from "@/components/common/NumberPickerModal";
@@ -12,6 +15,13 @@ import { activeOptions } from "@/constants/activeOptions";
 import { genderOptions } from "@/constants/genderOptions";
 import { auth } from "@/lib/firebaseConfig";
 import { calcAge, calcBmr, calcTotalCalorie } from "@/lib/calc";
+import {
+  pickIconFromCamera,
+  pickIconFromLibrary,
+  PickedIconImage,
+  resizeIconImage,
+  uploadIconImage,
+} from "@/lib/iconUpload";
 import { validateNickname } from "@/lib/validators";
 import * as userProfileService from "@/service/userProfileService";
 import * as userService from "@/service/userService";
@@ -19,9 +29,11 @@ import theme from "@/styles/theme";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
+import { Image } from "expo-image";
 import { router, useFocusEffect, useNavigation } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -42,6 +54,9 @@ export default function ProfileScreen() {
 
   const [nickname, setNickname] = useState("");
   const [handle, setHandle] = useState<string | null>(null);
+  const [iconUrl, setIconUrl] = useState<string | null>(null);
+  const [iconUpdatedAt, setIconUpdatedAt] = useState<string | null>(null);
+  const [isIconUploading, setIconUploading] = useState(false);
   const [height, setHeight] = useState<string | null>(null);
   const [weight, setWeight] = useState<string | null>(null);
   const [birthday, setBirthday] = useState<Date | null>(null);
@@ -65,6 +80,7 @@ export default function ProfileScreen() {
   const weightRef = useRef<NumberPickerModalHandle>(null);
   const genderRef = useRef<SelectModalHandle>(null);
   const activeLevelRef = useRef<SelectModalHandle>(null);
+  const iconActionSheetRef = useRef<IconActionSheetHandle>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -76,6 +92,8 @@ export default function ProfileScreen() {
 
           const user = await userService.getUser();
           setHandle(user?.handle ?? null);
+          setIconUrl(user?.iconUrl ?? null);
+          setIconUpdatedAt(user?.updatedAt ?? null);
 
           const res = await userProfileService.getUserProfile();
           if (res) {
@@ -202,6 +220,69 @@ export default function ProfileScreen() {
     saveProfile({ birthday: date });
   };
 
+  // 画像選択（カメラ/ライブラリ）→リサイズ→アップロード→サーバー反映までの一連の処理
+  const pickAndUploadIcon = async (
+    pick: () => Promise<PickedIconImage | null>
+  ) => {
+    const user = auth.currentUser;
+    if (user == null) return;
+
+    try {
+      const picked = await pick();
+      if (!picked) return;
+
+      setIconUploading(true);
+      const resizedUri = await resizeIconImage(picked.uri);
+      const downloadUrl = await uploadIconImage(user.uid, resizedUri);
+      await userService.updateIcon(user, downloadUrl);
+      setIconUrl(downloadUrl);
+      setIconUpdatedAt(new Date().toISOString());
+    } catch (error) {
+      console.error("アイコン更新失敗：" + error);
+      Alert.alert("アイコンの更新に失敗しました");
+    } finally {
+      setIconUploading(false);
+    }
+  };
+
+  const onSelectCamera = () => {
+    iconActionSheetRef.current?.dismiss();
+    pickAndUploadIcon(pickIconFromCamera);
+  };
+
+  const onSelectLibrary = () => {
+    iconActionSheetRef.current?.dismiss();
+    pickAndUploadIcon(pickIconFromLibrary);
+  };
+
+  const onSelectDeleteIcon = () => {
+    iconActionSheetRef.current?.dismiss();
+    const user = auth.currentUser;
+    if (user == null) return;
+
+    setIconUploading(true);
+    userService
+      .updateIcon(user, null)
+      .then(() => {
+        setIconUrl(null);
+        setIconUpdatedAt(new Date().toISOString());
+      })
+      .catch((error) => {
+        console.error("アイコン削除失敗：" + error);
+        Alert.alert("アイコンの削除に失敗しました");
+      })
+      .finally(() => setIconUploading(false));
+  };
+
+  // avatars/{uid}.jpgは固定パスのため、上書き後もダウンロードURL自体は変わらないことがある。
+  // updatedAtをクエリパラメータに付与し、画像キャッシュを更新後の内容で読み直させる
+  const iconDisplayUri =
+    iconUrl && iconUpdatedAt
+      ? `${iconUrl}${iconUrl.includes("?") ? "&" : "?"}v=${encodeURIComponent(
+          iconUpdatedAt
+        )}`
+      : iconUrl;
+
   if (isLoading) {
     return <Indicator />;
   }
@@ -212,6 +293,42 @@ export default function ProfileScreen() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
+        <View style={styles.avatarSection}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            disabled={isIconUploading}
+            onPress={() => iconActionSheetRef.current?.present()}
+          >
+            <View style={styles.avatarWrapper}>
+              {iconDisplayUri ? (
+                <Image
+                  source={{ uri: iconDisplayUri }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Ionicons
+                    name="person"
+                    size={40}
+                    color={theme.colors.font.gray}
+                  />
+                </View>
+              )}
+              <View style={styles.avatarEditBadge}>
+                {isIconUploading ? (
+                  <ActivityIndicator size="small" color={theme.colors.white} />
+                ) : (
+                  <Ionicons
+                    name="camera"
+                    size={14}
+                    color={theme.colors.white}
+                  />
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
         <SectionTitle icon="person" label="アカウント" />
         <View>
           <Row
@@ -353,6 +470,13 @@ export default function ProfileScreen() {
           confirmTextIOS="完了"
           cancelTextIOS="キャンセル"
         />
+        <IconActionSheet
+          ref={iconActionSheetRef}
+          canDelete={iconUrl != null}
+          onSelectCamera={onSelectCamera}
+          onSelectLibrary={onSelectLibrary}
+          onSelectDelete={onSelectDeleteIcon}
+        />
       </ScrollView>
     </BottomSheetModalProvider>
   );
@@ -423,6 +547,41 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: theme.spacing[6],
+  },
+  avatarSection: {
+    alignItems: "center",
+    marginTop: theme.spacing[5],
+  },
+  avatarWrapper: {
+    width: 88,
+    height: 88,
+  },
+  avatarImage: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: theme.colors.background.dark,
+  },
+  avatarPlaceholder: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: theme.colors.background.dark,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarEditBadge: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: theme.colors.background.lightGray,
   },
   sectionTitleRow: {
     flexDirection: "row",
