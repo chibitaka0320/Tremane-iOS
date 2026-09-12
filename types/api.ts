@@ -91,6 +91,7 @@ export type UserSearchResponse = {
 export type TrainingDateRankingResponse = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   trainingCounts: number;
 };
 

@@ -8,6 +8,7 @@ export type FriendRequest = {
 export type TrainingRanking = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   count: number;
 };
 
