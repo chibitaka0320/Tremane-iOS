@@ -82,6 +82,7 @@ export type UserSearchResponse = {
   userId: string;
   handle: string;
   nickname: string;
+  iconUrl: string | null;
   status: string;
   requestId: string;
 };

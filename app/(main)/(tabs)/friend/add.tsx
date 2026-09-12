@@ -5,6 +5,7 @@ import { validateHandle } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { UserSearchResponse } from "@/types/api";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -320,6 +321,20 @@ export default function FriendAddScreen({ onClose }: Props) {
         <View style={styles.searchResultContainer}>
           {user ? (
             <View style={styles.resultUserContainer}>
+              {user.iconUrl ? (
+                <Image
+                  source={{ uri: user.iconUrl }}
+                  style={styles.userIcon}
+                />
+              ) : (
+                <View style={styles.userIconPlaceholder}>
+                  <Ionicons
+                    name="person"
+                    size={32}
+                    color={theme.colors.font.gray}
+                  />
+                </View>
+              )}
               <Text style={styles.userName}>{user.nickname}</Text>
               {isStatusLoading ? (
                 <View
@@ -513,6 +528,20 @@ const styles = StyleSheet.create({
 
   resultUserContainer: {
     alignItems: "center",
+  },
+  userIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.background.dark,
+  },
+  userIconPlaceholder: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.background.dark,
+    alignItems: "center",
+    justifyContent: "center",
   },
   userName: {
     fontSize: theme.fontSizes.large,
