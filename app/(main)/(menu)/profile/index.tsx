@@ -86,15 +86,23 @@ export default function ProfileScreen() {
     useCallback(() => {
       const showLoading = isFirstLoad.current;
       if (showLoading) setLoading(true);
-      const fetchApi = async () => {
-        try {
-          setNickname(auth.currentUser?.displayName ?? "");
 
-          const user = await userService.getUser();
+      setNickname(auth.currentUser?.displayName ?? "");
+
+      // ニックネーム・ID・アイコンは取得を待たずに画面を表示し、取得でき次第反映する
+      userService
+        .getUser()
+        .then((user) => {
           setHandle(user?.handle ?? null);
           setIconUrl(user?.iconUrl ?? null);
           setIconUpdatedAt(user?.updatedAt ?? null);
+        })
+        .catch((error) => {
+          console.error("ユーザー情報取得失敗：" + error);
+        });
 
+      const fetchProfile = async () => {
+        try {
           const res = await userProfileService.getUserProfile();
           if (res) {
             if (res.height != null) setHeight(String(res.height));
@@ -109,7 +117,7 @@ export default function ProfileScreen() {
           isFirstLoad.current = false;
         }
       };
-      fetchApi();
+      fetchProfile();
     }, []),
   );
 
