@@ -20,6 +20,11 @@ export async function updateHandle(handle: string): Promise<void> {
   await apiRequestAuth<void>("/users/handle", "PUT", { handle });
 }
 
+// PUT /users/icon
+export async function updateIcon(iconUrl: string | null): Promise<void> {
+  await apiRequestAuth<void>("/users/icon", "PUT", { iconUrl });
+}
+
 // DELETE /users
 export async function deleteUser() {
   await apiRequestAuth<void>("/users", "DELETE", null);

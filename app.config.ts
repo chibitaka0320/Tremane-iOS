@@ -71,6 +71,15 @@ const config: ExpoConfig = {
     "expo-image",
     "expo-status-bar",
     "expo-apple-authentication",
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "プロフィールアイコンの設定に写真ライブラリを使用します。",
+        cameraPermission:
+          "プロフィールアイコンの設定にカメラを使用します。",
+      },
+    ],
     ...(googleSignInPlugin ? [googleSignInPlugin] : []),
   ],
   experiments: {

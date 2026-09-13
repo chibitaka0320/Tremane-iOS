@@ -4,6 +4,7 @@ export type UserResponse = {
   userId: string;
   nickname: string;
   handle: string | null;
+  iconUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -81,6 +82,7 @@ export type UserSearchResponse = {
   userId: string;
   handle: string;
   nickname: string;
+  iconUrl: string | null;
   status: string;
   requestId: string;
 };
@@ -89,6 +91,7 @@ export type UserSearchResponse = {
 export type TrainingDateRankingResponse = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   trainingCounts: number;
 };
 
@@ -96,6 +99,7 @@ export type TrainingDateRankingResponse = {
 export type TimelineTrainingResponse = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   date: string;
   bodyParts: {
     partsId: number;
