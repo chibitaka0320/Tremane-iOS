@@ -28,6 +28,7 @@ export async function getNotification() {
         notificationSource: notificationRes.notificationSource,
         type: notificationRes.type,
         message: notificationRes.message,
+        iconUrl: notificationRes.iconUrl,
         relatedId: notificationRes.relatedId,
         createdAt: notificationRes.createdAt,
         status: notificationRes.status,
