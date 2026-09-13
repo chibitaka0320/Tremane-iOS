@@ -9,7 +9,8 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as friendService from "@/service/friendService";
 import { ApiError } from "@/lib/error";
 
@@ -207,6 +208,16 @@ export const NotificationItem = ({ notification }: Props) => {
   if (isFriendRequestType()) {
     return (
       <View style={styles.notificationItem}>
+        {notification.iconUrl ? (
+          <Image
+            source={{ uri: notification.iconUrl }}
+            style={styles.icon}
+          />
+        ) : (
+          <View style={styles.iconPlaceholder}>
+            <Ionicons name="person" size={18} color={theme.colors.font.gray} />
+          </View>
+        )}
         <Text style={styles.notificationMessage}>{notification.message}</Text>
         {isStatusLoading ? (
           <View
@@ -270,6 +281,22 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontSize: theme.fontSizes.medium,
     marginRight: theme.spacing[3],
+  },
+  icon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: theme.spacing[3],
+    backgroundColor: theme.colors.background.dark,
+  },
+  iconPlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: theme.spacing[3],
+    backgroundColor: theme.colors.background.dark,
+    alignItems: "center",
+    justifyContent: "center",
   },
   activityContainer: {
     width: 70,
