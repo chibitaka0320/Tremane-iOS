@@ -3,7 +3,7 @@ import { calcKcal } from "@/lib/calc";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import { EatingRequest } from "@/types/api";
 import { EatingEntity } from "@/types/db";
-import { DailyEating, MealRecord } from "@/types/dto/eatingDto";
+import { DailyEating, FoodRecord } from "@/types/dto/eatingDto";
 import { format } from "date-fns";
 
 // 1日のトレーニング情報取得
@@ -12,7 +12,7 @@ export async function getEatingByDate(date: string): Promise<DailyEating> {
 }
 
 // 食事詳細情報取得
-export async function getEating(eatingId: string): Promise<MealRecord | null> {
+export async function getEating(eatingId: string): Promise<FoodRecord | null> {
   return await eatingRepository.getEating(eatingId);
 }
 
@@ -24,7 +24,9 @@ export async function upsertEating(
   name: string,
   protein: number,
   fat: number,
-  carbo: number
+  carbo: number,
+  mealId: string | null = null,
+  unit: string | null = null
 ) {
   const now = new Date().toISOString();
   // 既存レコードの場合はcreated_atを維持し、日時ソートの並び順が更新の度に変わらないようにする
@@ -42,6 +44,8 @@ export async function upsertEating(
       protein,
       fat,
       carbo,
+      meal_id: mealId,
+      unit,
       is_synced: 0,
       is_deleted: 0,
       created_at: createdAt,
@@ -63,6 +67,8 @@ export async function upsertEating(
       protein,
       fat,
       carbo,
+      mealId,
+      unit,
       createdAt,
       updatedAt: now,
     },

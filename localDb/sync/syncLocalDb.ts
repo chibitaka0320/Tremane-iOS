@@ -2,6 +2,7 @@ import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import * as mealRepository from "@/localDb/repository/mealRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 import { ApiError } from "@/lib/error";
@@ -25,6 +26,10 @@ export const syncLocalDb = async () => {
     // トレーニングの非同期データ送信
     await trainingRepository.syncTrainingsFromLocal();
     console.log("トレーニングデータ同期完了");
+
+    // 食事記録の非同期データ送信（eatings.meal_idの外部キー制約のため、食品より先に同期する）
+    await mealRepository.syncMealsFromLocal();
+    console.log("食事記録データ同期完了");
 
     // 食事の非同期データ送信
     await eatingRepository.syncEatingsFromLocal();

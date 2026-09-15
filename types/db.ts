@@ -46,7 +46,7 @@ export type TrainingEntity = {
   updated_at: string;
 };
 
-// 食事テーブル
+// 食品記録テーブル
 export type EatingEntity = {
   eating_id: string;
   date: string;
@@ -56,6 +56,20 @@ export type EatingEntity = {
   protein: number;
   fat: number;
   carbo: number;
+  meal_id: string | null;
+  unit: string | null;
+  is_synced: number;
+  is_deleted: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// 食事記録テーブル（複数の食品記録をまとめる親レコード）
+export type MealEntity = {
+  meal_id: string;
+  date: string;
+  user_id: string;
+  name: string;
   is_synced: number;
   is_deleted: number;
   created_at: string;

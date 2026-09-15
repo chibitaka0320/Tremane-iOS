@@ -1,6 +1,6 @@
 import { db } from "@/lib/localDbConfig";
 import { EatingEntity } from "@/types/db";
-import { MealRecord, Nutrition } from "@/types/dto/eatingDto";
+import { FoodRecord, Nutrition } from "@/types/dto/eatingDto";
 
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
@@ -25,6 +25,8 @@ export async function getUnsyncedEatings(
         protein,
         fat,
         carbo,
+        meal_id,
+        unit,
         created_at,
         updated_at
     FROM eatings
@@ -37,16 +39,32 @@ export async function getUnsyncedEatings(
 }
 
 // 日別食事情報取得
-export async function getEatingsByDate(date: string): Promise<MealRecord[]> {
-  const rows = await db.getAllAsync<MealRecord>(
+export async function getEatingsByDate(date: string): Promise<FoodRecord[]> {
+  const rows = await db.getAllAsync<FoodRecord>(
     `
-    SELECT eating_id as eatingId, date, name, calories, protein, fat, carbo
+    SELECT eating_id as eatingId, date, name, calories, protein, fat, carbo, meal_id as mealId, unit
     FROM eatings
     WHERE date = ?
     AND is_deleted = 0
     ORDER BY created_at;
     `,
     [date]
+  );
+  return rows;
+}
+
+// 食事記録IDに紐づく食品一覧取得
+export async function getEatingsByMealId(mealId: string): Promise<FoodRecord[]> {
+  const rows = await db.getAllAsync<FoodRecord>(
+    `
+    SELECT eating_id as eatingId, date, name, calories, protein, fat, carbo, meal_id as mealId, unit,
+           created_at as createdAt, updated_at as updatedAt
+    FROM eatings
+    WHERE meal_id = ?
+    AND is_deleted = 0
+    ORDER BY created_at;
+    `,
+    [mealId]
   );
   return rows;
 }
@@ -81,8 +99,8 @@ export async function getEatingCreatedAt(
 }
 
 // 食事詳細取得
-export async function getEating(eatingId: string): Promise<MealRecord | null> {
-  const eating = await db.getFirstAsync<MealRecord>(
+export async function getEating(eatingId: string): Promise<FoodRecord | null> {
+  const eating = await db.getFirstAsync<FoodRecord>(
     `
     SELECT
       eating_id as eatingId,
@@ -92,6 +110,8 @@ export async function getEating(eatingId: string): Promise<MealRecord | null> {
       protein,
       fat,
       carbo,
+      meal_id as mealId,
+      unit,
       created_at as createdAt,
       updated_at as updatedAt
     FROM eatings
@@ -108,8 +128,8 @@ export async function upsertEatings(eatings: EatingEntity[]) {
     for (const eating of eatings) {
       await db.runAsync(
         `
-        INSERT OR REPLACE INTO eatings (eating_id, date, user_id, name, calories, protein, fat, carbo, is_synced, is_deleted, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT OR REPLACE INTO eatings (eating_id, date, user_id, name, calories, protein, fat, carbo, meal_id, unit, is_synced, is_deleted, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `,
         [
           eating.eating_id,
@@ -120,6 +140,8 @@ export async function upsertEatings(eatings: EatingEntity[]) {
           eating.protein,
           eating.fat,
           eating.carbo,
+          eating.meal_id,
+          eating.unit,
           eating.is_synced,
           eating.is_deleted,
           eating.created_at,

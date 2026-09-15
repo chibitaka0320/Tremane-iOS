@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS eatings (
     protein INTEGER,
     fat INTEGER,
     carbo INTEGER,
+    meal_id TEXT,
+    unit TEXT,
     is_synced INTEGER DEFAULT 0,
     is_deleted INTEGER DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -1,11 +1,11 @@
 import { PFC_LABELS } from "@/constants/pfc";
 import theme from "@/styles/theme";
-import { MealRecord } from "@/types/dto/eatingDto";
+import { FoodRecord } from "@/types/dto/eatingDto";
 import { router } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  meal: MealRecord;
+  meal: FoodRecord;
 };
 
 export default function EatingRow({ meal }: Props) {
@@ -25,7 +25,7 @@ export default function EatingRow({ meal }: Props) {
       </View>
       {PFC_LABELS.map(({ key }) => (
         <View style={styles.pfc} key={key}>
-          <Text style={styles.center}>{meal[key as keyof MealRecord]}</Text>
+          <Text style={styles.center}>{meal[key as keyof FoodRecord]}</Text>
           <Text style={styles.unit}>g</Text>
         </View>
       ))}

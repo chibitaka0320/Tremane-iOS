@@ -5,7 +5,7 @@ import * as userGoalDao from "@/localDb/dao/userGoalDao";
 import * as userProfileDao from "@/localDb/dao/userProfileDao";
 import { EatingRequest, EatingResponse } from "@/types/api";
 import { EatingEntity, UserGoalEntity, UserProfileEntity } from "@/types/db";
-import { DailyEating, MealRecord, Nutrition } from "@/types/dto/eatingDto";
+import { DailyEating, FoodRecord, Nutrition } from "@/types/dto/eatingDto";
 import { format } from "date-fns";
 
 // リモートDBから食事データの最新情報を同期
@@ -82,7 +82,7 @@ export async function getEatingByDate(date: string): Promise<DailyEating> {
 }
 
 // 食事詳細情報取得
-export async function getEating(eatingId: string): Promise<MealRecord | null> {
+export async function getEating(eatingId: string): Promise<FoodRecord | null> {
   return await eatingDao.getEating(eatingId);
 }
 
@@ -124,6 +124,8 @@ function toEntity(eatingResponse: EatingResponse): EatingEntity {
     protein: eatingResponse.protein,
     fat: eatingResponse.fat,
     carbo: eatingResponse.carbo,
+    meal_id: eatingResponse.mealId,
+    unit: eatingResponse.unit,
     is_synced: 1,
     is_deleted: 0,
     created_at: eatingResponse.createdAt,
@@ -132,7 +134,7 @@ function toEntity(eatingResponse: EatingResponse): EatingEntity {
 }
 
 // エンティティをリクエストに変換
-function toRequest(eatingEntity: EatingEntity): EatingResponse {
+function toRequest(eatingEntity: EatingEntity): EatingRequest {
   return {
     eatingId: eatingEntity.eating_id,
     date: eatingEntity.date,
@@ -142,6 +144,8 @@ function toRequest(eatingEntity: EatingEntity): EatingResponse {
     protein: eatingEntity.protein,
     fat: eatingEntity.fat,
     carbo: eatingEntity.carbo,
+    mealId: eatingEntity.meal_id,
+    unit: eatingEntity.unit,
     createdAt: eatingEntity.created_at,
     updatedAt: eatingEntity.updated_at,
   };
