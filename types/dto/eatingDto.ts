@@ -6,14 +6,37 @@ export type Nutrition = {
   carbo: number;
 };
 
-// 1食分食事記録
-export type MealRecord = Nutrition & {
+// 1件分の食品記録
+export type FoodRecord = Nutrition & {
   eatingId: string;
+  date: string;
+  name: string;
+  mealId: string | null;
+  unit: string | null;
+  quantity: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// 食事記録（複数の食品記録をまとめる親レコード）
+export type Meal = {
+  mealId: string;
   date: string;
   name: string;
   createdAt: string;
   updatedAt: string;
 };
+
+// 食事記録詳細（内包する食品一覧・合計栄養素付き）
+export type MealDetail = Meal & {
+  foods: FoodRecord[];
+  total: Nutrition;
+};
+
+// 1日分食事一覧の1行（単独の食品記録、または食事記録のまとまり）
+export type DailyEatingItem =
+  | { type: "food"; food: FoodRecord }
+  | { type: "meal"; meal: Meal; total: Nutrition; foodCount: number };
 
 // 1日分食事集計
 export type DailyEating = {
@@ -21,5 +44,5 @@ export type DailyEating = {
   total: Nutrition;
   goal: Nutrition | null;
   rate: Nutrition;
-  meals: MealRecord[];
+  items: DailyEatingItem[];
 };

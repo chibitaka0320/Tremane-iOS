@@ -141,6 +141,15 @@ export async function updateHandle(handle: string): Promise<void> {
   await userApi.updateHandle(handle);
 }
 
+// プロフィールアイコンの更新（削除の場合はiconUrlにnullを渡す）
+export async function updateIcon(
+  user: firebaseAuth.User,
+  iconUrl: string | null
+): Promise<void> {
+  await firebaseAuth.updateProfile(user, { photoURL: iconUrl });
+  await userApi.updateIcon(iconUrl);
+}
+
 // ユーザー削除（退会）
 export async function deleteUser() {
   // カスタムトークン取得

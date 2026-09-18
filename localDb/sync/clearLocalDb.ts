@@ -2,6 +2,7 @@ import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import * as mealRepository from "@/localDb/repository/mealRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 
@@ -26,6 +27,10 @@ export const clearLocalDb = async () => {
     // トレーニング情報削除
     await trainingRepository.deleteTrainings();
     console.log("トレーニングデータクリア完了");
+
+    // 食事記録情報削除
+    await mealRepository.deleteMeals();
+    console.log("食事記録データクリア完了");
 
     // 食事情報削除
     await eatingRepository.deleteEatings();

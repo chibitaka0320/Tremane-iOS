@@ -4,6 +4,7 @@ export type UserResponse = {
   userId: string;
   nickname: string;
   handle: string | null;
+  iconUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -54,6 +55,9 @@ export type EatingResponse = {
   protein: number;
   fat: number;
   carbo: number;
+  mealId: string | null;
+  unit: string | null;
+  quantity: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -81,6 +85,7 @@ export type UserSearchResponse = {
   userId: string;
   handle: string;
   nickname: string;
+  iconUrl: string | null;
   status: string;
   requestId: string;
 };
@@ -89,6 +94,7 @@ export type UserSearchResponse = {
 export type TrainingDateRankingResponse = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   trainingCounts: number;
 };
 
@@ -96,6 +102,7 @@ export type TrainingDateRankingResponse = {
 export type TimelineTrainingResponse = {
   userId: string;
   nickname: string;
+  iconUrl: string | null;
   date: string;
   bodyParts: {
     partsId: number;
@@ -121,6 +128,7 @@ export type NotificationResponse = {
   notificationSource: string;
   type: string;
   message: string;
+  iconUrl: string | null;
   relatedId: string;
   createdAt: string;
   status: string | null;
@@ -178,6 +186,29 @@ export type EatingRequest = {
   protein: number;
   fat: number;
   carbo: number;
+  mealId: string | null;
+  unit: string | null;
+  quantity: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// 食事記録取得API
+export type MealResponse = {
+  mealId: string;
+  date: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// 食事記録追加更新API
+export type MealRequest = {
+  mealId: string;
+  date: string;
+  userId: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
 };

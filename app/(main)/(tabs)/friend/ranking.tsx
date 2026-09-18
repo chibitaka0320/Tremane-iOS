@@ -1,5 +1,7 @@
 import Indicator from "@/components/common/Indicator";
 import theme from "@/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
@@ -55,6 +57,20 @@ export default function RankingScreen() {
             <View style={styles.listItem} key={index}>
               <View style={styles.itemLeft}>
                 <Text style={styles.rank}>{index + 1}</Text>
+                {ranking.iconUrl ? (
+                  <Image
+                    source={{ uri: ranking.iconUrl }}
+                    style={styles.icon}
+                  />
+                ) : (
+                  <View style={styles.iconPlaceholder}>
+                    <Ionicons
+                      name="person"
+                      size={18}
+                      color={theme.colors.font.gray}
+                    />
+                  </View>
+                )}
                 <Text style={styles.name}>{ranking.nickname}</Text>
               </View>
               <View style={styles.itemRight}>
@@ -104,6 +120,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: theme.fontSizes.medium,
     marginRight: theme.spacing[3],
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: theme.spacing[3],
+    backgroundColor: theme.colors.background.dark,
+  },
+  iconPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: theme.spacing[3],
+    backgroundColor: theme.colors.background.dark,
+    alignItems: "center",
+    justifyContent: "center",
   },
   name: {
     fontSize: theme.fontSizes.medium + 2,

@@ -1,5 +1,7 @@
 import Indicator from "@/components/common/Indicator";
 import theme from "@/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
 import * as timelineService from "@/service/timelineService";
@@ -72,6 +74,17 @@ export default function FriendScreen() {
       renderItem={({ item }) => (
         <View style={styles.recordContainer}>
           <View style={styles.headerRow}>
+            {item.iconUrl ? (
+              <Image source={{ uri: item.iconUrl }} style={styles.userIcon} />
+            ) : (
+              <View style={styles.userIconPlaceholder}>
+                <Ionicons
+                  name="person"
+                  size={16}
+                  color={theme.colors.font.gray}
+                />
+              </View>
+            )}
             <Text style={styles.userName}>{item.nickname}</Text>
             <Text style={styles.recordDatetime}>
               {formatActivityTime(item.lastActivityAt)}
@@ -137,6 +150,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: theme.spacing[2],
     marginBottom: theme.spacing[3],
+  },
+  userIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.background.dark,
+  },
+  userIconPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.background.dark,
+    alignItems: "center",
+    justifyContent: "center",
   },
   userName: {
     fontSize: theme.fontSizes.medium,

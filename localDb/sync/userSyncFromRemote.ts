@@ -2,6 +2,7 @@ import * as userRepository from "@/localDb/repository/userRepository";
 import * as userProfileRepository from "@/localDb/repository/userProfileRepository";
 import * as userGoalRepository from "@/localDb/repository/userGoalRepository";
 import * as trainingRepository from "@/localDb/repository/trainingRepository";
+import * as mealRepository from "@/localDb/repository/mealRepository";
 import * as eatingRepository from "@/localDb/repository/eatingRepository";
 import * as exerciseRepository from "@/localDb/repository/exerciseRepository";
 import { ApiError } from "@/lib/error";
@@ -25,6 +26,10 @@ export async function userSyncFromRemote() {
     // トレーニングテーブル初期化
     await trainingRepository.syncTrainingsFromRemote();
     console.log("トレーニングデータ同期完了");
+
+    // 食事記録テーブル初期化
+    await mealRepository.syncMealsFromRemote();
+    console.log("食事記録データ同期完了");
 
     // 食事テーブル初期化
     await eatingRepository.syncEatingsFromRemote();

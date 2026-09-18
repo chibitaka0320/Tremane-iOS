@@ -5,6 +5,7 @@ import { validateHandle } from "@/lib/validators";
 import theme from "@/styles/theme";
 import { UserSearchResponse } from "@/types/api";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -319,55 +320,100 @@ export default function FriendAddScreen({ onClose }: Props) {
         </View>
         <View style={styles.searchResultContainer}>
           {user ? (
-            <View style={styles.resultUserContainer}>
-              <Text style={styles.userName}>{user.nickname}</Text>
-              {isStatusLoading ? (
-                <View
-                  style={[
-                    styles.activityContainer,
-                    status !== null && styles.alreadyFriend,
-                  ]}
-                >
-                  <ActivityIndicator />
+            <View style={styles.resultWrapper}>
+              <Text style={styles.resultLabel}>検索結果</Text>
+              <View style={styles.resultCard}>
+                {user.iconUrl ? (
+                  <Image
+                    source={{ uri: user.iconUrl }}
+                    style={styles.userIcon}
+                  />
+                ) : (
+                  <View style={styles.userIconPlaceholder}>
+                    <Ionicons
+                      name="person"
+                      size={28}
+                      color={theme.colors.font.gray}
+                    />
+                  </View>
+                )}
+                <View style={styles.resultInfo}>
+                  <Text
+                    style={styles.userName}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {user.nickname}
+                  </Text>
+                  <Text
+                    style={styles.userHandle}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    @{user.handle}
+                  </Text>
                 </View>
-              ) : (
-                <>
-                  {status === null && (
-                    <TouchableOpacity onPress={addFriend}>
-                      <Text style={styles.addFriend}>+ 友達に追加</Text>
-                    </TouchableOpacity>
-                  )}
-                  {status === "pending" && (
-                    <TouchableOpacity onPress={cancelApplication}>
-                      <Text style={[styles.addFriend, styles.alreadyFriend]}>
-                        申請中
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  {status === "accepted" && (
-                    <TouchableOpacity onPress={removeFriend}>
-                      <Text style={[styles.addFriend, styles.alreadyFriend]}>
-                        <FontAwesome name="check" color="white" size={16} />{" "}
-                        友達
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  {status === "receive" && (
-                    <View style={styles.receiveContainer}>
-                      <TouchableOpacity onPress={rejectFriend}>
-                        <Text style={styles.receiveFriend}>拒否</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={receiveFriend}>
-                        <Text
-                          style={[styles.receiveFriend, styles.alreadyFriend]}
-                        >
-                          許可
-                        </Text>
-                      </TouchableOpacity>
+                <View style={styles.resultAction}>
+                  {isStatusLoading ? (
+                    <View
+                      style={[
+                        styles.activityContainer,
+                        status !== null && styles.alreadyFriend,
+                      ]}
+                    >
+                      <ActivityIndicator />
                     </View>
+                  ) : (
+                    <>
+                      {status === null && (
+                        <TouchableOpacity onPress={addFriend}>
+                          <Text style={styles.addFriend}>+ 友達に追加</Text>
+                        </TouchableOpacity>
+                      )}
+                      {status === "pending" && (
+                        <TouchableOpacity onPress={cancelApplication}>
+                          <Text
+                            style={[styles.addFriend, styles.alreadyFriend]}
+                          >
+                            申請中
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      {status === "accepted" && (
+                        <TouchableOpacity onPress={removeFriend}>
+                          <Text
+                            style={[styles.addFriend, styles.alreadyFriend]}
+                          >
+                            <FontAwesome
+                              name="check"
+                              color="white"
+                              size={16}
+                            />{" "}
+                            友達
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      {status === "receive" && (
+                        <View style={styles.receiveContainer}>
+                          <TouchableOpacity onPress={rejectFriend}>
+                            <Text style={styles.receiveFriend}>拒否</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={receiveFriend}>
+                            <Text
+                              style={[
+                                styles.receiveFriend,
+                                styles.alreadyFriend,
+                              ]}
+                            >
+                              許可
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </>
                   )}
-                </>
-              )}
+                </View>
+              </View>
             </View>
           ) : (
             <View style={styles.resultTextContainer}>
@@ -511,16 +557,58 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  resultUserContainer: {
+  resultWrapper: {
+    marginTop: theme.spacing[2],
+  },
+  resultLabel: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: "bold",
+    color: theme.colors.font.gray,
+    marginBottom: theme.spacing[3],
+  },
+  resultCard: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: theme.spacing[3],
+    padding: theme.spacing[3],
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    backgroundColor: theme.colors.background.light,
+  },
+  userIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.background.dark,
+  },
+  userIconPlaceholder: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.background.dark,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  resultInfo: {
+    flex: 1,
+    flexShrink: 1,
   },
   userName: {
-    fontSize: theme.fontSizes.large,
-    marginVertical: theme.spacing[4],
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+  },
+  userHandle: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
+    marginTop: theme.spacing[1],
+  },
+  resultAction: {
+    flexShrink: 0,
   },
   addFriend: {
     fontWeight: "700",
-    width: 150,
+    width: 110,
     textAlign: "center",
     paddingVertical: theme.spacing[2],
     borderColor: theme.colors.font.gray,
@@ -532,7 +620,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.black,
   },
   activityContainer: {
-    width: 150,
+    width: 110,
     alignItems: "center",
     paddingVertical: theme.spacing[2],
     borderColor: theme.colors.font.gray,
@@ -542,13 +630,13 @@ const styles = StyleSheet.create({
 
   receiveContainer: {
     flexDirection: "row",
+    gap: theme.spacing[2],
   },
   receiveFriend: {
     fontWeight: "700",
-    width: 100,
+    width: 70,
     textAlign: "center",
     paddingVertical: theme.spacing[2],
-    marginHorizontal: theme.spacing[2],
     borderColor: theme.colors.font.gray,
     borderWidth: 0.5,
     borderRadius: 4,

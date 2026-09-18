@@ -10,6 +10,7 @@ export async function getTrainingTimeline(): Promise<TrainingTimeline[]> {
       const timeline: TrainingTimeline = {
         userId: timelineRes.userId,
         nickname: timelineRes.nickname,
+        iconUrl: timelineRes.iconUrl,
         date: timelineRes.date,
         bodyParts: timelineRes.bodyParts,
         exerciseCount: timelineRes.exerciseCount,

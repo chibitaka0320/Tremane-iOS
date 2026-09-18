@@ -12,6 +12,7 @@ export async function getTrainingRankingMonthly(): Promise<TrainingRanking[]> {
       const ranking: TrainingRanking = {
         userId: rankingRes.userId,
         nickname: rankingRes.nickname,
+        iconUrl: rankingRes.iconUrl,
         count: rankingRes.trainingCounts,
       };
       rankings.push(ranking);

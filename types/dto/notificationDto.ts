@@ -5,6 +5,7 @@ export type Notification = {
   notificationSource: string;
   type: string;
   message: string;
+  iconUrl: string | null;
   relatedId: string;
   createdAt: string;
   status: string | null;
