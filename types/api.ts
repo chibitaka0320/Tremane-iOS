@@ -55,6 +55,9 @@ export type EatingResponse = {
   protein: number;
   fat: number;
   carbo: number;
+  mealId: string | null;
+  unit: string | null;
+  quantity: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -183,6 +186,29 @@ export type EatingRequest = {
   protein: number;
   fat: number;
   carbo: number;
+  mealId: string | null;
+  unit: string | null;
+  quantity: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// 食事記録取得API
+export type MealResponse = {
+  mealId: string;
+  date: string;
+  userId: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// 食事記録追加更新API
+export type MealRequest = {
+  mealId: string;
+  date: string;
+  userId: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
 };

@@ -60,6 +60,8 @@ export default function MainScreen() {
 
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  // シートを開き直すたびにRecordMenuを作り直すためのkey（展開状態などをリセットするため）
+  const [menuKey, setMenuKey] = useState(0);
 
   // callbacks
   const onPlusButton = useCallback(() => {
@@ -75,7 +77,7 @@ export default function MainScreen() {
         pressBehavior="close"
       />
     ),
-    []
+    [],
   );
 
   return (
@@ -115,9 +117,10 @@ export default function MainScreen() {
         <BottomSheetModal
           ref={bottomSheetModalRef}
           backdropComponent={renderBackdrop}
+          onDismiss={() => setMenuKey((prev) => prev + 1)}
         >
           <BottomSheetView style={styles.menu}>
-            <RecordMenu bottomSheetRef={bottomSheetModalRef} />
+            <RecordMenu key={menuKey} bottomSheetRef={bottomSheetModalRef} />
           </BottomSheetView>
         </BottomSheetModal>
 

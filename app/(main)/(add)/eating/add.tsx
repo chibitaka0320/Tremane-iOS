@@ -1,14 +1,19 @@
 import Indicator from "@/components/common/Indicator";
 import CustomTextInput from "@/components/common/CustomTextInput";
+import SelectModal, {
+  SelectModalHandle,
+} from "@/components/common/SelectModal";
+import { unitOptions } from "@/constants/unitOptions";
 import { auth } from "@/lib/firebaseConfig";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import * as eatingService from "@/service/eatingService";
 import theme from "@/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -17,21 +22,32 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import uuid from "react-native-uuid";
 
 export default function EatingAddScreen() {
+  // 食事記録詳細から食品を追加する場合に渡される、所属先の食事記録ID
+  const { mealId } = useLocalSearchParams<{ mealId?: string }>();
+
   const [date, setDate] = useState(new Date());
   const [name, setName] = useState("");
   const [protein, setProtein] = useState("0");
   const [fat, setFat] = useState("0");
   const [carbo, setCarbo] = useState("0");
+  const [unit, setUnit] = useState(unitOptions[0].value);
+  const [quantity, setQuantity] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
+
+  const unitRef = useRef<SelectModalHandle>(null);
+
+  const onConfirmUnit = (value: string) => {
+    unitRef.current?.dismiss();
+    setUnit(value);
+  };
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -72,7 +88,10 @@ export default function EatingAddScreen() {
         name,
         parseFloat(protein),
         parseFloat(fat),
-        parseFloat(carbo)
+        parseFloat(carbo),
+        mealId ?? null,
+        unit,
+        quantity === "" || isNaN(Number(quantity)) ? null : Number(quantity),
       );
       router.back();
     } catch (error) {
@@ -88,12 +107,13 @@ export default function EatingAddScreen() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <BottomSheetModalProvider>
       <View style={styles.container}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          onScrollBeginDrag={Keyboard.dismiss}
         >
           <View style={styles.item}>
             <Text style={styles.sectionLabel}>日付</Text>
@@ -134,6 +154,34 @@ export default function EatingAddScreen() {
               onChangeText={setName}
               value={name}
             />
+          </View>
+
+          <View style={styles.item}>
+            <Text style={styles.sectionLabel}>数量（任意）</Text>
+            <View style={styles.quantityRow}>
+              <View style={styles.quantityInputBox}>
+                <TextInput
+                  keyboardType="numeric"
+                  style={styles.quantityInputText}
+                  placeholder="例：100"
+                  onChangeText={setQuantity}
+                  value={quantity}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.unitCard}
+                onPress={() => unitRef.current?.present()}
+              >
+                <Text style={styles.dateText}>
+                  {unitOptions.find((o) => o.value === unit)?.label}
+                </Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={18}
+                  color={theme.colors.font.gray}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.item}>
@@ -231,8 +279,16 @@ export default function EatingAddScreen() {
         >
           <Text style={styles.submitButtonText}>食事を記録</Text>
         </TouchableOpacity>
+
+        <SelectModal
+          ref={unitRef}
+          title="単位を選択してください"
+          value={unit}
+          options={unitOptions}
+          onConfirm={onConfirmUnit}
+        />
       </View>
-    </TouchableWithoutFeedback>
+    </BottomSheetModalProvider>
   );
 }
 
@@ -278,6 +334,38 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: theme.fontSizes.medium,
     color: theme.colors.dark,
+  },
+
+  // 数量・単位
+  quantityRow: {
+    flexDirection: "row",
+    gap: theme.spacing[2],
+  },
+  quantityInputBox: {
+    flex: 2,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.lightGray,
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    paddingHorizontal: theme.spacing[4],
+  },
+  quantityInputText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.dark,
+    paddingVertical: theme.spacing[3],
+  },
+  unitCard: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.lightGray,
+    backgroundColor: theme.colors.background.light,
+    borderRadius: 8,
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
   },
 
   // 栄養素カード
