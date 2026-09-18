@@ -5,14 +5,14 @@ import { Meal } from "@/types/dto/eatingDto";
 // 最新更新日を取得
 export async function getLastUpdatedAt(): Promise<string> {
   const row = await db.getFirstAsync<{ last_updated: string }>(
-    `SELECT MAX(updated_at) as last_updated FROM meals;`
+    `SELECT MAX(updated_at) as last_updated FROM meals;`,
   );
   return row?.last_updated ?? "1970-01-01T00:00:00";
 }
 
 // 非同期データの取得
 export async function getUnsyncedMeals(
-  deleteFlg: number
+  deleteFlg: number,
 ): Promise<MealEntity[]> {
   const unsynced = await db.getAllAsync<MealEntity>(
     `
@@ -21,7 +21,7 @@ export async function getUnsyncedMeals(
     WHERE is_synced = 0
     AND is_deleted = ?
     `,
-    [deleteFlg]
+    [deleteFlg],
   );
   return unsynced;
 }
@@ -39,18 +39,35 @@ export async function getMeal(mealId: string): Promise<Meal | null> {
     FROM meals
     WHERE meal_id = ?
     `,
-    [mealId]
+    [mealId],
   );
   return meal;
 }
 
+// 日別食事記録一覧取得
+export async function getMealsByDate(date: string): Promise<Meal[]> {
+  const rows = await db.getAllAsync<Meal>(
+    `
+    SELECT
+      meal_id as mealId,
+      date,
+      name,
+      created_at as createdAt,
+      updated_at as updatedAt
+    FROM meals
+    WHERE date = ?
+    AND is_deleted = 0
+    `,
+    [date],
+  );
+  return rows;
+}
+
 // 食事記録IDから登録日時を取得（既存レコードかどうかの判定に使用）
-export async function getMealCreatedAt(
-  mealId: string
-): Promise<string | null> {
+export async function getMealCreatedAt(mealId: string): Promise<string | null> {
   const row = await db.getFirstAsync<{ created_at: string }>(
     `SELECT created_at FROM meals WHERE meal_id = ?;`,
-    [mealId]
+    [mealId],
   );
   return row?.created_at ?? null;
 }
@@ -73,7 +90,7 @@ export async function upsertMeals(meals: MealEntity[]) {
           meal.is_deleted,
           meal.created_at,
           meal.updated_at,
-        ]
+        ],
       );
     }
   });

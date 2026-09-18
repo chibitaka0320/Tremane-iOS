@@ -37,62 +37,66 @@ export type SelectModalHandle = {
 // onLayoutが発火してシートが毎回再アニメーションし、画面がガタつくため固定値にしている）
 const SNAP_POINTS = [480];
 
-const SelectModal = forwardRef<SelectModalHandle, Props>(
-  function SelectModal({ title, value, options, onConfirm }, ref) {
-    const sheetRef = useRef<BottomSheetModal>(null);
-    // シートを開くたびに変え、SelectPickerBodyをその時点のvalueで作り直すためのkey。
-    const [openToken, setOpenToken] = useState(0);
+const SelectModal = forwardRef<SelectModalHandle, Props>(function SelectModal(
+  { title, value, options, onConfirm },
+  ref,
+) {
+  const sheetRef = useRef<BottomSheetModal>(null);
+  // シートを開くたびに変え、SelectPickerBodyをその時点のvalueで作り直すためのkey。
+  const [openToken, setOpenToken] = useState(0);
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        present: () => {
-          setOpenToken((prev) => prev + 1);
-          sheetRef.current?.present();
-        },
-        dismiss: () => sheetRef.current?.dismiss(),
-      }),
-      []
-    );
+  useImperativeHandle(
+    ref,
+    () => ({
+      present: () => {
+        setOpenToken((prev) => prev + 1);
+        sheetRef.current?.present();
+      },
+      dismiss: () => sheetRef.current?.dismiss(),
+    }),
+    [],
+  );
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetDefaultBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          disappearsOnIndex={-1}
-          appearsOnIndex={0}
-          pressBehavior="close"
+  const renderBackdrop = useCallback(
+    (props: BottomSheetDefaultBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        pressBehavior="close"
+      />
+    ),
+    [],
+  );
+
+  return (
+    <BottomSheetModal
+      ref={sheetRef}
+      backdropComponent={renderBackdrop}
+      // 他のBottomSheetModal（食品追加シートなど）の上に重ねて表示するため、
+      // デフォルトの"replace"（既存シートを閉じて差し替え）ではなく"push"（積み上げ）にする
+      stackBehavior="push"
+      enablePanDownToClose
+      // ピッカーの内部スクロールジェスチャーとシートのドラッグジェスチャーが競合し、
+      // スクロール中にシート位置が動いて見える問題を避けるため、コンテンツ領域のドラッグは無効化する
+      // （閉じる操作はハンドルのドラッグ・背景タップ・キャンセル/確認ボタンから可能）
+      enableContentPanningGesture={false}
+      enableDynamicSizing={false}
+      snapPoints={SNAP_POINTS}
+    >
+      <BottomSheetView style={styles.content}>
+        <Text style={styles.title}>{title}</Text>
+        <SelectPickerBody
+          key={openToken}
+          initialValue={value}
+          options={options}
+          onCancel={() => sheetRef.current?.dismiss()}
+          onConfirm={onConfirm}
         />
-      ),
-      []
-    );
-
-    return (
-      <BottomSheetModal
-        ref={sheetRef}
-        backdropComponent={renderBackdrop}
-        enablePanDownToClose
-        // ピッカーの内部スクロールジェスチャーとシートのドラッグジェスチャーが競合し、
-        // スクロール中にシート位置が動いて見える問題を避けるため、コンテンツ領域のドラッグは無効化する
-        // （閉じる操作はハンドルのドラッグ・背景タップ・キャンセル/確認ボタンから可能）
-        enableContentPanningGesture={false}
-        enableDynamicSizing={false}
-        snapPoints={SNAP_POINTS}
-      >
-        <BottomSheetView style={styles.content}>
-          <Text style={styles.title}>{title}</Text>
-          <SelectPickerBody
-            key={openToken}
-            initialValue={value}
-            options={options}
-            onCancel={() => sheetRef.current?.dismiss()}
-            onConfirm={onConfirm}
-          />
-        </BottomSheetView>
-      </BottomSheetModal>
-    );
-  }
-);
+      </BottomSheetView>
+    </BottomSheetModal>
+  );
+});
 
 export default SelectModal;
 

@@ -13,6 +13,7 @@ export type FoodRecord = Nutrition & {
   name: string;
   mealId: string | null;
   unit: string | null;
+  quantity: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -32,11 +33,16 @@ export type MealDetail = Meal & {
   total: Nutrition;
 };
 
+// 1日分食事一覧の1行（単独の食品記録、または食事記録のまとまり）
+export type DailyEatingItem =
+  | { type: "food"; food: FoodRecord }
+  | { type: "meal"; meal: Meal; total: Nutrition; foodCount: number };
+
 // 1日分食事集計
 export type DailyEating = {
   date: string;
   total: Nutrition;
   goal: Nutrition | null;
   rate: Nutrition;
-  meals: FoodRecord[];
+  items: DailyEatingItem[];
 };

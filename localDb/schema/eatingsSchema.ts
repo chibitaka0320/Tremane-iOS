@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS eatings (
     carbo INTEGER,
     meal_id TEXT,
     unit TEXT,
+    quantity REAL,
     is_synced INTEGER DEFAULT 0,
     is_deleted INTEGER DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

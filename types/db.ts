@@ -58,6 +58,7 @@ export type EatingEntity = {
   carbo: number;
   meal_id: string | null;
   unit: string | null;
+  quantity: number | null;
   is_synced: number;
   is_deleted: number;
   created_at: string;

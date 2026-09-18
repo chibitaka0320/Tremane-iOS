@@ -1,4 +1,4 @@
 export const unitOptions = [
-  { label: "kg", value: "kg" },
+  { label: "g", value: "g" },
   { label: "個", value: "count" },
 ];

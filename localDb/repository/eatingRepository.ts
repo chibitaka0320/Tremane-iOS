@@ -1,11 +1,17 @@
 import * as eatingApi from "@/api/eatingApi";
 import { calcGoalKcal, isUserProfileComplete } from "@/lib/calc";
 import * as eatingDao from "@/localDb/dao/eatingDao";
+import * as mealDao from "@/localDb/dao/mealDao";
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
 import * as userProfileDao from "@/localDb/dao/userProfileDao";
 import { EatingRequest, EatingResponse } from "@/types/api";
 import { EatingEntity, UserGoalEntity, UserProfileEntity } from "@/types/db";
-import { DailyEating, FoodRecord, Nutrition } from "@/types/dto/eatingDto";
+import {
+  DailyEating,
+  DailyEatingItem,
+  FoodRecord,
+  Nutrition,
+} from "@/types/dto/eatingDto";
 import { format } from "date-fns";
 
 // リモートDBから食事データの最新情報を同期
@@ -42,7 +48,7 @@ export async function syncEatingsFromLocal() {
     eatingApi.upsertEatings(requests);
   } else {
     console.log(
-      "同期対象の食事データ（未削除）が存在しませんでした。（ローカル → リモート）"
+      "同期対象の食事データ（未削除）が存在しませんでした。（ローカル → リモート）",
     );
   }
 
@@ -54,7 +60,7 @@ export async function syncEatingsFromLocal() {
     }
   } else {
     console.log(
-      "同期対象の食事データ（削除）が存在しませんでした。（ローカル → リモート）"
+      "同期対象の食事データ（削除）が存在しませんでした。（ローカル → リモート）",
     );
   }
 }
@@ -75,10 +81,55 @@ export async function getEatingByDate(date: string): Promise<DailyEating> {
   // 目標達成比率
   const rate = getRateNutrition(total, goal ?? EMPTY_NUTRITION);
 
-  // 食事内容
-  const meals = await eatingDao.getEatingsByDate(date);
+  // 食事内容（単独の食品記録・食事記録のまとまりが混在した一覧）
+  const items = await buildDailyItems(date);
 
-  return { date, total, goal, rate, meals };
+  return { date, total, goal, rate, items };
+}
+
+// 日別の食品記録を、単独の食品記録／食事記録のまとまりに振り分けて一覧化する
+async function buildDailyItems(date: string): Promise<DailyEatingItem[]> {
+  const [foods, meals] = await Promise.all([
+    eatingDao.getEatingsByDate(date),
+    mealDao.getMealsByDate(date),
+  ]);
+
+  const mealMap = new Map(meals.map((meal) => [meal.mealId, meal]));
+  const mealGroups = new Map<string, FoodRecord[]>();
+  const items: DailyEatingItem[] = [];
+
+  for (const food of foods) {
+    // mealIdが無い、または対象の食事記録が見つからない場合は単独の食品記録として扱う
+    if (!food.mealId || !mealMap.has(food.mealId)) {
+      items.push({ type: "food", food });
+      continue;
+    }
+    const group = mealGroups.get(food.mealId) ?? [];
+    group.push(food);
+    mealGroups.set(food.mealId, group);
+  }
+
+  for (const [mealId, groupFoods] of mealGroups) {
+    const meal = mealMap.get(mealId)!;
+    const total = groupFoods.reduce<Nutrition>(
+      (sum, food) => ({
+        calories: sum.calories + food.calories,
+        protein: sum.protein + food.protein,
+        fat: sum.fat + food.fat,
+        carbo: sum.carbo + food.carbo,
+      }),
+      { calories: 0, protein: 0, fat: 0, carbo: 0 },
+    );
+    items.push({ type: "meal", meal, total, foodCount: groupFoods.length });
+  }
+
+  // 登録日時順に並び替え
+  items.sort((a, b) => itemCreatedAt(a).localeCompare(itemCreatedAt(b)));
+  return items;
+}
+
+function itemCreatedAt(item: DailyEatingItem): string {
+  return item.type === "food" ? item.food.createdAt : item.meal.createdAt;
 }
 
 // 食事詳細情報取得
@@ -88,7 +139,7 @@ export async function getEating(eatingId: string): Promise<FoodRecord | null> {
 
 // 食事IDから登録日時を取得（既存レコードかどうかの判定に使用）
 export async function getEatingCreatedAt(
-  eatingId: string
+  eatingId: string,
 ): Promise<string | null> {
   return await eatingDao.getEatingCreatedAt(eatingId);
 }
@@ -126,6 +177,7 @@ function toEntity(eatingResponse: EatingResponse): EatingEntity {
     carbo: eatingResponse.carbo,
     meal_id: eatingResponse.mealId,
     unit: eatingResponse.unit,
+    quantity: eatingResponse.quantity,
     is_synced: 1,
     is_deleted: 0,
     created_at: eatingResponse.createdAt,
@@ -146,18 +198,24 @@ function toRequest(eatingEntity: EatingEntity): EatingRequest {
     carbo: eatingEntity.carbo,
     mealId: eatingEntity.meal_id,
     unit: eatingEntity.unit,
+    quantity: eatingEntity.quantity,
     createdAt: eatingEntity.created_at,
     updatedAt: eatingEntity.updated_at,
   };
 }
 
 // 未設定時の栄養素（達成比率算出用のフォールバック）
-const EMPTY_NUTRITION: Nutrition = { calories: 0, protein: 0, fat: 0, carbo: 0 };
+const EMPTY_NUTRITION: Nutrition = {
+  calories: 0,
+  protein: 0,
+  fat: 0,
+  carbo: 0,
+};
 
 // ユーザーの目標摂取栄養素を取得（プロフィールまたは目標が未設定の場合はnull）
 function getGoalNutrition(
   userProfile: UserProfileEntity | null,
-  userGoal: UserGoalEntity | null
+  userGoal: UserGoalEntity | null,
 ): Nutrition | null {
   if (!userProfile || !userGoal || !isUserProfileComplete(userProfile)) {
     return null;

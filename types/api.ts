@@ -57,6 +57,7 @@ export type EatingResponse = {
   carbo: number;
   mealId: string | null;
   unit: string | null;
+  quantity: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -187,6 +188,7 @@ export type EatingRequest = {
   carbo: number;
   mealId: string | null;
   unit: string | null;
+  quantity: number | null;
   createdAt: string;
   updatedAt: string;
 };
