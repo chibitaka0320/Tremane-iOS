@@ -1,3 +1,6 @@
+import IconActionSheet, {
+  IconActionSheetHandle,
+} from "@/components/common/IconActionSheet";
 import Indicator from "@/components/common/Indicator";
 import SelectModal, {
   SelectModalHandle,
@@ -5,8 +8,14 @@ import SelectModal, {
 import { unitOptions } from "@/constants/unitOptions";
 import { calcKcal } from "@/lib/calc";
 import { auth } from "@/lib/firebaseConfig";
+import {
+  pickMealPhotoFromCamera,
+  pickMealPhotoFromLibrary,
+  PickedMealPhoto,
+} from "@/lib/mealPhoto";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import * as eatingService from "@/service/eatingService";
+import * as mealAnalyzeService from "@/service/mealAnalyzeService";
 import * as mealService from "@/service/mealService";
 import theme from "@/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,8 +32,10 @@ import { ja } from "date-fns/locale";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -68,9 +79,11 @@ export default function MealAddScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
+  const [isAnalyzing, setAnalyzing] = useState(false);
 
   const unitRef = useRef<SelectModalHandle>(null);
   const foodSheetRef = useRef<BottomSheetModal>(null);
+  const photoSheetRef = useRef<IconActionSheetHandle>(null);
 
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
@@ -170,6 +183,64 @@ export default function MealAddScreen() {
     if (!editingFoodId) return;
     setFoods((prev) => prev.filter((food) => food.id !== editingFoodId));
     foodSheetRef.current?.dismiss();
+  };
+
+  // 「写真から追加」押下：オフラインならその場でエラーを表示する
+  const onOpenPhotoSheet = async () => {
+    if (!(await mealAnalyzeService.isOnline())) {
+      Alert.alert(mealAnalyzeService.OFFLINE_MESSAGE);
+      return;
+    }
+    photoSheetRef.current?.present();
+  };
+
+  // 写真を撮影・選択して解析し、推定した食品を一覧の末尾に追加する
+  const analyzePhoto = async (
+    pick: () => Promise<PickedMealPhoto | null>,
+  ) => {
+    photoSheetRef.current?.dismiss();
+
+    let photo: PickedMealPhoto | null;
+    try {
+      photo = await pick();
+    } catch (error) {
+      Alert.alert(
+        error instanceof Error ? error.message : "写真を取得できませんでした",
+      );
+      return;
+    }
+    if (!photo) return;
+
+    setAnalyzing(true);
+    try {
+      const result = await mealAnalyzeService.analyzeMealPhoto(photo);
+      if (result.foods.length === 0) {
+        Alert.alert(
+          "食品を認識できませんでした",
+          "別の写真で試すか、手動で追加してください。",
+        );
+        return;
+      }
+
+      const analyzedFoods: PendingFood[] = result.foods.map((food) => ({
+        id: uuid.v4() as string,
+        name: food.name,
+        protein: food.protein,
+        fat: food.fat,
+        carbo: food.carbo,
+        unit: unitOptions[0].value,
+        quantity: null,
+      }));
+      setFoods((prev) => [...prev, ...analyzedFoods]);
+      if (mealName.trim() === "" && result.mealName) {
+        setMealName(result.mealName);
+      }
+    } catch (error) {
+      console.error("食事写真解析失敗：" + error);
+      Alert.alert(mealAnalyzeService.toAnalyzeErrorMessage(error));
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   // 合計栄養素
@@ -382,13 +453,30 @@ export default function MealAddScreen() {
               })
             )}
 
-            <TouchableOpacity
-              style={styles.addFoodOutlineButton}
-              onPress={onOpenAddFood}
-            >
-              <Ionicons name="add" size={18} color={theme.colors.secondary} />
-              <Text style={styles.addFoodOutlineButtonText}>食品を追加</Text>
-            </TouchableOpacity>
+            <View style={styles.addFoodButtonRow}>
+              <TouchableOpacity
+                style={[styles.addFoodOutlineButton, styles.addFoodButtonFlex]}
+                onPress={onOpenAddFood}
+              >
+                <Ionicons name="add" size={18} color={theme.colors.secondary} />
+                <Text style={styles.addFoodOutlineButtonText}>食品を追加</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.addFoodOutlineButton, styles.addFoodButtonFlex]}
+                onPress={onOpenPhotoSheet}
+                disabled={isAnalyzing}
+              >
+                <Ionicons
+                  name="camera-outline"
+                  size={18}
+                  color={theme.colors.secondary}
+                />
+                <Text style={styles.addFoodOutlineButtonText}>写真から追加</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.photoNote}>
+              ※ 写真からの推定値は目安です。タップして修正できます。
+            </Text>
           </View>
         </ScrollView>
 
@@ -399,6 +487,23 @@ export default function MealAddScreen() {
         >
           <Text style={styles.submitButtonText}>この食事を登録する</Text>
         </TouchableOpacity>
+
+        <IconActionSheet
+          ref={photoSheetRef}
+          canDelete={false}
+          onSelectCamera={() => analyzePhoto(pickMealPhotoFromCamera)}
+          onSelectLibrary={() => analyzePhoto(pickMealPhotoFromLibrary)}
+          onSelectDelete={() => {}}
+        />
+
+        <Modal visible={isAnalyzing} transparent animationType="fade">
+          <View style={styles.analyzingOverlay}>
+            <View style={styles.analyzingCard}>
+              <ActivityIndicator size="large" color={theme.colors.secondary} />
+              <Text style={styles.analyzingText}>写真を解析中…</Text>
+            </View>
+          </View>
+        </Modal>
 
         <SelectModal
           ref={unitRef}
@@ -692,6 +797,13 @@ const styles = StyleSheet.create({
   },
 
   // 含まれる食品一覧
+  addFoodButtonRow: {
+    flexDirection: "row",
+    gap: theme.spacing[2],
+  },
+  addFoodButtonFlex: {
+    flex: 1,
+  },
   addFoodOutlineButton: {
     flexDirection: "row",
     justifyContent: "center",
@@ -702,7 +814,30 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.light,
     borderRadius: 8,
     paddingVertical: theme.spacing[3],
+    marginBottom: theme.spacing[2],
+  },
+  photoNote: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
     marginBottom: theme.spacing[3],
+  },
+  analyzingOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  analyzingCard: {
+    alignItems: "center",
+    gap: theme.spacing[3],
+    paddingVertical: theme.spacing[5],
+    paddingHorizontal: theme.spacing[6],
+    borderRadius: 12,
+    backgroundColor: theme.colors.background.light,
+  },
+  analyzingText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.font.black,
   },
   addFoodOutlineButtonText: {
     fontSize: theme.fontSizes.medium,

@@ -213,6 +213,22 @@ export type MealRequest = {
   updatedAt: string;
 };
 
+// 食事写真解析API
+export type MealAnalyzeRequest = {
+  image: string; // Base64
+  mediaType: string;
+};
+
+export type MealAnalyzeResponse = {
+  mealName: string;
+  foods: {
+    name: string;
+    protein: number;
+    fat: number;
+    carbo: number;
+  }[];
+};
+
 // トレーニング種目追加更新API
 export type ExerciseRequest = {
   exerciseId: string;
