@@ -1,7 +1,7 @@
 import * as mealAnalyzeApi from "@/api/mealAnalyzeApi";
 import { ApiError } from "@/lib/error";
 import { PickedMealPhoto, toAnalysisImage } from "@/lib/mealPhoto";
-import { MealAnalyzeResponse } from "@/types/api";
+import { MealAnalyzeResponse, MealAnalyzeUsageResponse } from "@/types/api";
 import * as Network from "expo-network";
 
 export const OFFLINE_MESSAGE =
@@ -29,7 +29,20 @@ export async function analyzeMealPhoto(
     image,
     mediaType: "image/jpeg",
   });
-  return result ?? { mealName: "", foods: [] };
+  if (!result) {
+    throw new Error("解析結果が空です");
+  }
+  return result;
+}
+
+/** 本日の残り解析回数を取得する（オフライン・取得失敗時はnull） */
+export async function getAnalyzeUsage(): Promise<MealAnalyzeUsageResponse | null> {
+  try {
+    return await mealAnalyzeApi.getAnalyzeUsage();
+  } catch (error) {
+    console.error("食事写真解析の利用状況取得失敗：" + error);
+    return null;
+  }
 }
 
 /** 解析時のエラーを画面表示用のメッセージに変換する */

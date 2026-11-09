@@ -227,6 +227,12 @@ export type MealAnalyzeResponse = {
     fat: number;
     carbo: number;
   }[];
+  remainingCount: number; // 本日の残り解析回数
+};
+
+export type MealAnalyzeUsageResponse = {
+  remainingCount: number; // 本日の残り解析回数
+  dailyLimit: number; // 1日あたりの解析回数上限
 };
 
 // トレーニング種目追加更新API

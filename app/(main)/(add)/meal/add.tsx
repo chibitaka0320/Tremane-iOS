@@ -17,6 +17,7 @@ import { validateEatName, validatePfc } from "@/lib/validators";
 import * as eatingService from "@/service/eatingService";
 import * as mealAnalyzeService from "@/service/mealAnalyzeService";
 import * as mealService from "@/service/mealService";
+import { MealAnalyzeUsageResponse } from "@/types/api";
 import theme from "@/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -80,6 +81,10 @@ export default function MealAddScreen() {
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
   const [isAnalyzing, setAnalyzing] = useState(false);
+  // 写真解析の本日の残り回数（取得できない場合はnullで非表示）
+  const [analyzeUsage, setAnalyzeUsage] =
+    useState<MealAnalyzeUsageResponse | null>(null);
+  const isPhotoLimitReached = analyzeUsage?.remainingCount === 0;
 
   const unitRef = useRef<SelectModalHandle>(null);
   const foodSheetRef = useRef<BottomSheetModal>(null);
@@ -185,6 +190,15 @@ export default function MealAddScreen() {
     foodSheetRef.current?.dismiss();
   };
 
+  // 写真解析の残り回数を取得する
+  const refreshAnalyzeUsage = useCallback(() => {
+    mealAnalyzeService.getAnalyzeUsage().then(setAnalyzeUsage);
+  }, []);
+
+  useEffect(() => {
+    refreshAnalyzeUsage();
+  }, [refreshAnalyzeUsage]);
+
   // 「写真から追加」押下：オフラインならその場でエラーを表示する
   const onOpenPhotoSheet = async () => {
     if (!(await mealAnalyzeService.isOnline())) {
@@ -214,6 +228,14 @@ export default function MealAddScreen() {
     setAnalyzing(true);
     try {
       const result = await mealAnalyzeService.analyzeMealPhoto(photo);
+      if (analyzeUsage) {
+        setAnalyzeUsage({
+          ...analyzeUsage,
+          remainingCount: result.remainingCount,
+        });
+      } else {
+        refreshAnalyzeUsage();
+      }
       if (result.foods.length === 0) {
         Alert.alert(
           "食品を認識できませんでした",
@@ -238,6 +260,8 @@ export default function MealAddScreen() {
     } catch (error) {
       console.error("食事写真解析失敗：" + error);
       Alert.alert(mealAnalyzeService.toAnalyzeErrorMessage(error));
+      // 失敗時も回数を消費している場合があるため、サーバーの値で表示を合わせる
+      refreshAnalyzeUsage();
     } finally {
       setAnalyzing(false);
     }
@@ -462,18 +486,46 @@ export default function MealAddScreen() {
                 <Text style={styles.addFoodOutlineButtonText}>食品を追加</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.addFoodOutlineButton, styles.addFoodButtonFlex]}
+                style={[
+                  styles.addFoodOutlineButton,
+                  styles.addFoodButtonFlex,
+                  isPhotoLimitReached && styles.addFoodOutlineButtonDisabled,
+                ]}
                 onPress={onOpenPhotoSheet}
-                disabled={isAnalyzing}
+                disabled={isAnalyzing || isPhotoLimitReached}
               >
                 <Ionicons
                   name="camera-outline"
                   size={18}
-                  color={theme.colors.secondary}
+                  color={
+                    isPhotoLimitReached
+                      ? theme.colors.font.gray
+                      : theme.colors.secondary
+                  }
                 />
-                <Text style={styles.addFoodOutlineButtonText}>写真から追加</Text>
+                <Text
+                  style={[
+                    styles.addFoodOutlineButtonText,
+                    isPhotoLimitReached &&
+                      styles.addFoodOutlineButtonTextDisabled,
+                  ]}
+                >
+                  写真から追加
+                </Text>
               </TouchableOpacity>
             </View>
+            {analyzeUsage && (
+              <Text
+                style={[
+                  styles.photoUsage,
+                  isPhotoLimitReached && styles.photoUsageLimit,
+                ]}
+              >
+                {isPhotoLimitReached
+                  ? `本日の写真解析は上限（${analyzeUsage.dailyLimit}回）に達しました。明日またご利用ください。`
+                  : `写真から追加：本日あと${analyzeUsage.remainingCount}回（1日${analyzeUsage.dailyLimit}回まで）`}
+              </Text>
+            )}
             <Text style={styles.photoNote}>
               ※ 写真からの推定値は目安です。タップして修正できます。
             </Text>
@@ -815,6 +867,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: theme.spacing[3],
     marginBottom: theme.spacing[2],
+  },
+  addFoodOutlineButtonDisabled: {
+    borderColor: theme.colors.lightGray,
+  },
+  addFoodOutlineButtonTextDisabled: {
+    color: theme.colors.font.gray,
+  },
+  photoUsage: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.black,
+    marginBottom: theme.spacing[1],
+  },
+  photoUsageLimit: {
+    color: theme.colors.error,
   },
   photoNote: {
     fontSize: theme.fontSizes.small,
