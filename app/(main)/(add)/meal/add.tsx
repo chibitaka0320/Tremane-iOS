@@ -36,6 +36,7 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
+  Linking,
   Modal,
   ScrollView,
   StyleSheet,
@@ -47,6 +48,33 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import uuid from "react-native-uuid";
+
+/**
+ * 写真を外部AI（Anthropic）へ送信することへの同意を確認する
+ * 「プライバシーポリシー」を選んだ場合はページを開き、同意しなかった扱いとする（再度ボタンから確認できる）
+ */
+function confirmAnalysisConsent(): Promise<boolean> {
+  return new Promise((resolve) => {
+    Alert.alert(
+      "写真の解析について",
+      "「写真から追加」では、撮影・選択した食事の写真を、料理と栄養素の推定のために Anthropic 社の AI（Claude）へ送信します。\n\n" +
+        "写真は推定にのみ使用し、本アプリおよび開発者のサーバーには保存しません。\n\n" +
+        "同意のうえご利用ください。",
+      [
+        { text: "キャンセル", style: "cancel", onPress: () => resolve(false) },
+        {
+          text: "プライバシーポリシーを見る",
+          onPress: () => {
+            Linking.openURL(mealAnalyzeService.PRIVACY_POLICY_URL);
+            resolve(false);
+          },
+        },
+        { text: "同意して続ける", onPress: () => resolve(true) },
+      ],
+      { cancelable: true, onDismiss: () => resolve(false) },
+    );
+  });
+}
 
 // 食事記録に追加した食品（登録前の一時的な状態）
 type PendingFood = {
@@ -199,11 +227,25 @@ export default function MealAddScreen() {
     refreshAnalyzeUsage();
   }, [refreshAnalyzeUsage]);
 
-  // 「写真から追加」押下：オフラインならその場でエラーを表示する
+  // 「写真から追加」押下：オフラインならその場でエラーを表示し、
+  // 初回は外部AIへの写真送信について同意を得てから撮影・選択に進む
   const onOpenPhotoSheet = async () => {
     if (!(await mealAnalyzeService.isOnline())) {
       Alert.alert(mealAnalyzeService.OFFLINE_MESSAGE);
       return;
+    }
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    if (!(await mealAnalyzeService.hasAnalysisConsent(userId))) {
+      const agreed = await confirmAnalysisConsent();
+      if (!agreed) return;
+      try {
+        await mealAnalyzeService.saveAnalysisConsent(userId);
+      } catch (error) {
+        // 保存に失敗しても今回は同意を得ているため続行する（次回また確認する）
+        console.error("写真解析の同意保存失敗：" + error);
+      }
     }
     photoSheetRef.current?.present();
   };
