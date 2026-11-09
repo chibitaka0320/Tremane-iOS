@@ -2,10 +2,31 @@ import * as mealAnalyzeApi from "@/api/mealAnalyzeApi";
 import { ApiError } from "@/lib/error";
 import { PickedMealPhoto, toAnalysisImage } from "@/lib/mealPhoto";
 import { MealAnalyzeResponse, MealAnalyzeUsageResponse } from "@/types/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Network from "expo-network";
 
 export const OFFLINE_MESSAGE =
   "ネットワークに接続されていません。接続を確認してください。";
+
+export const PRIVACY_POLICY_URL =
+  "https://chibitaka0320.github.io/tremane-privacy-policy/";
+
+// 写真を外部AI（Anthropic）へ送信することへの同意（ユーザーごとに端末へ保存）
+const CONSENT_KEY_PREFIX = "meal_photo_analysis_consent:";
+
+/** 写真解析（外部AIへの送信）に同意済みかどうか */
+export async function hasAnalysisConsent(userId: string): Promise<boolean> {
+  try {
+    return (await AsyncStorage.getItem(CONSENT_KEY_PREFIX + userId)) === "true";
+  } catch {
+    return false;
+  }
+}
+
+/** 写真解析（外部AIへの送信）への同意を保存する */
+export async function saveAnalysisConsent(userId: string): Promise<void> {
+  await AsyncStorage.setItem(CONSENT_KEY_PREFIX + userId, "true");
+}
 
 // サーバーが返す日本語メッセージをそのまま表示するステータス
 const SERVER_MESSAGE_STATUSES = [400, 422, 429, 502, 503, 504];
