@@ -1,3 +1,6 @@
+import IconActionSheet, {
+  IconActionSheetHandle,
+} from "@/components/common/IconActionSheet";
 import Indicator from "@/components/common/Indicator";
 import SelectModal, {
   SelectModalHandle,
@@ -5,9 +8,16 @@ import SelectModal, {
 import { unitOptions } from "@/constants/unitOptions";
 import { calcKcal } from "@/lib/calc";
 import { auth } from "@/lib/firebaseConfig";
+import {
+  pickMealPhotoFromCamera,
+  pickMealPhotoFromLibrary,
+  PickedMealPhoto,
+} from "@/lib/mealPhoto";
 import { validateEatName, validatePfc } from "@/lib/validators";
 import * as eatingService from "@/service/eatingService";
+import * as mealAnalyzeService from "@/service/mealAnalyzeService";
 import * as mealService from "@/service/mealService";
+import { MealAnalyzeUsageResponse } from "@/types/api";
 import theme from "@/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -23,8 +33,11 @@ import { ja } from "date-fns/locale";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
+  Linking,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -35,6 +48,33 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import uuid from "react-native-uuid";
+
+/**
+ * 写真を外部AI（Anthropic）へ送信することへの同意を確認する
+ * 「プライバシーポリシー」を選んだ場合はページを開き、同意しなかった扱いとする（再度ボタンから確認できる）
+ */
+function confirmAnalysisConsent(): Promise<boolean> {
+  return new Promise((resolve) => {
+    Alert.alert(
+      "写真の解析について",
+      "「写真から追加」では、撮影・選択した食事の写真を、料理と栄養素の推定のために Anthropic 社の AI（Claude）へ送信します。\n\n" +
+        "写真は推定にのみ使用し、本アプリおよび開発者のサーバーには保存しません。\n\n" +
+        "同意のうえご利用ください。",
+      [
+        { text: "キャンセル", style: "cancel", onPress: () => resolve(false) },
+        {
+          text: "プライバシーポリシーを見る",
+          onPress: () => {
+            Linking.openURL(mealAnalyzeService.PRIVACY_POLICY_URL);
+            resolve(false);
+          },
+        },
+        { text: "同意して続ける", onPress: () => resolve(true) },
+      ],
+      { cancelable: true, onDismiss: () => resolve(false) },
+    );
+  });
+}
 
 // 食事記録に追加した食品（登録前の一時的な状態）
 type PendingFood = {
@@ -68,9 +108,15 @@ export default function MealAddScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(true);
+  const [isAnalyzing, setAnalyzing] = useState(false);
+  // 写真解析の本日の残り回数（取得できない場合はnullで非表示）
+  const [analyzeUsage, setAnalyzeUsage] =
+    useState<MealAnalyzeUsageResponse | null>(null);
+  const isPhotoLimitReached = analyzeUsage?.remainingCount === 0;
 
   const unitRef = useRef<SelectModalHandle>(null);
   const foodSheetRef = useRef<BottomSheetModal>(null);
+  const photoSheetRef = useRef<IconActionSheetHandle>(null);
 
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
@@ -170,6 +216,97 @@ export default function MealAddScreen() {
     if (!editingFoodId) return;
     setFoods((prev) => prev.filter((food) => food.id !== editingFoodId));
     foodSheetRef.current?.dismiss();
+  };
+
+  // 写真解析の残り回数を取得する
+  const refreshAnalyzeUsage = useCallback(() => {
+    mealAnalyzeService.getAnalyzeUsage().then(setAnalyzeUsage);
+  }, []);
+
+  useEffect(() => {
+    refreshAnalyzeUsage();
+  }, [refreshAnalyzeUsage]);
+
+  // 「写真から追加」押下：オフラインならその場でエラーを表示し、
+  // 初回は外部AIへの写真送信について同意を得てから撮影・選択に進む
+  const onOpenPhotoSheet = async () => {
+    if (!(await mealAnalyzeService.isOnline())) {
+      Alert.alert(mealAnalyzeService.OFFLINE_MESSAGE);
+      return;
+    }
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    if (!(await mealAnalyzeService.hasAnalysisConsent(userId))) {
+      const agreed = await confirmAnalysisConsent();
+      if (!agreed) return;
+      try {
+        await mealAnalyzeService.saveAnalysisConsent(userId);
+      } catch (error) {
+        // 保存に失敗しても今回は同意を得ているため続行する（次回また確認する）
+        console.error("写真解析の同意保存失敗：" + error);
+      }
+    }
+    photoSheetRef.current?.present();
+  };
+
+  // 写真を撮影・選択して解析し、推定した食品を一覧の末尾に追加する
+  const analyzePhoto = async (
+    pick: () => Promise<PickedMealPhoto | null>,
+  ) => {
+    photoSheetRef.current?.dismiss();
+
+    let photo: PickedMealPhoto | null;
+    try {
+      photo = await pick();
+    } catch (error) {
+      Alert.alert(
+        error instanceof Error ? error.message : "写真を取得できませんでした",
+      );
+      return;
+    }
+    if (!photo) return;
+
+    setAnalyzing(true);
+    try {
+      const result = await mealAnalyzeService.analyzeMealPhoto(photo);
+      if (analyzeUsage) {
+        setAnalyzeUsage({
+          ...analyzeUsage,
+          remainingCount: result.remainingCount,
+        });
+      } else {
+        refreshAnalyzeUsage();
+      }
+      if (result.foods.length === 0) {
+        Alert.alert(
+          "食品を認識できませんでした",
+          "別の写真で試すか、手動で追加してください。",
+        );
+        return;
+      }
+
+      const analyzedFoods: PendingFood[] = result.foods.map((food) => ({
+        id: uuid.v4() as string,
+        name: food.name,
+        protein: food.protein,
+        fat: food.fat,
+        carbo: food.carbo,
+        unit: unitOptions[0].value,
+        quantity: null,
+      }));
+      setFoods((prev) => [...prev, ...analyzedFoods]);
+      if (mealName.trim() === "" && result.mealName) {
+        setMealName(result.mealName);
+      }
+    } catch (error) {
+      console.error("食事写真解析失敗：" + error);
+      Alert.alert(mealAnalyzeService.toAnalyzeErrorMessage(error));
+      // 失敗時も回数を消費している場合があるため、サーバーの値で表示を合わせる
+      refreshAnalyzeUsage();
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   // 合計栄養素
@@ -382,13 +519,58 @@ export default function MealAddScreen() {
               })
             )}
 
-            <TouchableOpacity
-              style={styles.addFoodOutlineButton}
-              onPress={onOpenAddFood}
-            >
-              <Ionicons name="add" size={18} color={theme.colors.secondary} />
-              <Text style={styles.addFoodOutlineButtonText}>食品を追加</Text>
-            </TouchableOpacity>
+            <View style={styles.addFoodButtonRow}>
+              <TouchableOpacity
+                style={[styles.addFoodOutlineButton, styles.addFoodButtonFlex]}
+                onPress={onOpenAddFood}
+              >
+                <Ionicons name="add" size={18} color={theme.colors.secondary} />
+                <Text style={styles.addFoodOutlineButtonText}>食品を追加</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.addFoodOutlineButton,
+                  styles.addFoodButtonFlex,
+                  isPhotoLimitReached && styles.addFoodOutlineButtonDisabled,
+                ]}
+                onPress={onOpenPhotoSheet}
+                disabled={isAnalyzing || isPhotoLimitReached}
+              >
+                <Ionicons
+                  name="camera-outline"
+                  size={18}
+                  color={
+                    isPhotoLimitReached
+                      ? theme.colors.font.gray
+                      : theme.colors.secondary
+                  }
+                />
+                <Text
+                  style={[
+                    styles.addFoodOutlineButtonText,
+                    isPhotoLimitReached &&
+                      styles.addFoodOutlineButtonTextDisabled,
+                  ]}
+                >
+                  写真から追加
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {analyzeUsage && (
+              <Text
+                style={[
+                  styles.photoUsage,
+                  isPhotoLimitReached && styles.photoUsageLimit,
+                ]}
+              >
+                {isPhotoLimitReached
+                  ? `本日の写真解析は上限（${analyzeUsage.dailyLimit}回）に達しました。明日またご利用ください。`
+                  : `写真から追加：本日あと${analyzeUsage.remainingCount}回（1日${analyzeUsage.dailyLimit}回まで）`}
+              </Text>
+            )}
+            <Text style={styles.photoNote}>
+              ※ 写真からの推定値は目安です。タップして修正できます。
+            </Text>
           </View>
         </ScrollView>
 
@@ -399,6 +581,23 @@ export default function MealAddScreen() {
         >
           <Text style={styles.submitButtonText}>この食事を登録する</Text>
         </TouchableOpacity>
+
+        <IconActionSheet
+          ref={photoSheetRef}
+          canDelete={false}
+          onSelectCamera={() => analyzePhoto(pickMealPhotoFromCamera)}
+          onSelectLibrary={() => analyzePhoto(pickMealPhotoFromLibrary)}
+          onSelectDelete={() => {}}
+        />
+
+        <Modal visible={isAnalyzing} transparent animationType="fade">
+          <View style={styles.analyzingOverlay}>
+            <View style={styles.analyzingCard}>
+              <ActivityIndicator size="large" color={theme.colors.secondary} />
+              <Text style={styles.analyzingText}>写真を解析中…</Text>
+            </View>
+          </View>
+        </Modal>
 
         <SelectModal
           ref={unitRef}
@@ -692,6 +891,13 @@ const styles = StyleSheet.create({
   },
 
   // 含まれる食品一覧
+  addFoodButtonRow: {
+    flexDirection: "row",
+    gap: theme.spacing[2],
+  },
+  addFoodButtonFlex: {
+    flex: 1,
+  },
   addFoodOutlineButton: {
     flexDirection: "row",
     justifyContent: "center",
@@ -702,7 +908,44 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background.light,
     borderRadius: 8,
     paddingVertical: theme.spacing[3],
+    marginBottom: theme.spacing[2],
+  },
+  addFoodOutlineButtonDisabled: {
+    borderColor: theme.colors.lightGray,
+  },
+  addFoodOutlineButtonTextDisabled: {
+    color: theme.colors.font.gray,
+  },
+  photoUsage: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.black,
+    marginBottom: theme.spacing[1],
+  },
+  photoUsageLimit: {
+    color: theme.colors.error,
+  },
+  photoNote: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.font.gray,
     marginBottom: theme.spacing[3],
+  },
+  analyzingOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  analyzingCard: {
+    alignItems: "center",
+    gap: theme.spacing[3],
+    paddingVertical: theme.spacing[5],
+    paddingHorizontal: theme.spacing[6],
+    borderRadius: 12,
+    backgroundColor: theme.colors.background.light,
+  },
+  analyzingText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.font.black,
   },
   addFoodOutlineButtonText: {
     fontSize: theme.fontSizes.medium,
