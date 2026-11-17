@@ -1,5 +1,9 @@
 import * as eatingApi from "@/api/eatingApi";
-import { calcGoalKcal, isUserProfileComplete } from "@/lib/calc";
+import {
+  calcGoalKcal,
+  isUserProfileComplete,
+  sumNutrition,
+} from "@/lib/calc";
 import * as eatingDao from "@/localDb/dao/eatingDao";
 import * as mealDao from "@/localDb/dao/mealDao";
 import * as userGoalDao from "@/localDb/dao/userGoalDao";
@@ -111,15 +115,7 @@ async function buildDailyItems(date: string): Promise<DailyEatingItem[]> {
 
   for (const [mealId, groupFoods] of mealGroups) {
     const meal = mealMap.get(mealId)!;
-    const total = groupFoods.reduce<Nutrition>(
-      (sum, food) => ({
-        calories: sum.calories + food.calories,
-        protein: sum.protein + food.protein,
-        fat: sum.fat + food.fat,
-        carbo: sum.carbo + food.carbo,
-      }),
-      { calories: 0, protein: 0, fat: 0, carbo: 0 },
-    );
+    const total = sumNutrition(groupFoods);
     items.push({ type: "meal", meal, total, foodCount: groupFoods.length });
   }
 

@@ -79,9 +79,9 @@ export async function getNutritionTotalByDate(
   const nutrition = db.getFirstAsync<Nutrition>(
     `
     SELECT IFNULL(SUM(calories), 0) AS calories,
-           IFNULL(SUM(protein), 0) AS protein,
-           IFNULL(SUM(fat), 0) AS fat,
-           IFNULL(SUM(carbo), 0) AS carbo
+           IFNULL(ROUND(SUM(protein), 1), 0) AS protein,
+           IFNULL(ROUND(SUM(fat), 1), 0) AS fat,
+           IFNULL(ROUND(SUM(carbo), 1), 0) AS carbo
     FROM eatings
     WHERE date = ? AND is_deleted = 0;
     `,

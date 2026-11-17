@@ -6,7 +6,7 @@ import SelectModal, {
   SelectModalHandle,
 } from "@/components/common/SelectModal";
 import { unitOptions } from "@/constants/unitOptions";
-import { calcKcal } from "@/lib/calc";
+import { calcKcal, sumNutrition } from "@/lib/calc";
 import { auth } from "@/lib/firebaseConfig";
 import {
   pickMealPhotoFromCamera,
@@ -310,14 +310,13 @@ export default function MealAddScreen() {
   };
 
   // 合計栄養素
-  const total = foods.reduce(
-    (sum, food) => ({
-      calories: sum.calories + calcKcal(food.protein, food.fat, food.carbo),
-      protein: sum.protein + food.protein,
-      fat: sum.fat + food.fat,
-      carbo: sum.carbo + food.carbo,
-    }),
-    { calories: 0, protein: 0, fat: 0, carbo: 0 },
+  const total = sumNutrition(
+    foods.map((food) => ({
+      calories: calcKcal(food.protein, food.fat, food.carbo),
+      protein: food.protein,
+      fat: food.fat,
+      carbo: food.carbo,
+    })),
   );
 
   // 食事記録登録ボタン押下
