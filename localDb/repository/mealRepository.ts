@@ -3,7 +3,8 @@ import * as eatingDao from "@/localDb/dao/eatingDao";
 import * as mealDao from "@/localDb/dao/mealDao";
 import { MealRequest, MealResponse } from "@/types/api";
 import { MealEntity } from "@/types/db";
-import { MealDetail, Nutrition } from "@/types/dto/eatingDto";
+import { sumNutrition } from "@/lib/calc";
+import { MealDetail } from "@/types/dto/eatingDto";
 import { format } from "date-fns";
 
 // リモートDBから食事記録データの最新情報を同期
@@ -63,15 +64,7 @@ export async function getMealDetail(mealId: string): Promise<MealDetail | null> 
   }
 
   const foods = await eatingDao.getEatingsByMealId(mealId);
-  const total = foods.reduce<Nutrition>(
-    (sum, food) => ({
-      calories: sum.calories + food.calories,
-      protein: sum.protein + food.protein,
-      fat: sum.fat + food.fat,
-      carbo: sum.carbo + food.carbo,
-    }),
-    { calories: 0, protein: 0, fat: 0, carbo: 0 }
-  );
+  const total = sumNutrition(foods);
 
   return { ...meal, foods, total };
 }

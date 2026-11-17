@@ -1,4 +1,27 @@
 import { UserGoalEntity, UserProfileEntity } from "@/types/db";
+import { Nutrition } from "@/types/dto/eatingDto";
+
+// PFCの丸め（小数第1位）。浮動小数点の加算誤差（例: 34.000000000000001）を除去する
+export const roundPfc = (value: number) => Math.round(value * 10) / 10;
+
+// 栄養素の合計（PFCは小数第1位で丸める）
+export const sumNutrition = (foods: Nutrition[]): Nutrition => {
+  const total = foods.reduce<Nutrition>(
+    (sum, food) => ({
+      calories: sum.calories + food.calories,
+      protein: sum.protein + food.protein,
+      fat: sum.fat + food.fat,
+      carbo: sum.carbo + food.carbo,
+    }),
+    { calories: 0, protein: 0, fat: 0, carbo: 0 },
+  );
+  return {
+    calories: Math.round(total.calories),
+    protein: roundPfc(total.protein),
+    fat: roundPfc(total.fat),
+    carbo: roundPfc(total.carbo),
+  };
+};
 
 // 年齢計算
 export const calcAge = (strBirthday: string) => {
